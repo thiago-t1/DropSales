@@ -1,0 +1,35 @@
+# =============================================================
+# .dockerignore — DropSales Backend
+# Exclui do contexto de build tudo que o Docker não precisa.
+# Reduz o tamanho do contexto enviado ao daemon e evita que
+# arquivos sensíveis ou desnecessários entrem na imagem.
+# =============================================================
+
+# Artefatos de build locais — o Stage 1 roda o Maven dentro do container
+target/
+
+# IDEs e editores
+.idea/
+.vscode/
+*.iml
+
+# Testes e coverage
+**/*Test.java
+**/test-classes/
+
+# Logs e temporários
+*.log
+*.tmp
+
+# Arquivos de configuração local (segredos ficam em variáveis de ambiente)
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+
+# Documentação
+*.md
+docs/
