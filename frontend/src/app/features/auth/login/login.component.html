@@ -1,0 +1,124 @@
+﻿<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800 p-4">
+  <!-- Background decoration -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-accent-500/10 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- Login Card -->
+  <div class="relative w-full max-w-md animate-fade-in">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 shadow-glow mb-4">
+        <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+      </div>
+      <h1 class="text-3xl font-bold text-white tracking-tight">DropSales</h1>
+      <p class="text-primary-300 mt-1 text-sm">Gestao financeira inteligente</p>
+    </div>
+
+    <!-- Card com Glassmorphism -->
+    <div class="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 shadow-2xl p-8">
+      <h2 class="text-xl font-semibold text-white mb-6">Entrar na sua conta</h2>
+
+      <!-- Error Alert -->
+      @if (error) {
+        <div class="mb-4 p-3 rounded-xl bg-red-500/20 border border-red-400/30 text-red-200 text-sm flex items-center gap-2 animate-slide-up">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {{ error }}
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
+        <!-- Email -->
+        <div>
+          <label class="block text-sm font-medium text-primary-200 mb-1.5">Email</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+              </svg>
+            </div>
+            <input
+              id="login-email"
+              type="email"
+              formControlName="email"
+              placeholder="seu@email.com"
+              class="w-full pl-11 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-primary-400/60
+                     focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all duration-200"
+            />
+          </div>
+          @if (form.get('email')?.touched && form.get('email')?.errors?.['required']) {
+            <p class="text-red-300 text-xs mt-1">Email obrigatorio</p>
+          }
+          @if (form.get('email')?.touched && form.get('email')?.errors?.['email']) {
+            <p class="text-red-300 text-xs mt-1">Email invalido</p>
+          }
+        </div>
+
+        <!-- Senha -->
+        <div>
+          <label class="block text-sm font-medium text-primary-200 mb-1.5">Senha</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <svg class="w-5 h-5 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <input
+              id="login-password"
+              type="password"
+              formControlName="senha"
+              placeholder="••••••••"
+              class="w-full pl-11 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-primary-400/60
+                     focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all duration-200"
+            />
+          </div>
+          @if (form.get('senha')?.touched && form.get('senha')?.errors?.['required']) {
+            <p class="text-red-300 text-xs mt-1">Senha obrigatoria</p>
+          }
+        </div>
+
+        <!-- Submit -->
+        <button
+          id="login-submit"
+          type="submit"
+          [disabled]="loading"
+          class="w-full py-3.5 rounded-xl font-semibold text-white
+                 bg-gradient-to-r from-primary-500 to-accent-500
+                 hover:from-primary-600 hover:to-accent-600
+                 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 focus:ring-offset-primary-900
+                 disabled:opacity-50 disabled:cursor-not-allowed
+                 active:scale-[0.98] transition-all duration-200
+                 shadow-lg shadow-primary-500/30 flex items-center justify-center gap-2"
+        >
+          @if (loading) {
+            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            Entrando...
+          } @else {
+            Entrar
+          }
+        </button>
+      </form>
+
+      <!-- Link para Cadastro -->
+      <p class="text-center text-primary-300 text-sm mt-6">
+        Nao tem uma conta?
+        <a routerLink="/register" class="text-accent-400 hover:text-accent-300 font-semibold transition-colors">
+          Criar conta
+        </a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-primary-400 text-xs mt-6">
+      &copy; 2026 DropSales. Todos os direitos reservados.
+    </p>
+  </div>
+</div>
