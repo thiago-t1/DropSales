@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
@@ -6,10 +6,11 @@ import {
   DashboardResponse, UsuarioResponse, UsuarioUpdateRequest,
   AlterarSenhaRequest, ImportResultDTO
 } from '../models/api.models';
+import { environment } from '@env/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private readonly API = 'https://dropsales.onrender.com/api';
+  private readonly API = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
