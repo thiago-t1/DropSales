@@ -1,4 +1,4 @@
-﻿package com.dropsales.model;
+package com.dropsales.model;
 
 import jakarta.persistence.*;
 import lombok.*;

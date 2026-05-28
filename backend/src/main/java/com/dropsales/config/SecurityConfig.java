@@ -1,4 +1,4 @@
-﻿package com.dropsales.config;
+package com.dropsales.config;
 
 import com.dropsales.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;

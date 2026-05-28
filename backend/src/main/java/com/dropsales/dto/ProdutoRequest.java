@@ -1,4 +1,4 @@
-﻿package com.dropsales.dto;
+package com.dropsales.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;

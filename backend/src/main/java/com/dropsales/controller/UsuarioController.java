@@ -1,4 +1,4 @@
-﻿package com.dropsales.controller;
+package com.dropsales.controller;
 
 import com.dropsales.dto.AlterarSenhaRequest;
 import com.dropsales.dto.UsuarioResponse;
