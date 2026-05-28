@@ -5,7 +5,7 @@ import { LoginRequest, LoginResponse, RegisterRequest } from '../models/api.mode
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly API = 'http://localhost:8080/api/auth';
+  private readonly API = 'https://dropsales.onrender.com/api';
   private readonly TOKEN_KEY = 'ds_token';
   private readonly USER_KEY = 'ds_user';
 

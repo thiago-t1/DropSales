@@ -9,7 +9,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private readonly API = 'http://localhost:8080/api';
+  private readonly API = 'https://dropsales.onrender.com/api';
 
   constructor(private http: HttpClient) {}
 
