@@ -26,10 +26,13 @@ public class CorsConfig {
                 .toList();
         config.setAllowedOrigins(origins);
 
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
         // Lista explícita — nunca usar wildcard "*" com allowCredentials=true
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
+
+        // Expõe o header Authorization para que o Angular consiga ler o JWT da resposta
+        config.setExposedHeaders(List.of("Authorization"));
 
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
