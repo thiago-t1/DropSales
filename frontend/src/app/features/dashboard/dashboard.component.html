@@ -2,12 +2,13 @@
   <!-- Header -->
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-2xl lg:text-3xl font-bold text-surface-900">Visao Geral</h1>
-      <p class="text-surface-700/50 text-sm mt-0.5">Desempenho financeiro do seu negocio</p>
+      <h1 class="text-2xl lg:text-3xl font-bold text-white">Visao Geral</h1>
+      <p class="text-sm mt-0.5" style="color: rgba(255,255,255,0.35);">Desempenho financeiro do seu negocio</p>
     </div>
     @if (!loading) {
-      <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-50 border border-green-200 text-green-700 text-xs font-medium">
-        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+      <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium"
+           style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #34d399;">
+        <span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.6);"></span>
         Ao vivo
       </div>
     }
@@ -17,69 +18,85 @@
   @if (loading) {
     <div class="grid grid-cols-2 xl:grid-cols-5 gap-3">
       @for (i of [1,2,3,4,5]; track i) {
-        <div class="rounded-2xl p-5 animate-pulse bg-surface-100 h-28"></div>
+        <div class="rounded-2xl p-5 h-28" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.04);"></div>
       }
     </div>
   } @else {
     <div class="grid grid-cols-2 xl:grid-cols-5 gap-4">
       <!-- Saldo Atual -->
-      <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-md transition-shadow duration-300 animate-slide-up col-span-1 flex flex-col">
+      <div class="rounded-2xl p-5 col-span-1 flex flex-col animate-slide-up transition-all duration-300"
+           style="background: rgba(22,27,34,0.6); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px);"
+           onmouseover="this.style.borderColor='rgba(59,130,246,0.2)'; this.style.boxShadow='0 0 30px rgba(59,130,246,0.08)'"
+           onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'; this.style.boxShadow='none'">
         <div class="flex items-start justify-between mb-3">
-          <p class="text-xs font-medium text-surface-500">Saldo Atual</p>
-          <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+          <p class="text-xs font-medium" style="color: rgba(255,255,255,0.4);">Saldo Atual</p>
+          <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+               style="background: rgba(59,130,246,0.12); color: #60a5fa;">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-surface-900 leading-tight">R$ {{ fmt(saldo) }}</p>
-        <p class="mt-auto pt-2 text-xs text-surface-500">Saldo disponivel</p>
+        <p class="text-2xl font-bold text-white leading-tight">R$ {{ fmt(saldo) }}</p>
+        <p class="mt-auto pt-2 text-xs" style="color: rgba(255,255,255,0.3);">Saldo disponivel</p>
       </div>
 
       <!-- Faturamento (Receitas) -->
-      <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-md transition-shadow duration-300 animate-slide-up col-span-1 flex flex-col" style="animation-delay:80ms">
+      <div class="rounded-2xl p-5 col-span-1 flex flex-col animate-slide-up transition-all duration-300" style="animation-delay:80ms; background: rgba(22,27,34,0.6); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px);"
+           onmouseover="this.style.borderColor='rgba(16,185,129,0.2)'; this.style.boxShadow='0 0 30px rgba(16,185,129,0.08)'"
+           onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'; this.style.boxShadow='none'">
         <div class="flex items-start justify-between mb-3">
-          <p class="text-xs font-medium text-surface-500">Faturamento</p>
-          <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+          <p class="text-xs font-medium" style="color: rgba(255,255,255,0.4);">Faturamento</p>
+          <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+               style="background: rgba(16,185,129,0.12); color: #34d399;">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-surface-900 leading-tight">R$ {{ fmt(receitas) }}</p>
-        <p class="mt-auto pt-2 text-xs text-surface-500">Total de receitas</p>
+        <p class="text-2xl font-bold text-white leading-tight">R$ {{ fmt(receitas) }}</p>
+        <p class="mt-auto pt-2 text-xs" style="color: rgba(255,255,255,0.3);">Total de receitas</p>
       </div>
 
       <!-- Lucro -->
-      <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-md transition-shadow duration-300 animate-slide-up col-span-1 flex flex-col" style="animation-delay:160ms">
+      <div class="rounded-2xl p-5 col-span-1 flex flex-col animate-slide-up transition-all duration-300" style="animation-delay:160ms; background: rgba(22,27,34,0.6); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px);"
+           onmouseover="this.style.borderColor='rgba(245,158,11,0.2)'; this.style.boxShadow='0 0 30px rgba(245,158,11,0.08)'"
+           onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'; this.style.boxShadow='none'">
         <div class="flex items-start justify-between mb-3">
-          <p class="text-xs font-medium text-surface-500">Lucro</p>
-          <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0">
+          <p class="text-xs font-medium" style="color: rgba(255,255,255,0.4);">Lucro</p>
+          <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+               style="background: rgba(245,158,11,0.12); color: #fbbf24;">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-surface-900 leading-tight">R$ {{ fmt(lucroLiquido) }}</p>
-        <p class="mt-auto pt-2 text-xs text-surface-500">Lucro liquido</p>
+        <p class="text-2xl font-bold text-white leading-tight">R$ {{ fmt(lucroLiquido) }}</p>
+        <p class="mt-auto pt-2 text-xs" style="color: rgba(255,255,255,0.3);">Lucro liquido</p>
       </div>
 
       <!-- Despesas -->
-      <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-md transition-shadow duration-300 animate-slide-up col-span-1 flex flex-col" style="animation-delay:240ms">
+      <div class="rounded-2xl p-5 col-span-1 flex flex-col animate-slide-up transition-all duration-300" style="animation-delay:240ms; background: rgba(22,27,34,0.6); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px);"
+           onmouseover="this.style.borderColor='rgba(239,68,68,0.2)'; this.style.boxShadow='0 0 30px rgba(239,68,68,0.08)'"
+           onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'; this.style.boxShadow='none'">
         <div class="flex items-start justify-between mb-3">
-          <p class="text-xs font-medium text-surface-500">Despesas</p>
-          <div class="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
+          <p class="text-xs font-medium" style="color: rgba(255,255,255,0.4);">Despesas</p>
+          <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+               style="background: rgba(239,68,68,0.12); color: #f87171;">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6" /></svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-surface-900 leading-tight">R$ {{ fmt(despesas) }}</p>
-        <p class="mt-auto pt-2 text-xs text-surface-500">Total de despesas</p>
+        <p class="text-2xl font-bold text-white leading-tight">R$ {{ fmt(despesas) }}</p>
+        <p class="mt-auto pt-2 text-xs" style="color: rgba(255,255,255,0.3);">Total de despesas</p>
       </div>
 
       <!-- CMV -->
-      <div class="bg-white rounded-2xl p-5 border border-surface-200 shadow-sm hover:shadow-md transition-shadow duration-300 animate-slide-up col-span-2 xl:col-span-1 flex flex-col" style="animation-delay:320ms">
+      <div class="rounded-2xl p-5 col-span-2 xl:col-span-1 flex flex-col animate-slide-up transition-all duration-300" style="animation-delay:320ms; background: rgba(22,27,34,0.6); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px);"
+           onmouseover="this.style.borderColor='rgba(139,92,246,0.2)'; this.style.boxShadow='0 0 30px rgba(139,92,246,0.08)'"
+           onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'; this.style.boxShadow='none'">
         <div class="flex items-start justify-between mb-3">
-          <p class="text-xs font-medium text-surface-500">CMV</p>
-          <div class="w-10 h-10 rounded-full bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0">
+          <p class="text-xs font-medium" style="color: rgba(255,255,255,0.4);">CMV</p>
+          <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+               style="background: rgba(139,92,246,0.12); color: #a78bfa;">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
           </div>
         </div>
-        <p class="text-2xl font-bold text-surface-900 leading-tight">R$ {{ fmt(cmv) }}</p>
-        <p class="mt-auto pt-2 text-xs text-surface-500">Custo mercadoria</p>
+        <p class="text-2xl font-bold text-white leading-tight">R$ {{ fmt(cmv) }}</p>
+        <p class="mt-auto pt-2 text-xs" style="color: rgba(255,255,255,0.3);">Custo mercadoria</p>
       </div>
     </div>
   }
@@ -88,15 +105,15 @@
   @if (!loading) {
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-slide-up" style="animation-delay:400ms">
       <!-- Barras 30 dias -->
-      <div class="lg:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-surface-100">
+      <div class="lg:col-span-2 rounded-2xl p-5" style="background: rgba(22,27,34,0.6); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px);">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h3 class="font-semibold text-surface-900 text-sm">Desempenho de Vendas (Ultimos 30 dias)</h3>
-            <p class="text-xs text-surface-700/50 mt-0.5">Receitas vs Custo diario</p>
+            <h3 class="font-semibold text-white text-sm">Desempenho de Vendas (Ultimos 30 dias)</h3>
+            <p class="text-xs mt-0.5" style="color: rgba(255,255,255,0.3);">Receitas vs Custo diario</p>
           </div>
           <div class="flex gap-3 text-xs">
-            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-blue-500"></div><span class="text-surface-700/60">Receitas</span></div>
-            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-red-500"></div><span class="text-surface-700/60">Custo</span></div>
+            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded" style="background: rgba(99,102,241,0.9);"></div><span style="color: rgba(255,255,255,0.4);">Receitas</span></div>
+            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded" style="background: rgba(244,63,94,0.9);"></div><span style="color: rgba(255,255,255,0.4);">Custo</span></div>
           </div>
         </div>
         <div style="height: 240px; position: relative;">
@@ -105,20 +122,20 @@
       </div>
 
       <!-- Doughnut -->
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-surface-100">
-        <h3 class="font-semibold text-surface-900 text-sm mb-1">Resumo de Transacoes</h3>
-        <p class="text-xs text-surface-700/50 mb-4">Distribuicao financeira</p>
+      <div class="rounded-2xl p-5" style="background: rgba(22,27,34,0.6); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px);">
+        <h3 class="font-semibold text-white text-sm mb-1">Resumo de Transacoes</h3>
+        <p class="text-xs mb-4" style="color: rgba(255,255,255,0.3);">Distribuicao financeira</p>
         <div style="height: 200px; position: relative;">
           <canvas baseChart [datasets]="doughnutData.datasets" [labels]="doughnutData.labels" [options]="doughnutOptions" type="doughnut"></canvas>
         </div>
-        <div class="mt-4 space-y-2 border-t border-surface-100 pt-3">
+        <div class="mt-4 space-y-2 pt-3" style="border-top: 1px solid rgba(255,255,255,0.06);">
           <div class="flex justify-between text-xs">
-            <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-blue-500"></div><span class="text-surface-700/60">Receitas</span></div>
-            <span class="font-semibold text-blue-600">R$ {{ fmt(receitas) }}</span>
+            <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full" style="background: rgba(99,102,241,0.9);"></div><span style="color: rgba(255,255,255,0.4);">Receitas</span></div>
+            <span class="font-semibold text-primary-400">R$ {{ fmt(receitas) }}</span>
           </div>
           <div class="flex justify-between text-xs">
-            <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-red-500"></div><span class="text-surface-700/60">Despesas</span></div>
-            <span class="font-semibold text-red-500">R$ {{ fmt(despesas) }}</span>
+            <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full" style="background: rgba(244,63,94,0.9);"></div><span style="color: rgba(255,255,255,0.4);">Despesas</span></div>
+            <span class="font-semibold" style="color: #f87171;">R$ {{ fmt(despesas) }}</span>
           </div>
         </div>
       </div>
@@ -128,11 +145,11 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-slide-up" style="animation-delay:500ms">
 
       <!-- Top 5 Produtos -->
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-surface-100">
-        <h3 class="font-semibold text-surface-900 text-sm mb-1">Top 5 Produtos Vendidos (Unidades)</h3>
-        <p class="text-xs text-surface-700/50 mb-4">Mais vendidos no periodo</p>
+      <div class="rounded-2xl p-5" style="background: rgba(22,27,34,0.6); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px);">
+        <h3 class="font-semibold text-white text-sm mb-1">Top 5 Produtos Vendidos (Unidades)</h3>
+        <p class="text-xs mb-4" style="color: rgba(255,255,255,0.3);">Mais vendidos no periodo</p>
         @if (topProdutos.length === 0) {
-          <div class="flex flex-col items-center justify-center h-40 text-surface-700/30">
+          <div class="flex flex-col items-center justify-center h-40" style="color: rgba(255,255,255,0.15);">
             <svg class="w-10 h-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
             <p class="text-xs">Sem dados de venda</p>
           </div>
@@ -144,50 +161,49 @@
       </div>
 
       <!-- Estoque Baixo / Critico -->
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-surface-100">
+      <div class="rounded-2xl p-5" style="background: rgba(22,27,34,0.6); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px);">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h3 class="font-semibold text-surface-900 text-sm">Estoque Baixo/Critico</h3>
-            <p class="text-xs text-surface-700/50 mt-0.5">Produtos que precisam reposicao</p>
+            <h3 class="font-semibold text-white text-sm">Estoque Baixo/Critico</h3>
+            <p class="text-xs mt-0.5" style="color: rgba(255,255,255,0.3);">Produtos que precisam reposicao</p>
           </div>
           @if (estoqueBaixo.length > 0) {
-            <span class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-full px-2 py-0.5">{{ estoqueBaixo.length }}</span>
+            <span class="text-xs font-bold rounded-full px-2 py-0.5" style="background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.2);">{{ estoqueBaixo.length }}</span>
           }
         </div>
 
         @if (estoqueBaixo.length === 0) {
-          <div class="flex flex-col items-center justify-center h-36 text-surface-700/30">
-            <svg class="w-10 h-10 mb-2 text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7" /></svg>
-            <p class="text-xs text-green-600 font-medium">Estoques saudaveis!</p>
+          <div class="flex flex-col items-center justify-center h-36">
+            <svg class="w-10 h-10 mb-2" style="color: rgba(16,185,129,0.3);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7" /></svg>
+            <p class="text-xs font-medium" style="color: #34d399;">Estoques saudaveis!</p>
           </div>
         } @else {
           <div class="space-y-3">
-            <div class="grid grid-cols-3 text-xs text-surface-700/40 font-medium pb-1 border-b border-surface-100">
+            <div class="grid grid-cols-3 text-xs font-medium pb-1" style="color: rgba(255,255,255,0.25); border-bottom: 1px solid rgba(255,255,255,0.06);">
               <span>Nome</span><span class="text-center">Stock</span><span class="text-right">Status</span>
             </div>
             @for (p of estoqueBaixo; track p.id) {
-              <div class="grid grid-cols-3 items-center gap-2 py-3 border-b border-surface-50 last:border-0 hover:bg-surface-50/50 px-3 rounded-xl transition-colors">
+              <div class="grid grid-cols-3 items-center gap-2 py-3 px-3 rounded-xl transition-colors"
+                   style="border-bottom: 1px solid rgba(255,255,255,0.03);"
+                   onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
                 <div>
-                  <p class="text-[13px] font-medium text-surface-700 truncate">{{ p.nome }}</p>
-                  <p class="text-[11px] text-surface-500">{{ p.sku }}</p>
+                  <p class="text-[13px] font-medium text-white/70 truncate">{{ p.nome }}</p>
+                  <p class="text-[11px]" style="color: rgba(255,255,255,0.3);">{{ p.sku }}</p>
                 </div>
                 <p class="text-center text-sm font-semibold"
-                   [class.text-red-600]="estoqueStatus(p) === 'critico'"
-                   [class.text-amber-600]="estoqueStatus(p) === 'baixo'">
+                   [style.color]="estoqueStatus(p) === 'critico' ? '#f87171' : estoqueStatus(p) === 'baixo' ? '#fbbf24' : '#34d399'">
                   {{ p.quantidadeEstoque }}
                 </p>
                 <div class="flex items-center gap-1.5">
                   <!-- Barra colorida de status -->
-                  <div class="flex-1 h-2 rounded-full bg-surface-100 overflow-hidden">
+                  <div class="flex-1 h-2 rounded-full overflow-hidden" style="background: rgba(255,255,255,0.06);">
                     <div class="h-full rounded-full transition-all duration-500"
-                         [class.bg-red-500]="estoqueStatus(p) === 'critico'"
-                         [class.bg-amber-400]="estoqueStatus(p) === 'baixo'"
-                         [class.bg-green-500]="estoqueStatus(p) === 'ok'"
+                         [style.background]="estoqueStatus(p) === 'critico' ? '#ef4444' : estoqueStatus(p) === 'baixo' ? '#f59e0b' : '#10b981'"
                          [style.width.%]="estoquePercent(p)">
                     </div>
                   </div>
                   @if (p.quantidadeEstoque === 0) {
-                    <span class="text-[10px] text-red-600 font-semibold whitespace-nowrap">Red</span>
+                    <span class="text-[10px] font-semibold whitespace-nowrap" style="color: #f87171;">Red</span>
                   }
                 </div>
               </div>
@@ -197,41 +213,44 @@
       </div>
 
       <!-- Vendas Recentes -->
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-surface-100">
+      <div class="rounded-2xl p-5" style="background: rgba(22,27,34,0.6); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px);">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h3 class="font-semibold text-surface-900 text-sm">Vendas Recentes</h3>
-            <p class="text-xs text-surface-700/50 mt-0.5">Ultimas transacoes</p>
+            <h3 class="font-semibold text-white text-sm">Vendas Recentes</h3>
+            <p class="text-xs mt-0.5" style="color: rgba(255,255,255,0.3);">Ultimas transacoes</p>
           </div>
-          <a routerLink="/vendas" class="text-xs text-primary-600 hover:text-primary-800 font-medium transition-colors">Ver todas</a>
+          <a routerLink="/vendas" class="text-xs text-primary-400 hover:text-primary-300 font-medium transition-colors">Ver todas</a>
         </div>
 
         @if (vendasRecentes.length === 0) {
-          <div class="flex flex-col items-center justify-center h-36 text-surface-700/30">
+          <div class="flex flex-col items-center justify-center h-36" style="color: rgba(255,255,255,0.15);">
             <svg class="w-10 h-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" /></svg>
             <p class="text-xs">Nenhuma venda</p>
           </div>
         } @else {
           <div class="space-y-1">
-            <div class="grid grid-cols-4 text-xs text-surface-700/40 font-medium pb-2 border-b border-surface-100">
+            <div class="grid grid-cols-4 text-xs font-medium pb-2" style="color: rgba(255,255,255,0.25); border-bottom: 1px solid rgba(255,255,255,0.06);">
               <span>Data</span><span>Custem</span><span class="text-center">Items</span><span class="text-right">Valor</span>
             </div>
             @for (v of vendasRecentes; track v.id) {
-              <div class="grid grid-cols-4 items-center py-3 border-b border-surface-50 last:border-0 hover:bg-surface-50/50 rounded-xl transition-colors px-3">
-                <div class="text-[11px] text-surface-500 font-medium">
+              <div class="grid grid-cols-4 items-center py-3 rounded-xl transition-colors px-3"
+                   style="border-bottom: 1px solid rgba(255,255,255,0.03);"
+                   onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+                <div class="text-[11px] font-medium" style="color: rgba(255,255,255,0.4);">
                   {{ v.data.split(' ')[0] }}
                 </div>
                 <div class="flex items-center gap-2">
-                  <div class="w-7 h-7 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                  <div class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 text-white"
+                       style="background: linear-gradient(135deg, #6366f1, #06b6d4);">
                     {{ v.vendedor.charAt(0).toUpperCase() }}
                   </div>
-                  <span class="text-[11px] text-surface-700 font-medium truncate">{{ v.vendedor.split(' ')[0] }}</span>
+                  <span class="text-[11px] font-medium truncate" style="color: rgba(255,255,255,0.6);">{{ v.vendedor.split(' ')[0] }}</span>
                 </div>
-                <p class="text-center text-xs text-surface-500">{{ v.totalItens }} {{ v.totalItens === 1 ? 'Item' : 'Itens' }}</p>
+                <p class="text-center text-xs" style="color: rgba(255,255,255,0.4);">{{ v.totalItens }} {{ v.totalItens === 1 ? 'Item' : 'Itens' }}</p>
                 <div class="flex items-center justify-end gap-1.5">
-                  <span class="text-xs font-semibold text-surface-900">R$ {{ fmt(v.valor) }}</span>
-                  <div class="w-4 h-4 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-2.5 h-2.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                  <span class="text-xs font-semibold text-white">R$ {{ fmt(v.valor) }}</span>
+                  <div class="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0" style="background: rgba(16,185,129,0.15);">
+                    <svg class="w-2.5 h-2.5" style="color: #34d399;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
                   </div>
                 </div>
               </div>

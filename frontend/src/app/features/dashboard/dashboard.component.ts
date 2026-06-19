@@ -57,10 +57,14 @@ export class DashboardComponent implements OnInit {
     plugins: {
       legend: {
         display: true, position: 'top',
-        labels: { color: '#64748b', usePointStyle: true, pointStyleWidth: 10, font: { size: 12 } },
+        labels: { color: 'rgba(255,255,255,0.5)', usePointStyle: true, pointStyleWidth: 10, font: { size: 12 } },
       },
       tooltip: {
-        backgroundColor: 'rgba(15, 23, 42, 0.92)',
+        backgroundColor: 'rgba(22, 27, 34, 0.95)',
+        titleColor: '#fff',
+        bodyColor: 'rgba(255,255,255,0.8)',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
         padding: 12, cornerRadius: 8,
         callbacks: {
           label: (ctx) => ` R$ ${(ctx.parsed.y || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
@@ -68,11 +72,11 @@ export class DashboardComponent implements OnInit {
       },
     },
     scales: {
-      x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 }, maxRotation: 0 } },
+      x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 10 }, maxRotation: 0 } },
       y: {
         beginAtZero: true,
-        grid: { color: 'rgba(0,0,0,0.03)' },
-        ticks: { color: '#94a3b8', font: { size: 11 }, callback: (v) => 'R$ ' + Number(v).toLocaleString('pt-BR') },
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 11 }, callback: (v) => 'R$ ' + Number(v).toLocaleString('pt-BR') },
       },
     },
   };
@@ -93,10 +97,12 @@ export class DashboardComponent implements OnInit {
     plugins: {
       legend: {
         position: 'right',
-        labels: { color: '#64748b', usePointStyle: true, pointStyleWidth: 10, font: { size: 12 }, padding: 16 },
+        labels: { color: 'rgba(255,255,255,0.5)', usePointStyle: true, pointStyleWidth: 10, font: { size: 12 }, padding: 16 },
       },
       tooltip: {
-        backgroundColor: 'rgba(15,23,42,0.92)', padding: 12, cornerRadius: 8,
+        backgroundColor: 'rgba(22,27,34,0.95)', titleColor: '#fff', bodyColor: 'rgba(255,255,255,0.8)',
+        borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
+        padding: 12, cornerRadius: 8,
         callbacks: {
           label: (ctx) => ` R$ ${(ctx.parsed || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
         },
@@ -122,13 +128,15 @@ export class DashboardComponent implements OnInit {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: 'rgba(15,23,42,0.92)', padding: 10, cornerRadius: 8,
+        backgroundColor: 'rgba(22,27,34,0.95)', titleColor: '#fff', bodyColor: 'rgba(255,255,255,0.8)',
+        borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
+        padding: 10, cornerRadius: 8,
         callbacks: { label: (ctx) => ` ${ctx.parsed.x} un.` },
       },
     },
     scales: {
-      x: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.03)' }, ticks: { color: '#94a3b8', font: { size: 11 } } },
-      y: { grid: { display: false }, ticks: { color: '#475569', font: { size: 12 } } },
+      x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 11 } } },
+      y: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.5)', font: { size: 12 } } },
     },
   };
 

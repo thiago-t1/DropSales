@@ -1,18 +1,20 @@
-﻿<div class="max-w-2xl mx-auto space-y-5 animate-fade-in">
+<div class="max-w-2xl mx-auto space-y-5 animate-fade-in">
   <div>
-    <h1 class="text-2xl lg:text-3xl font-bold text-surface-900">Meu Perfil</h1>
-    <p class="text-surface-700/60 mt-1 text-sm">Gerencie suas informacoes pessoais e seguranca</p>
+    <h1 class="text-2xl lg:text-3xl font-bold text-white">Meu Perfil</h1>
+    <p class="mt-1 text-sm" style="color: rgba(255,255,255,0.35);">Gerencie suas informacoes pessoais e seguranca</p>
   </div>
 
   @if (sucesso) {
-    <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 flex items-center gap-3 animate-slide-up">
-      <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <div class="p-4 rounded-xl flex items-center gap-3 animate-slide-up"
+         style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #34d399;">
+      <svg class="w-5 h-5 flex-shrink-0" style="color: #10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
       <span class="text-sm font-medium">{{ sucesso }}</span>
     </div>
   }
   @if (erro) {
-    <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-3 animate-slide-up">
-      <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <div class="p-4 rounded-xl flex items-center gap-3 animate-slide-up"
+         style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171;">
+      <svg class="w-5 h-5 flex-shrink-0" style="color: #ef4444;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
       <span class="text-sm font-medium">{{ erro }}</span>
     </div>
   }
@@ -29,16 +31,19 @@
     <!-- Secao: Foto e Dados -->
     <div class="ds-card">
       <!-- Foto de Perfil -->
-      <div class="flex flex-col sm:flex-row items-center gap-6 pb-6 mb-6 border-b border-surface-100">
+      <div class="flex flex-col sm:flex-row items-center gap-6 pb-6 mb-6" style="border-bottom: 1px solid rgba(255,255,255,0.06);">
         <div class="relative group">
           @if (fotoPreview) {
             <img [src]="fotoPreview" alt="Foto de perfil"
-              class="w-24 h-24 rounded-full object-cover ring-4 ring-primary-100 shadow-md" />
+              class="w-24 h-24 rounded-full object-cover"
+              style="box-shadow: 0 0 0 4px rgba(99,102,241,0.2), 0 4px 6px rgba(0,0,0,0.3);" />
           } @else if (usuario?.temFoto) {
             <img [src]="fotoUrl" alt="Foto de perfil"
-              class="w-24 h-24 rounded-full object-cover ring-4 ring-primary-100 shadow-md" />
+              class="w-24 h-24 rounded-full object-cover"
+              style="box-shadow: 0 0 0 4px rgba(99,102,241,0.2), 0 4px 6px rgba(0,0,0,0.3);" />
           } @else {
-            <div class="w-24 h-24 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 flex items-center justify-center text-white font-bold text-3xl ring-4 ring-primary-100 shadow-md">
+            <div class="w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-md"
+                 style="background: linear-gradient(135deg, #6366f1, #06b6d4); box-shadow: 0 0 20px rgba(99,102,241,0.3);">
               {{ form.nome.charAt(0).toUpperCase() || 'U' }}
             </div>
           }
@@ -57,21 +62,22 @@
         </div>
 
         <div>
-          <h3 class="text-lg font-semibold text-surface-900">{{ usuario?.nome }}</h3>
-          <p class="text-sm text-surface-700/60">{{ usuario?.email }}</p>
-          <span class="inline-block mt-2 text-xs font-semibold bg-primary-100 text-primary-700 px-2.5 py-1 rounded-full">{{ usuario?.perfil }}</span>
-          <p class="text-xs text-surface-700/40 mt-2">Clique na foto para alterar a imagem</p>
+          <h3 class="text-lg font-semibold text-white">{{ usuario?.nome }}</h3>
+          <p class="text-sm" style="color: rgba(255,255,255,0.4);">{{ usuario?.email }}</p>
+          <span class="inline-block mt-2 text-xs font-semibold px-2.5 py-1 rounded-full"
+                style="background: rgba(99,102,241,0.15); color: #a5b4fc;">{{ usuario?.perfil }}</span>
+          <p class="text-xs mt-2" style="color: rgba(255,255,255,0.25);">Clique na foto para alterar a imagem</p>
         </div>
       </div>
 
       <!-- Dados Pessoais -->
       <div class="space-y-4">
-        <h4 class="text-sm font-semibold text-surface-900">Dados Pessoais</h4>
+        <h4 class="text-sm font-semibold text-white">Dados Pessoais</h4>
         <div>
           <label class="ds-label">Nome completo</label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <svg class="w-4 h-4 text-surface-700/30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+              <svg class="w-4 h-4" style="color: rgba(255,255,255,0.2);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
             </div>
             <input id="perfil-nome" type="text" [(ngModel)]="form.nome" class="ds-input pl-10" placeholder="Seu nome" />
           </div>
@@ -80,7 +86,7 @@
           <label class="ds-label">Email</label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <svg class="w-4 h-4 text-surface-700/30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>
+              <svg class="w-4 h-4" style="color: rgba(255,255,255,0.2);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>
             </div>
             <input id="perfil-email" type="email" [(ngModel)]="form.email" class="ds-input pl-10" placeholder="seu@email.com" />
           </div>
@@ -101,24 +107,27 @@
     <!-- Secao: Alterar Senha -->
     <div class="ds-card">
       <div class="flex items-center gap-3 mb-5">
-        <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center">
-          <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center"
+             style="background: rgba(245,158,11,0.12); color: #fbbf24;">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
         </div>
         <div>
-          <h4 class="font-semibold text-surface-900 text-sm">Alterar Senha</h4>
-          <p class="text-xs text-surface-700/50">Use uma senha forte com pelo menos 6 caracteres</p>
+          <h4 class="font-semibold text-white text-sm">Alterar Senha</h4>
+          <p class="text-xs" style="color: rgba(255,255,255,0.3);">Use uma senha forte com pelo menos 6 caracteres</p>
         </div>
       </div>
 
       @if (sucessoSenha) {
-        <div class="mb-4 p-3 rounded-xl bg-green-50 border border-green-200 text-green-800 flex items-center gap-2 text-sm">
-          <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <div class="mb-4 p-3 rounded-xl flex items-center gap-2 text-sm"
+             style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #34d399;">
+          <svg class="w-4 h-4 flex-shrink-0" style="color: #10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           {{ sucessoSenha }}
         </div>
       }
       @if (erroSenha) {
-        <div class="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-2 text-sm">
-          <svg class="w-4 h-4 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <div class="mb-4 p-3 rounded-xl flex items-center gap-2 text-sm"
+             style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171;">
+          <svg class="w-4 h-4 flex-shrink-0" style="color: #ef4444;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           {{ erroSenha }}
         </div>
       }
@@ -137,7 +146,9 @@
           <input type="password" [(ngModel)]="senhaForm.confirmarSenha" class="ds-input" placeholder="Repita a nova senha" autocomplete="new-password" />
         </div>
         <button (click)="alterarSenha()" [disabled]="savingSenha || !senhaForm.senhaAtual || !senhaForm.novaSenha || !senhaForm.confirmarSenha"
-          class="w-full py-3 px-4 rounded-xl font-semibold text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
+          class="w-full py-3 px-4 rounded-xl font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
+          style="background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 20px rgba(245,158,11,0.3);"
+          onmouseover="this.style.boxShadow='0 6px 30px rgba(245,158,11,0.4)'" onmouseout="this.style.boxShadow='0 4px 20px rgba(245,158,11,0.3)'">
           @if (savingSenha) {
             <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
             Alterando...

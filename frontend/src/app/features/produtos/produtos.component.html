@@ -2,16 +2,17 @@
   <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <h1 class="text-2xl lg:text-3xl font-bold text-surface-900">Produtos</h1>
-      <p class="text-surface-700/60 mt-1">Gerencie seu catalogo de produtos</p>
+      <h1 class="text-2xl lg:text-3xl font-bold text-white">Produtos</h1>
+      <p class="mt-1" style="color: rgba(255,255,255,0.35);">Gerencie seu catalogo de produtos</p>
     </div>
     <div class="flex items-center gap-2">
       <!-- Import Excel -->
       <input #importInput type="file" accept=".xlsx,.xls" class="hidden" (change)="onImportFile($event)" />
       <button id="btn-importar-excel" (click)="abrirImport()" [disabled]="importing"
-        class="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-emerald-700
-               bg-emerald-50 border border-emerald-200 hover:bg-emerald-100
-               active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:cursor-wait">
+        class="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold
+               active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:cursor-wait"
+        style="background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2);"
+        onmouseover="this.style.background='rgba(16,185,129,0.18)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'">
         @if (importing) {
           <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
           Importando...
@@ -22,8 +23,10 @@
       </button>
       <button id="btn-novo-produto" (click)="abrirNovo()"
         class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white
-               bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600
-               active:scale-[0.98] transition-all duration-200 shadow-lg shadow-primary-500/25">
+               active:scale-[0.98] transition-all duration-200"
+        style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%); box-shadow: 0 4px 20px rgba(99,102,241,0.35);"
+        onmouseover="this.style.boxShadow='0 6px 30px rgba(99,102,241,0.45)'; this.style.transform='translateY(-1px)'"
+        onmouseout="this.style.boxShadow='0 4px 20px rgba(99,102,241,0.35)'; this.style.transform='none'">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
         Novo Produto
       </button>
@@ -32,14 +35,16 @@
 
   <!-- Alerts -->
   @if (sucesso) {
-    <div class="p-4 rounded-xl bg-accent-50 border border-accent-200 text-accent-800 flex items-center gap-3 animate-slide-up">
-      <svg class="w-5 h-5 text-accent-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <div class="p-4 rounded-xl flex items-center gap-3 animate-slide-up"
+         style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #34d399;">
+      <svg class="w-5 h-5 flex-shrink-0" style="color: #10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
       <span class="text-sm font-medium">{{ sucesso }}</span>
     </div>
   }
   @if (erro && !showModal) {
-    <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 flex items-center gap-3 animate-slide-up">
-      <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <div class="p-4 rounded-xl flex items-center gap-3 animate-slide-up"
+         style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171;">
+      <svg class="w-5 h-5 flex-shrink-0" style="color: #ef4444;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
       <span class="text-sm font-medium">{{ erro }}</span>
     </div>
   }
@@ -55,11 +60,11 @@
       </div>
     } @else if (produtos.length === 0) {
       <div class="text-center py-12">
-        <div class="w-16 h-16 rounded-full bg-surface-100 flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-surface-700/30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(255,255,255,0.04);">
+          <svg class="w-8 h-8" style="color: rgba(255,255,255,0.15);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
         </div>
-        <p class="text-surface-700/50 text-sm mb-4">Nenhum produto cadastrado ainda.</p>
-        <button (click)="abrirNovo()" class="text-primary-600 hover:text-primary-700 font-semibold text-sm transition-colors">
+        <p class="text-sm mb-4" style="color: rgba(255,255,255,0.3);">Nenhum produto cadastrado ainda.</p>
+        <button (click)="abrirNovo()" class="text-primary-400 hover:text-primary-300 font-semibold text-sm transition-colors">
           + Cadastrar primeiro produto
         </button>
       </div>
@@ -67,31 +72,31 @@
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
-            <tr class="border-b border-surface-100">
-              <th class="text-left py-3 px-3 font-medium text-surface-700/60">Produto</th>
-              <th class="text-center py-3 px-3 font-medium text-surface-700/60 hidden sm:table-cell">SKU</th>
-              <th class="text-right py-3 px-3 font-medium text-surface-700/60">Preco</th>
-              <th class="text-center py-3 px-3 font-medium text-surface-700/60">Estoque</th>
-              <th class="text-center py-3 px-3 font-medium text-surface-700/60">Status</th>
-              <th class="text-center py-3 px-3 font-medium text-surface-700/60">Acoes</th>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+              <th class="text-left py-3 px-3 font-medium" style="color: rgba(255,255,255,0.35);">Produto</th>
+              <th class="text-center py-3 px-3 font-medium hidden sm:table-cell" style="color: rgba(255,255,255,0.35);">SKU</th>
+              <th class="text-right py-3 px-3 font-medium" style="color: rgba(255,255,255,0.35);">Preco</th>
+              <th class="text-center py-3 px-3 font-medium" style="color: rgba(255,255,255,0.35);">Estoque</th>
+              <th class="text-center py-3 px-3 font-medium" style="color: rgba(255,255,255,0.35);">Status</th>
+              <th class="text-center py-3 px-3 font-medium" style="color: rgba(255,255,255,0.35);">Acoes</th>
             </tr>
           </thead>
           <tbody>
             @for (p of produtos; track p.id) {
-              <tr class="border-b border-surface-50 hover:bg-surface-50/50 transition-colors">
+              <tr class="transition-colors" style="border-bottom: 1px solid rgba(255,255,255,0.03);"
+                  onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
                 <td class="py-3 px-3">
                   <div>
-                    <p class="font-medium text-surface-800">{{ p.nome }}</p>
+                    <p class="font-medium text-white/90">{{ p.nome }}</p>
                     @if (p.categoria) {
-                      <p class="text-xs text-surface-700/50">{{ p.categoria }}</p>
+                      <p class="text-xs" style="color: rgba(255,255,255,0.3);">{{ p.categoria }}</p>
                     }
                   </div>
                 </td>
-                <td class="text-center py-3 px-3 text-surface-700/60 hidden sm:table-cell font-mono text-xs">{{ p.sku || '-' }}</td>
-                <td class="text-right py-3 px-3 font-semibold text-surface-800">R$ {{ fmt(p.precoVenda) }}</td>
+                <td class="text-center py-3 px-3 hidden sm:table-cell font-mono text-xs" style="color: rgba(255,255,255,0.4);">{{ p.sku || '-' }}</td>
+                <td class="text-right py-3 px-3 font-semibold text-white">R$ {{ fmt(p.precoVenda) }}</td>
                 <td class="text-center py-3 px-3 font-semibold"
-                    [class.text-red-600]="p.estoqueBaixo"
-                    [class.text-surface-800]="!p.estoqueBaixo">
+                    [style.color]="p.estoqueBaixo ? '#f87171' : 'rgba(255,255,255,0.8)'">
                   {{ p.quantidadeEstoque }}
                 </td>
                 <td class="text-center py-3 px-3">
@@ -105,10 +110,16 @@
                 </td>
                 <td class="text-center py-3 px-3">
                   <div class="flex items-center justify-center gap-1">
-                    <button (click)="abrirEditar(p)" class="p-1.5 rounded-lg text-primary-500 hover:bg-primary-50 hover:text-primary-700 transition-colors" title="Editar">
+                    <button (click)="abrirEditar(p)" class="p-1.5 rounded-lg transition-all duration-200" title="Editar"
+                            style="color: #818cf8;"
+                            onmouseover="this.style.background='rgba(99,102,241,0.1)'; this.style.color='#a5b4fc'"
+                            onmouseout="this.style.background='transparent'; this.style.color='#818cf8'">
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                     </button>
-                    <button (click)="excluir(p.id)" class="p-1.5 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors" title="Excluir">
+                    <button (click)="excluir(p.id)" class="p-1.5 rounded-lg transition-all duration-200" title="Excluir"
+                            style="color: rgba(248,113,113,0.6);"
+                            onmouseover="this.style.background='rgba(239,68,68,0.1)'; this.style.color='#f87171'"
+                            onmouseout="this.style.background='transparent'; this.style.color='rgba(248,113,113,0.6)'">
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                   </div>
@@ -123,17 +134,20 @@
 
   <!-- Modal -->
   @if (showModal) {
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" (click)="fecharModal()">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 animate-slide-up" (click)="$event.stopPropagation()">
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" (click)="fecharModal()"
+         style="background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);">
+      <div class="rounded-2xl shadow-glass w-full max-w-lg p-6 animate-slide-up" (click)="$event.stopPropagation()"
+           style="background: rgba(22,27,34,0.95); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px);">
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-bold text-surface-900">{{ editId ? 'Editar Produto' : 'Novo Produto' }}</h2>
-          <button (click)="fecharModal()" class="p-2 rounded-xl hover:bg-surface-100 transition-colors">
-            <svg class="w-5 h-5 text-surface-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          <h2 class="text-xl font-bold text-white">{{ editId ? 'Editar Produto' : 'Novo Produto' }}</h2>
+          <button (click)="fecharModal()" class="p-2 rounded-xl transition-colors"
+                  onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
+            <svg class="w-5 h-5" style="color: rgba(255,255,255,0.5);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
 
         @if (erro && showModal) {
-          <div class="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{{ erro }}</div>
+          <div class="mb-4 p-3 rounded-xl text-sm" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171;">{{ erro }}</div>
         }
 
         <div class="space-y-4">
@@ -172,7 +186,9 @@
         </div>
 
         <div class="flex gap-3 mt-6">
-          <button (click)="fecharModal()" class="flex-1 py-3 rounded-xl font-semibold text-surface-700 border border-surface-200 hover:bg-surface-50 transition-all duration-200">
+          <button (click)="fecharModal()" class="flex-1 py-3 rounded-xl font-semibold transition-all duration-200"
+                  style="color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.1);"
+                  onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='transparent'">
             Cancelar
           </button>
           <button id="btn-salvar-produto" (click)="salvar()" [disabled]="saving || !form.nome || !form.precoVenda"
@@ -191,46 +207,52 @@
 
   <!-- Import Result Modal -->
   @if (showImportResult && importResult) {
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" (click)="fecharImportResult()">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-slide-up" (click)="$event.stopPropagation()">
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" (click)="fecharImportResult()"
+         style="background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);">
+      <div class="rounded-2xl shadow-glass w-full max-w-md p-6 animate-slide-up" (click)="$event.stopPropagation()"
+           style="background: rgba(22,27,34,0.95); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px);">
         <div class="flex items-center justify-between mb-5">
-          <h2 class="text-xl font-bold text-surface-900">Resultado da Importacao</h2>
-          <button (click)="fecharImportResult()" class="p-2 rounded-xl hover:bg-surface-100 transition-colors">
-            <svg class="w-5 h-5 text-surface-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          <h2 class="text-xl font-bold text-white">Resultado da Importacao</h2>
+          <button (click)="fecharImportResult()" class="p-2 rounded-xl transition-colors"
+                  onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
+            <svg class="w-5 h-5" style="color: rgba(255,255,255,0.5);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
 
         <div class="grid grid-cols-3 gap-3 mb-5">
-          <div class="text-center p-3 rounded-xl bg-green-50 border border-green-200">
-            <p class="text-2xl font-bold text-green-600">{{ importResult.importados }}</p>
-            <p class="text-xs text-green-700 font-medium mt-1">Novos</p>
+          <div class="text-center p-3 rounded-xl" style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2);">
+            <p class="text-2xl font-bold" style="color: #34d399;">{{ importResult.importados }}</p>
+            <p class="text-xs font-medium mt-1" style="color: rgba(16,185,129,0.8);">Novos</p>
           </div>
-          <div class="text-center p-3 rounded-xl bg-blue-50 border border-blue-200">
-            <p class="text-2xl font-bold text-blue-600">{{ importResult.atualizados }}</p>
-            <p class="text-xs text-blue-700 font-medium mt-1">Atualizados</p>
+          <div class="text-center p-3 rounded-xl" style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);">
+            <p class="text-2xl font-bold" style="color: #60a5fa;">{{ importResult.atualizados }}</p>
+            <p class="text-xs font-medium mt-1" style="color: rgba(59,130,246,0.8);">Atualizados</p>
           </div>
-          <div class="text-center p-3 rounded-xl bg-amber-50 border border-amber-200">
-            <p class="text-2xl font-bold text-amber-600">{{ importResult.ignorados }}</p>
-            <p class="text-xs text-amber-700 font-medium mt-1">Ignorados</p>
+          <div class="text-center p-3 rounded-xl" style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2);">
+            <p class="text-2xl font-bold" style="color: #fbbf24;">{{ importResult.ignorados }}</p>
+            <p class="text-xs font-medium mt-1" style="color: rgba(245,158,11,0.8);">Ignorados</p>
           </div>
         </div>
 
         @if (importResult.erros && importResult.erros.length > 0) {
           <div class="mb-5">
-            <p class="text-xs font-semibold text-red-600 mb-2">Erros encontrados ({{ importResult.erros.length }}):</p>
+            <p class="text-xs font-semibold mb-2" style="color: #f87171;">Erros encontrados ({{ importResult.erros.length }}):</p>
             <div class="max-h-40 overflow-y-auto space-y-1">
               @for (erro of importResult.erros; track $index) {
-                <div class="text-xs text-red-700 bg-red-50 rounded-lg px-3 py-1.5">{{ erro }}</div>
+                <div class="text-xs rounded-lg px-3 py-1.5" style="background: rgba(239,68,68,0.08); color: #fca5a5;">{{ erro }}</div>
               }
             </div>
           </div>
         }
 
         <button (click)="fecharImportResult()"
-          class="w-full py-2.5 rounded-xl font-semibold text-surface-700 border border-surface-200 hover:bg-surface-50 transition-all duration-200">
+          class="w-full py-2.5 rounded-xl font-semibold transition-all duration-200"
+          style="color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.1);"
+          onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='transparent'">
           Fechar
         </button>
       </div>
     </div>
   }
+
 </div>
