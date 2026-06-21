@@ -97,26 +97,6 @@ Acesse `http://localhost:4200`.
 
 > **Nota**: Para que o frontend local aponte para seu backend local, certifique-se de que o arquivo `src/environments/environment.ts` esteja com `apiUrl: 'http://localhost:8080/api'`.
 
----
-
-## 🚀 Como fazer o Deploy do Frontend
-
-O frontend está hospedado no GitHub Pages. **Apenas fazer o `git push` NÃO atualiza a página automaticamente** (a menos que seja configurada uma GitHub Action). 
-
-Para atualizar a versão que está no ar após realizar alterações, siga os passos abaixo:
-
-```bash
-cd frontend
-
-# 1. Gere a build de produção (com o caminho base correto do repositório)
-ng build --base-href=/DropSales/
-
-# 2. Faça o deploy da pasta compilada para a branch gh-pages
-npx angular-cli-ghpages --dir=dist/dropsales-frontend/browser
-```
-*(Após rodar o comando acima, o GitHub pode levar alguns minutos para refletir a nova versão online).*
-
----
 
 ## 🔒 Variáveis de Ambiente Necessárias (Backend)
 
@@ -132,6 +112,6 @@ npx angular-cli-ghpages --dir=dist/dropsales-frontend/browser
 ---
 
 <div align="center">
-  Feito com 💙 por Thiago. <br>
+  Feito por TH. <br>
   Licença MIT
 </div>
