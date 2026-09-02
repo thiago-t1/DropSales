@@ -9,11 +9,13 @@ import java.math.BigDecimal;
 public class ProdutoResponse {
     private Long id;
     private String nome;
+    private String descricao;
     private String sku;
     private BigDecimal precoCusto;
     private BigDecimal precoVenda;
     private Integer quantidadeEstoque;
     private Integer estoqueMinimo;
+    private Long categoriaId;
     private String categoria;
     private boolean estoqueBaixo;
 }

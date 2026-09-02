@@ -1,269 +1,712 @@
-<div class="space-y-6 animate-fade-in">
-
-  <!-- ── Cabeçalho ─────────────────────────────────────────────────── -->
-  <div>
-    <h1 class="text-2xl lg:text-3xl font-bold text-white">Vendas</h1>
-    <p class="mt-1" style="color: rgba(255,255,255,0.35);">Registre e gerencie suas vendas</p>
-  </div>
-
-  <!-- ── Alertas ───────────────────────────────────────────────────── -->
-  @if (sucesso) {
-    <div class="p-4 rounded-xl flex items-center gap-3 animate-slide-up"
-         style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #34d399;">
-      <svg class="w-5 h-5 flex-shrink-0" style="color: #10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-      <span class="text-sm font-medium">{{ sucesso }}</span>
+<div class="mx-auto w-full max-w-[1600px] space-y-5 animate-fade-in">
+  <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div>
+      <p class="mb-2 text-[11px] font-extrabold uppercase tracking-[.1em] text-indigo-600">Operação da loja</p>
+      <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Vendas</h1>
+      <p class="mt-1 text-sm text-slate-500">
+        Monte o pedido, confira os itens e finalize a venda em poucos passos.
+      </p>
     </div>
-  }
-  @if (erro) {
-    <div class="p-4 rounded-xl flex items-center gap-3 animate-slide-up"
-         style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171;">
-      <svg class="w-5 h-5 flex-shrink-0" style="color: #ef4444;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-      <span class="text-sm font-medium">{{ erro }}</span>
-    </div>
-  }
 
-  <!-- ── Banner de modo edição ──────────────────────────────────────── -->
-  @if (modoEdicao) {
-    <div class="p-4 rounded-xl flex items-center justify-between gap-3 animate-slide-up"
-         style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: #60a5fa;">
-      <div class="flex items-center gap-3">
-        <svg class="w-5 h-5 flex-shrink-0" style="color: #3b82f6;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-        <span class="text-sm font-semibold">Editando Venda #{{ vendaEmEdicaoId }} — Ajuste os itens e clique em "Atualizar Venda"</span>
+    <div class="grid grid-cols-3 gap-2 sm:flex sm:gap-3">
+      <div class="min-w-0 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm sm:min-w-[132px] sm:px-3.5 sm:py-3">
+        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">No pedido</p>
+        <p class="mt-1 text-lg font-extrabold text-slate-800">{{ totalItensCarrinho }}</p>
+        <p class="hidden text-[11px] text-slate-400 sm:block">unidades</p>
       </div>
-      <button (click)="cancelarEdicao()" class="text-xs font-semibold underline underline-offset-2 transition-colors"
-              style="color: #60a5fa;"
-              onmouseover="this.style.color='#93c5fd'" onmouseout="this.style.color='#60a5fa'">
+      <div class="min-w-0 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm sm:min-w-[132px] sm:px-3.5 sm:py-3">
+        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Vendas</p>
+        <p class="mt-1 text-lg font-extrabold text-slate-800">{{ totalVendasConcluidas }}</p>
+        <p class="hidden text-[11px] text-slate-400 sm:block">concluídas</p>
+      </div>
+      <div class="min-w-0 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm sm:min-w-[132px] sm:px-3.5 sm:py-3">
+        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Faturado</p>
+        <p class="mt-1 truncate text-sm font-extrabold text-emerald-700 sm:text-lg">
+          R$ {{ fmt(totalHistorico) }}
+        </p>
+        <p class="hidden text-[11px] text-slate-400 sm:block">no histórico</p>
+      </div>
+    </div>
+  </header>
+
+  @if (sucesso) {
+    <div class="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 animate-slide-up" role="status">
+      <svg class="mt-0.5 h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span>{{ sucesso }}</span>
+    </div>
+  }
+
+  @if (erro) {
+    <div class="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 animate-slide-up" role="alert">
+      <svg class="mt-0.5 h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+      </svg>
+      <span>{{ erro }}</span>
+    </div>
+  }
+
+  @if (checkoutIncerto) {
+    <div class="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-amber-900 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-200 sm:flex-row sm:items-center sm:justify-between" role="alert">
+      <div class="flex items-start gap-3">
+        <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+        </svg>
+        <div>
+          <p class="text-sm font-extrabold">Resultado da venda ainda não confirmado</p>
+          <p class="mt-0.5 text-xs leading-relaxed text-amber-800/80 dark:text-amber-300/80">
+            O checkout foi preservado. Repetir usa a mesma chave segura e não cria uma venda duplicada.
+          </p>
+        </div>
+      </div>
+      <div class="flex flex-shrink-0 gap-2">
+        <button type="button" (click)="descartarCheckout()" class="secondary-action !border-amber-200 !bg-white/70 !text-amber-800 dark:!border-amber-500/30 dark:!bg-amber-500/10 dark:!text-amber-200 dark:hover:!bg-amber-500/20">
+          Descartar
+        </button>
+        <button type="button" (click)="repetirVendaIncerta()" [disabled]="loading" class="primary-action !min-h-[42px] !px-4">
+          {{ loading ? 'Reenviando...' : 'Tentar novamente' }}
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (modoEdicao) {
+    <div class="flex flex-col gap-3 rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-teal-50 p-4 text-indigo-800 dark:border-indigo-500/30 dark:from-indigo-500/15 dark:to-teal-500/10 dark:text-indigo-200 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-start gap-3">
+        <span class="grid h-9 w-9 flex-shrink-0 place-items-center rounded-xl bg-white/70 dark:bg-slate-900/60">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zM19.5 7.125L16.862 4.487M18 14.25V19.5A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10.5" />
+          </svg>
+        </span>
+        <div>
+          <p class="text-sm font-extrabold">Editando a Venda #{{ vendaEmEdicaoId }}</p>
+          <p class="mt-0.5 text-xs text-indigo-700/70 dark:text-indigo-300/75">
+            Ajuste os produtos e confirme no resumo para salvar as alterações.
+          </p>
+        </div>
+      </div>
+      <button type="button" (click)="cancelarEdicao()" [disabled]="checkoutBloqueado" class="secondary-action !border-indigo-200 !bg-white/70 !text-indigo-700 dark:!border-indigo-500/30 dark:!bg-indigo-500/10 dark:!text-indigo-200 dark:hover:!bg-indigo-500/20">
         Cancelar edição
       </button>
     </div>
   }
 
-  <!-- ── Formulário de venda + Resumo ──────────────────────────────── -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <fieldset
+    [disabled]="checkoutBloqueado"
+    [attr.aria-busy]="loading"
+    class="relative isolate m-0 grid min-w-0 grid-cols-1 items-start gap-5 border-0 p-0 2xl:grid-cols-[minmax(0,1fr)_380px]"
+  >
+    <section class="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_14px_36px_rgba(30,41,59,.055)]">
+      <section class="p-4 sm:p-6">
+        <div class="mb-5 flex items-start justify-between gap-4">
+          <div class="flex items-start gap-3">
+            <span class="step-dot">1</span>
+            <div>
+              <h2 class="font-extrabold text-slate-900">Escolha os produtos</h2>
+              <p class="mt-0.5 text-xs text-slate-500 sm:text-sm">
+                Pesquise por nome, SKU ou categoria.
+              </p>
+            </div>
+          </div>
+          @if (produtoSelecionado) {
+            <span class="hidden rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700 sm:inline-flex">
+              Produto selecionado
+            </span>
+          }
+        </div>
 
-    <!-- Formulário -->
-    <div class="lg:col-span-2 ds-card">
-      <h2 class="text-lg font-semibold text-white mb-4">
-        {{ modoEdicao ? 'Editar Venda #' + vendaEmEdicaoId : 'Nova Venda' }}
-      </h2>
+        <div class="relative">
+          <svg class="pointer-events-none absolute left-3.5 top-1/2 h-[17px] w-[17px] -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m2.35-5.65a8 8 0 11-16 0 8 8 0 0116 0z" />
+          </svg>
+          <input
+            id="busca-produto-venda"
+            type="search"
+            [(ngModel)]="buscaProduto"
+            class="sales-input !pl-10 !pr-10"
+            placeholder="Buscar no catálogo..."
+            autocomplete="off"
+            aria-label="Buscar produto para a venda"
+          />
+          @if (buscaProduto) {
+            <button
+              type="button"
+              (click)="buscaProduto = ''"
+              class="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              aria-label="Limpar busca de produto"
+            >
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          }
+        </div>
 
-      <!-- Seleção de produto + quantidade -->
-      <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
-        <div class="sm:col-span-6">
-          <label class="ds-label">Produto</label>
-          <select id="select-produto" [(ngModel)]="produtoSelecionadoId" class="ds-input">
-            <option [ngValue]="null" disabled>Selecione um produto...</option>
-            @for (p of produtos; track p.id) {
-              <option [ngValue]="p.id">{{ p.nome }} — R$ {{ fmt(p.precoVenda) }} ({{ p.quantidadeEstoque }} un.)</option>
+        <div class="product-list mt-3">
+          @if (produtos.length === 0) {
+            <div class="grid min-h-36 place-items-center p-6 text-center">
+              <div>
+                <span class="mx-auto grid h-11 w-11 place-items-center rounded-xl bg-slate-100 text-slate-400">
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 8-9-5-9 5m18 0-9 5m9-5v8l-9 5m0-8L3 8m9 5v8M3 8v8l9 5" />
+                  </svg>
+                </span>
+                <p class="mt-3 text-sm font-bold text-slate-700">Nenhum produto disponível</p>
+                <p class="mt-1 text-xs text-slate-400">Cadastre produtos para começar uma venda.</p>
+              </div>
+            </div>
+          } @else if (produtosFiltrados.length === 0) {
+            <div class="grid min-h-32 place-items-center p-6 text-center">
+              <div>
+                <p class="text-sm font-bold text-slate-700">Nenhum resultado encontrado</p>
+                <p class="mt-1 text-xs text-slate-400">Tente buscar com outro nome, SKU ou categoria.</p>
+              </div>
+            </div>
+          } @else {
+            @for (produto of produtosFiltrados; track produto.id) {
+              <button
+                type="button"
+                (click)="selecionarProduto(produto)"
+                [disabled]="estoqueRestante(produto) <= 0"
+                class="product-option"
+                [class.is-selected]="produtoSelecionadoId === produto.id"
+                [attr.aria-pressed]="produtoSelecionadoId === produto.id"
+              >
+                <div class="min-w-0">
+                  <div class="flex min-w-0 items-center gap-2">
+                    <p class="truncate text-sm font-extrabold">{{ produto.nome }}</p>
+                    @if (produto.categoria) {
+                      <span class="hidden truncate rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500 sm:inline">
+                        {{ produto.categoria }}
+                      </span>
+                    }
+                  </div>
+                  <p class="mt-1 truncate text-[11px] text-slate-400">
+                    {{ produto.sku || 'Sem SKU' }}
+                    @if (produtoSelecionadoId === produto.id) {
+                      <span class="font-bold text-indigo-600"> · selecionado</span>
+                    }
+                  </p>
+                </div>
+                <div class="flex flex-shrink-0 flex-col items-end gap-1.5">
+                  <p class="text-sm font-extrabold text-slate-900">R$ {{ fmt(produto.precoVenda) }}</p>
+                  <span
+                    class="stock-chip"
+                    [class.is-low]="estoqueRestante(produto) > 0 && estoqueRestante(produto) <= produto.estoqueMinimo"
+                    [class.is-empty]="estoqueRestante(produto) === 0"
+                  >
+                    <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
+                    {{ estoqueRestante(produto) === 0 ? 'Sem estoque' : estoqueRestante(produto) + ' em estoque' }}
+                  </span>
+                </div>
+              </button>
             }
-          </select>
+          }
         </div>
-        <div class="sm:col-span-3">
-          <label class="ds-label">Quantidade</label>
-          <input id="input-quantidade" type="number" [(ngModel)]="quantidade" min="1" class="ds-input" placeholder="1" />
-        </div>
-        <div class="sm:col-span-3">
-          <button id="btn-adicionar" (click)="adicionarItem()" [disabled]="!produtoSelecionadoId || quantidade < 1"
-            class="w-full py-3 px-4 rounded-xl font-semibold text-white
-                   disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all duration-200
-                   flex items-center justify-center gap-2"
-            style="background: rgba(99,102,241,0.8); border: 1px solid rgba(99,102,241,0.3);"
-            onmouseover="this.style.background='rgba(99,102,241,1)'; this.style.boxShadow='0 0 20px rgba(99,102,241,0.3)'"
-            onmouseout="this.style.background='rgba(99,102,241,0.8)'; this.style.boxShadow='none'">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-            Adicionar
-          </button>
-        </div>
-      </div>
 
-      <!-- Tabela do carrinho -->
-      @if (carrinho.length > 0) {
-        <div class="mt-6 overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead>
-              <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
-                <th class="text-left py-3 px-2 font-medium" style="color: rgba(255,255,255,0.35);">Produto</th>
-                <th class="text-center py-3 px-2 font-medium" style="color: rgba(255,255,255,0.35);">Qtd</th>
-                <th class="text-right py-3 px-2 font-medium" style="color: rgba(255,255,255,0.35);">Unit.</th>
-                <th class="text-right py-3 px-2 font-medium" style="color: rgba(255,255,255,0.35);">Subtotal</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of carrinho; track item.produto.id; let i = $index) {
-                <tr class="transition-colors" style="border-bottom: 1px solid rgba(255,255,255,0.03);"
-                    onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
-                  <td class="py-3 px-2 font-medium text-white/90">{{ item.produto.nome }}</td>
-                  <td class="text-center py-3 px-2 text-white/60">{{ item.quantidade }}</td>
-                  <td class="text-right py-3 px-2" style="color: rgba(255,255,255,0.4);">R$ {{ fmt(item.produto.precoVenda) }}</td>
-                  <td class="text-right py-3 px-2 font-semibold text-primary-400">R$ {{ fmt(item.subtotal) }}</td>
-                  <td class="text-center py-3 px-2">
-                    <button (click)="removerItem(i)" class="p-1.5 rounded-lg transition-all duration-200"
-                            style="color: rgba(248,113,113,0.6);"
-                            onmouseover="this.style.background='rgba(239,68,68,0.1)'; this.style.color='#f87171'"
-                            onmouseout="this.style.background='transparent'; this.style.color='rgba(248,113,113,0.6)'">
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      } @else {
-        <div class="mt-6 text-center py-10 rounded-2xl" style="border: 2px dashed rgba(255,255,255,0.08);">
-          <svg class="w-12 h-12 mx-auto mb-3" style="color: rgba(255,255,255,0.1);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" /></svg>
-          <p class="text-sm" style="color: rgba(255,255,255,0.25);">Adicione produtos para iniciar a venda</p>
-        </div>
-      }
-    </div>
+        @if (produtoSelecionado; as produto) {
+          <div class="mt-4 flex flex-col gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="min-w-0">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Adicionar ao pedido</p>
+              <p class="mt-1 truncate text-sm font-extrabold text-slate-900">{{ produto.nome }}</p>
+              <p class="mt-0.5 text-xs text-slate-500">
+                Até {{ estoqueRestante(produto) }} unidade(s) disponíveis
+              </p>
+            </div>
+            <div class="grid grid-cols-[124px_minmax(0,1fr)] gap-2 sm:flex">
+              <div class="quantity-control">
+                <button
+                  type="button"
+                  (click)="alterarQuantidadeSelecao(-1)"
+                  [disabled]="quantidade <= 1"
+                  aria-label="Diminuir quantidade"
+                >
+                  −
+                </button>
+                <input
+                  id="input-quantidade"
+                  type="number"
+                  [(ngModel)]="quantidade"
+                  (blur)="normalizarQuantidadeSelecao()"
+                  (keyup.enter)="adicionarItem()"
+                  min="1"
+                  [max]="estoqueRestante(produto)"
+                  aria-label="Quantidade do produto"
+                />
+                <button
+                  type="button"
+                  (click)="alterarQuantidadeSelecao(1)"
+                  [disabled]="quantidade >= estoqueRestante(produto)"
+                  aria-label="Aumentar quantidade"
+                >
+                  +
+                </button>
+              </div>
+              <button
+                id="btn-adicionar"
+                type="button"
+                (click)="adicionarItem()"
+                [disabled]="estoqueRestante(produto) <= 0"
+                class="primary-action whitespace-nowrap"
+              >
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4" />
+                </svg>
+                Adicionar
+              </button>
+            </div>
+          </div>
+        }
+      </section>
 
-    <!-- Painel de Resumo -->
-    <div class="ds-card h-fit sticky top-24">
-      <h2 class="text-lg font-semibold text-white mb-4">Resumo</h2>
-      <div class="space-y-3 mb-6">
-        <div class="flex justify-between text-sm">
-          <span style="color: rgba(255,255,255,0.4);">Itens no carrinho</span>
-          <span class="font-medium text-white">{{ carrinho.length }}</span>
-        </div>
-        <hr style="border-color: rgba(255,255,255,0.06);" />
-        <div class="flex justify-between">
-          <span class="font-semibold text-white">Total</span>
-          <span class="text-2xl font-bold text-primary-400">R$ {{ fmt(totalCarrinho) }}</span>
-        </div>
-      </div>
+      <div class="h-px bg-slate-100"></div>
 
-      <div class="mb-4">
-        <label class="ds-label">Observação (opcional)</label>
-        <textarea id="input-observacao" [(ngModel)]="observacao" rows="2"
-          class="ds-input resize-none" placeholder="Ex: Pago com PIX"></textarea>
-      </div>
+      <section class="p-4 sm:p-6">
+        <div class="mb-5 flex items-start justify-between gap-4">
+          <div class="flex items-start gap-3">
+            <span class="step-dot">2</span>
+            <div>
+              <h2 class="font-extrabold text-slate-900">Revise o pedido</h2>
+              <p class="mt-0.5 text-xs text-slate-500 sm:text-sm">
+                {{ carrinho.length ? carrinho.length + ' produto(s) no carrinho' : 'O carrinho ainda está vazio' }}
+              </p>
+            </div>
+          </div>
+          @if (carrinho.length) {
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="descartarCheckout()"
+                class="hidden text-xs font-bold text-slate-400 transition hover:text-red-600 sm:inline"
+              >
+                Limpar pedido
+              </button>
+              <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+                R$ {{ fmt(totalCarrinho) }}
+              </span>
+            </div>
+          }
+        </div>
 
-      <!-- Botão dinâmico: Finalizar / Atualizar -->
-      <button id="btn-finalizar" (click)="finalizarVenda()" [disabled]="carrinho.length === 0 || loading"
-        class="ds-btn-primary flex items-center justify-center gap-2 mb-3">
-        @if (loading) {
-          <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-          Processando...
-        } @else if (modoEdicao) {
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-5l-4 4m0 0l-4-4m4 4V4" /></svg>
-          Atualizar Venda
+        @if (carrinho.length === 0) {
+          <div class="grid min-h-[180px] place-items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-7 text-center text-slate-500">
+            <div>
+              <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-indigo-50 text-indigo-500">
+                <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M2.25 3h1.386a1.5 1.5 0 011.442 1.088L5.5 5.56m0 0h14.25l-1.5 7.5H7m-1.5-7.5L7 13.06m0 0-1.612 1.612A1.5 1.5 0 006.448 17.25H18m-9.75 3a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm10.5 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+              </span>
+              <p class="mt-3 text-sm font-extrabold text-slate-700">Seu pedido começa aqui</p>
+              <p class="mx-auto mt-1 max-w-xs text-xs leading-relaxed text-slate-400">
+                Selecione um produto acima, ajuste a quantidade e toque em “Adicionar”.
+              </p>
+            </div>
+          </div>
         } @else {
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-          Finalizar Venda
+          <div class="hidden md:block">
+            <div class="cart-line !py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <span>Produto</span>
+              <span>Quantidade</span>
+              <span class="text-right">Subtotal</span>
+              <span></span>
+            </div>
+            @for (item of carrinho; track item.produto.id; let index = $index) {
+              <div class="cart-line">
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-extrabold text-slate-800">{{ item.produto.nome }}</p>
+                  <p class="mt-1 text-xs text-slate-400">
+                    R$ {{ fmt(item.precoUnitario) }} por unidade
+                  </p>
+                </div>
+                <div class="quantity-control max-w-[118px]">
+                  <button
+                    type="button"
+                    (click)="alterarQuantidadeItem(index, -1)"
+                  [attr.aria-label]="'Diminuir quantidade de ' + item.produto.nome"
+                  >
+                    −
+                  </button>
+                  <span class="text-center text-sm font-extrabold text-slate-800">{{ item.quantidade }}</span>
+                  <button
+                    type="button"
+                    (click)="alterarQuantidadeItem(index, 1)"
+                    [disabled]="item.quantidade >= estoqueDisponivel(item.produto)"
+                    [attr.aria-label]="'Aumentar quantidade de ' + item.produto.nome"
+                  >
+                    +
+                  </button>
+                </div>
+                <p class="text-right text-sm font-extrabold text-slate-900">R$ {{ fmt(item.subtotal) }}</p>
+                <button
+                  type="button"
+                  (click)="removerItem(index)"
+                  class="icon-action is-danger"
+                  [attr.aria-label]="'Remover ' + item.produto.nome + ' do pedido'"
+                >
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 9.75l-.853 9.104A2.25 2.25 0 0116.407 21H7.593a2.25 2.25 0 01-2.24-2.146L4.5 9.75m5.25 3v5.25m4.5-5.25v5.25M3.75 6.75h16.5m-10.5 0V4.5A.75.75 0 0110.5 3.75h3a.75.75 0 01.75.75v2.25" />
+                  </svg>
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="space-y-3 md:hidden">
+            @for (item of carrinho; track item.produto.id; let index = $index) {
+              <article class="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="truncate text-sm font-extrabold text-slate-800">{{ item.produto.nome }}</p>
+                    <p class="mt-1 text-xs text-slate-400">R$ {{ fmt(item.precoUnitario) }} / un.</p>
+                  </div>
+                  <button
+                    type="button"
+                    (click)="removerItem(index)"
+                    class="icon-action is-danger !h-8 !w-8"
+                    [attr.aria-label]="'Remover ' + item.produto.nome + ' do pedido'"
+                  >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 9.75l-.853 9.104A2.25 2.25 0 0116.407 21H7.593a2.25 2.25 0 01-2.24-2.146L4.5 9.75m5.25 3v5.25m4.5-5.25v5.25M3.75 6.75h16.5m-10.5 0V4.5A.75.75 0 0110.5 3.75h3a.75.75 0 01.75.75v2.25" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="mt-4 flex items-center justify-between gap-3">
+                  <div class="quantity-control max-w-[116px]">
+                    <button type="button" (click)="alterarQuantidadeItem(index, -1)" aria-label="Diminuir quantidade">−</button>
+                    <span class="text-center text-sm font-extrabold text-slate-800">{{ item.quantidade }}</span>
+                    <button
+                      type="button"
+                      (click)="alterarQuantidadeItem(index, 1)"
+                      [disabled]="item.quantidade >= estoqueDisponivel(item.produto)"
+                      aria-label="Aumentar quantidade"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Subtotal</p>
+                    <p class="mt-0.5 font-extrabold text-slate-900">R$ {{ fmt(item.subtotal) }}</p>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        }
+
+        <div class="mt-5">
+          <label for="observacao-venda" class="mb-2 block text-xs font-bold text-slate-600">
+            Observação <span class="font-normal text-slate-400">(opcional)</span>
+          </label>
+          <textarea
+            id="observacao-venda"
+            [(ngModel)]="observacao"
+            rows="3"
+            maxlength="500"
+            class="sales-input resize-none"
+            placeholder="Ex.: cliente retirará o pedido no fim do dia."
+          ></textarea>
+          <p class="mt-1 text-right text-[10px] text-slate-400">{{ observacao.length }}/500</p>
+        </div>
+      </section>
+    </section>
+
+    <aside class="summary-card min-w-0 self-start rounded-[22px] border border-slate-200 bg-white p-5 shadow-[0_14px_36px_rgba(30,41,59,.055)]">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-[11px] font-extrabold uppercase tracking-[.1em] text-indigo-600">Etapa 3</p>
+          <h2 class="mt-1 text-lg font-extrabold text-slate-900">Resumo da venda</h2>
+        </div>
+        <span class="grid h-10 w-10 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 14.25l2.25 2.25L15 12.75m-6-6h6m-7.5-3h9A2.25 2.25 0 0118.75 6v15l-3.375-2.25L12 21l-3.375-2.25L5.25 21V6A2.25 2.25 0 017.5 3.75z" />
+          </svg>
+        </span>
+      </div>
+
+      <fieldset class="mt-5">
+        <legend class="text-xs font-extrabold text-slate-700 dark:text-slate-200">Forma de pagamento</legend>
+        <div class="mt-1 flex items-start justify-between gap-3">
+          <p class="text-[11px] leading-relaxed text-slate-400">Taxas e prazos vêm das configurações da loja.</p>
+          <button type="button" (click)="alternarPagamentoDividido()" [disabled]="checkoutBloqueado" class="shrink-0 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-[10px] font-extrabold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50 dark:border-indigo-500/30 dark:bg-indigo-500/15 dark:text-indigo-200 dark:hover:bg-indigo-500/25">{{ pagamentoDividido ? 'Pagamento único' : 'Dividir pagamento' }}</button>
+        </div>
+
+        @if (!pagamentoDividido) {
+          <div class="mt-3 grid grid-cols-2 gap-2" role="radiogroup" aria-label="Forma de pagamento">
+            @for (forma of formasPagamento; track forma.value) {
+              <button type="button" role="radio" (click)="selecionarFormaPagamento(forma.value)" [attr.aria-checked]="formaPagamento === forma.value" [class.border-indigo-500]="formaPagamento === forma.value" [class.bg-indigo-50]="formaPagamento === forma.value" [class.text-indigo-700]="formaPagamento === forma.value" class="flex min-h-[60px] items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-slate-600 transition hover:border-indigo-300 hover:bg-indigo-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-500/10">
+                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-slate-100 text-current">@if (forma.value === 'PIX') { <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m8.5 5.5 2-2a2.12 2.12 0 0 1 3 0l2 2a2.12 2.12 0 0 0 3 0M5.5 8.5l-2 2a2.12 2.12 0 0 0 0 3l2 2a2.12 2.12 0 0 1 0 3m13-10 2 2a2.12 2.12 0 0 1 0 3l-2 2a2.12 2.12 0 0 0 0 3m-10 0 2 2a2.12 2.12 0 0 0 3 0l2-2M7.76 12l4.24-4.24L16.24 12 12 16.24 7.76 12Z" /></svg> } @else if (forma.value === 'DINHEIRO') { <span class="text-sm font-black">$</span> } @else { <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.25 8.25h19.5m-18-3h16.5A1.5 1.5 0 0 1 21.75 6.75v10.5a1.5 1.5 0 0 1-1.5 1.5H3.75a1.5 1.5 0 0 1-1.5-1.5V6.75a1.5 1.5 0 0 1 1.5-1.5Z" /></svg> }</span><span class="min-w-0"><span class="block text-xs font-extrabold">{{ forma.label }}</span><span class="mt-0.5 block text-[9px] font-medium leading-3 opacity-65">{{ forma.resumo }}</span></span>
+              </button>
+            }
+          </div>
+        }
+
+        <div class="mt-3 space-y-3">
+          @for (pagamento of pagamentosCheckout; track pagamento.localId; let index = $index) {
+            <article class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              @if (pagamentoDividido) {
+                <div class="mb-3 flex items-center justify-between"><p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Pagamento {{ index + 1 }}</p>@if (pagamentosCheckout.length > 1) { <button type="button" (click)="removerPagamento(pagamento.localId)" class="text-[10px] font-bold text-rose-600">Remover</button> }</div>
+                <div class="grid grid-cols-2 gap-2"><label><span class="text-[10px] font-bold text-slate-500">Forma</span><select [(ngModel)]="pagamento.formaPagamento" (ngModelChange)="formaPagamentoLinhaAlterada(pagamento)" class="sales-input mt-1 !min-h-10 !py-2 text-xs">@for (forma of formasPagamento; track forma.value) { <option [ngValue]="forma.value">{{ forma.label }}</option> }</select></label><label><span class="text-[10px] font-bold text-slate-500">Valor</span><div class="relative mt-1"><span class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">R$</span><input type="number" [(ngModel)]="pagamento.valor" min="0.01" step="0.01" class="sales-input !min-h-10 !py-2 !pl-8 text-right text-xs !font-bold" /></div></label></div>
+              }
+
+              @if (pagamentoLinhaEmCartao(pagamento)) {
+                <div class="mt-2 grid grid-cols-2 gap-2"><label><span class="text-[10px] font-bold text-slate-500">Adquirente</span><select [(ngModel)]="pagamento.adquirenteId" (ngModelChange)="detalhesPagamentoAlterados(pagamento)" class="sales-input mt-1 !min-h-10 !py-2 text-xs"><option [ngValue]="null">Regra geral</option>@for (adquirente of adquirentes; track adquirente.id) { <option [ngValue]="adquirente.id">{{ adquirente.nome }}</option> }</select></label><label><span class="text-[10px] font-bold text-slate-500">Parcelas</span><select [(ngModel)]="pagamento.parcelas" (ngModelChange)="detalhesPagamentoAlterados(pagamento)" [disabled]="pagamento.formaPagamento !== 'CARTAO_CREDITO'" class="sales-input mt-1 !min-h-10 !py-2 text-xs">@for (parcela of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]; track parcela) { <option [ngValue]="parcela">{{ parcela }}x</option> }</select></label><label class="col-span-2"><span class="text-[10px] font-bold text-slate-500">Bandeira <span class="font-normal text-slate-400">(opcional)</span></span><select [(ngModel)]="pagamento.bandeira" (ngModelChange)="detalhesPagamentoAlterados(pagamento)" class="sales-input mt-1 !min-h-10 !py-2 text-xs"><option [ngValue]="null">Todas / não informada</option>@for (bandeira of ['VISA','MASTERCARD','ELO','AMEX','HIPERCARD','OUTRA']; track bandeira) { <option [ngValue]="bandeira">{{ bandeira }}</option> }</select></label></div>
+              }
+
+              @if (pagamento.formaPagamento === 'DINHEIRO') {
+                <div class="mt-2 grid grid-cols-2 gap-2"><label><span class="text-[10px] font-bold text-slate-500">Valor recebido</span><div class="relative mt-1"><span class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">R$</span><input type="number" [(ngModel)]="pagamento.valorRecebido" min="0" step="0.01" class="sales-input !min-h-10 !py-2 !pl-8 text-right text-xs !font-bold" /></div></label><div class="rounded-lg bg-white p-2"><p class="text-[10px] font-bold text-slate-400">Troco</p><p class="mt-1 text-sm font-extrabold text-emerald-700">R$ {{ fmt(trocoPagamento(pagamento)) }}</p></div></div>
+              }
+
+              <div class="mt-2 flex items-center justify-between rounded-lg bg-white px-2.5 py-2 text-[10px]"><span class="text-slate-400">Taxa automática: <strong class="text-slate-600">{{ fmt(taxaPercentualPagamento(pagamento)) }}%</strong></span><span class="font-extrabold" [class.text-rose-600]="taxaValorPagamento(pagamento) > 0" [class.text-emerald-700]="taxaValorPagamento(pagamento) === 0">Líquido R$ {{ fmt(liquidoPagamento(pagamento)) }}</span></div>
+            </article>
+          }
+        </div>
+
+        @if (pagamentoDividido && pagamentosCheckout.length < 5) { <button type="button" (click)="adicionarPagamento()" class="mt-2 flex min-h-10 w-full items-center justify-center gap-1 rounded-xl border border-dashed border-indigo-300 text-[11px] font-extrabold text-indigo-600 hover:bg-indigo-50"><span class="text-base leading-none">+</span> Adicionar outra forma</button> }
+        @if (erroPagamento) { <p class="mt-2 rounded-lg bg-rose-50 px-2.5 py-2 text-[10px] font-semibold text-rose-700" role="alert">{{ erroPagamento }}</p> }
+      </fieldset>
+
+      <div class="my-5 space-y-3 border-y border-slate-100 py-5 text-sm">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Produtos diferentes</span>
+          <span class="font-extrabold text-slate-800">{{ carrinho.length }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Total de unidades</span>
+          <span class="font-extrabold text-slate-800">{{ totalItensCarrinho }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">Pagamento</span>
+          <span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700">
+            {{ pagamentoDividido && pagamentosCheckout.length > 1 ? pagamentosCheckout.length + ' formas' : pagamentoLabel(pagamentosCheckout[0].formaPagamento || formaPagamento) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="mb-5 space-y-2.5">
+        <div class="flex items-center justify-between gap-3 text-sm">
+          <span class="text-slate-500">Total cobrado</span>
+          <span class="font-extrabold text-slate-800">R$ {{ fmt(totalCarrinho) }}</span>
+        </div>
+        <div class="flex items-center justify-between gap-3 text-sm">
+          <span class="text-slate-500">Taxa da operação</span>
+          <span class="font-bold" [class.text-rose-600]="taxaPagamentoValor > 0" [class.text-slate-400]="taxaPagamentoValor === 0">
+            {{ taxaPagamentoValor > 0 ? '− ' : '' }}R$ {{ fmt(taxaPagamentoValor) }}
+          </span>
+        </div>
+        <div class="flex items-end justify-between gap-3 border-t border-slate-100 pt-3">
+          <div>
+            <p class="text-xs font-semibold text-slate-400">Líquido para a loja</p>
+            <p class="summary-total mt-1">R$ {{ fmt(valorLiquidoVenda) }}</p>
+          </div>
+          <span class="mb-1 text-xs font-semibold text-slate-400">{{ pagamentoDividido && pagamentosCheckout.length > 1 ? 'Pagamento misto' : pagamentoLabel(pagamentosCheckout[0].formaPagamento || formaPagamento) }}</span>
+        </div>
+      </div>
+
+      <button
+        id="btn-finalizar-venda"
+        type="button"
+        (click)="finalizarVenda()"
+        [disabled]="carrinho.length === 0 || loading || !taxaPagamentoValida"
+        class="primary-action w-full"
+      >
+        @if (loading) {
+          <svg class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          Salvando...
+        } @else if (modoEdicao) {
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+          Salvar alterações
+        } @else {
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+          Finalizar venda
         }
       </button>
 
       @if (modoEdicao) {
-        <button (click)="cancelarEdicao()"
-          class="w-full py-3 px-4 rounded-xl font-semibold active:scale-[0.98] transition-all duration-200 text-sm"
-          style="color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.1);"
-          onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='transparent'">
-          Cancelar edição
+        <button type="button" (click)="cancelarEdicao()" class="secondary-action mt-2 w-full">
+          Descartar alterações
         </button>
       }
-    </div>
-  </div>
 
-  <!-- ── Histórico de Vendas ────────────────────────────────────────── -->
-  <div class="ds-card animate-slide-up" style="animation-delay: 150ms">
-    <div class="flex items-center justify-between mb-6">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center"
-             style="background: rgba(99,102,241,0.12); color: #818cf8;">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        </div>
+      <div class="mt-4 flex items-start gap-2 rounded-xl bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500">
+        <svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+        </svg>
+        O estoque, a receita bruta, a taxa e o valor líquido são atualizados após a confirmação.
+      </div>
+    </aside>
+  </fieldset>
+
+  <section class="relative z-0 overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_14px_36px_rgba(30,41,59,.055)]">
+    <div class="flex flex-col gap-4 p-4 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+      <div class="flex items-start gap-3">
+        <span class="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-teal-50 text-teal-700">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </span>
         <div>
-          <h3 class="font-semibold text-white">Histórico de Vendas</h3>
-          <p class="text-xs" style="color: rgba(255,255,255,0.3);">{{ vendas.length }} venda(s) registrada(s)</p>
+          <h2 class="font-extrabold text-slate-900">Histórico de vendas</h2>
+          <p class="mt-0.5 text-xs text-slate-500">
+            {{ vendasFiltradas.length }} de {{ vendas.length }} venda(s)
+          </p>
         </div>
       </div>
-      <button (click)="carregarVendas()" [disabled]="loadingVendas"
-        class="p-2 rounded-xl transition-colors disabled:opacity-40" title="Atualizar lista"
-        style="color: rgba(255,255,255,0.4);"
-        onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
-        <svg class="w-4 h-4" [class.animate-spin]="loadingVendas" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-      </button>
+
+      <div class="flex gap-2">
+        <div class="relative min-w-0 flex-1 sm:min-w-[280px]">
+          <svg class="pointer-events-none absolute left-3.5 top-1/2 h-[17px] w-[17px] -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m2.35-5.65a8 8 0 11-16 0 8 8 0 0116 0z" />
+          </svg>
+          <input
+            id="busca-historico-venda"
+            type="search"
+            [(ngModel)]="buscaHistorico"
+            class="sales-input !pl-10"
+            placeholder="Buscar no histórico"
+            aria-label="Buscar no histórico de vendas"
+          />
+        </div>
+        <button
+          type="button"
+          (click)="carregarVendas()"
+          [disabled]="loadingVendas"
+          class="icon-action !h-11 !w-11 flex-shrink-0 disabled:opacity-50"
+          title="Atualizar histórico"
+          aria-label="Atualizar histórico"
+        >
+          <svg class="h-4 w-4" [class.animate-spin]="loadingVendas" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.023 9.348h4.992V4.356m-1.291 14.37a9 9 0 10.291-9.622L21.015 9.348M2.985 14.652H7.977v4.992m-3.701-1.37a9 9 0 0015.448.452" />
+          </svg>
+        </button>
+      </div>
     </div>
 
     @if (loadingVendas) {
-      <div class="flex items-center justify-center py-10">
-        <svg class="animate-spin h-8 w-8 text-primary-400" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-        </svg>
+      <div class="space-y-3 border-t border-slate-100 p-5">
+        @for (item of [1, 2, 3]; track item) {
+          <div class="h-14 animate-pulse rounded-xl bg-slate-100"></div>
+        }
       </div>
-    } @else if (vendas.length === 0) {
-      <div class="text-center py-12 rounded-2xl" style="border: 2px dashed rgba(255,255,255,0.08);">
-        <svg class="w-14 h-14 mx-auto mb-4" style="color: rgba(255,255,255,0.08);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-        <p class="text-sm font-medium" style="color: rgba(255,255,255,0.3);">Nenhuma venda registrada ainda.</p>
-        <p class="text-xs mt-1" style="color: rgba(255,255,255,0.15);">Use o formulário acima para registrar a primeira venda.</p>
+    } @else if (vendasFiltradas.length === 0) {
+      <div class="border-t border-slate-100 p-5">
+        <div class="grid min-h-[180px] place-items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-7 text-center text-slate-500">
+          <div>
+            <span class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-400">
+              <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M9 12.75l2.25 2.25L15 11.25m-8.25-7.5h10.5A2.25 2.25 0 0119.5 6v15l-3.75-2.25L12 21l-3.75-2.25L4.5 21V6a2.25 2.25 0 012.25-2.25z" />
+              </svg>
+            </span>
+            @if (buscaHistorico) {
+              <p class="mt-3 text-sm font-extrabold text-slate-700">Nenhuma venda corresponde à busca</p>
+              <button type="button" (click)="buscaHistorico = ''" class="mt-2 text-xs font-bold text-indigo-600 hover:text-indigo-800">
+                Limpar busca
+              </button>
+            } @else {
+              <p class="mt-3 text-sm font-extrabold text-slate-700">Nenhuma venda registrada</p>
+              <p class="mt-1 text-xs text-slate-400">Sua primeira venda aparecerá aqui.</p>
+            }
+          </div>
+        </div>
       </div>
     } @else {
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+      <div class="hidden overflow-x-auto md:block">
+        <table class="history-table">
           <thead>
-            <tr style="border-bottom: 2px solid rgba(255,255,255,0.06);">
-              <th class="text-left py-3 px-3 font-semibold text-xs uppercase tracking-wide" style="color: rgba(255,255,255,0.3);">#</th>
-              <th class="text-left py-3 px-3 font-semibold text-xs uppercase tracking-wide" style="color: rgba(255,255,255,0.3);">Data</th>
-              <th class="text-left py-3 px-3 font-semibold text-xs uppercase tracking-wide hidden sm:table-cell" style="color: rgba(255,255,255,0.3);">Vendedor</th>
-              <th class="text-center py-3 px-3 font-semibold text-xs uppercase tracking-wide hidden md:table-cell" style="color: rgba(255,255,255,0.3);">Itens</th>
-              <th class="text-right py-3 px-3 font-semibold text-xs uppercase tracking-wide" style="color: rgba(255,255,255,0.3);">Total</th>
-              <th class="text-center py-3 px-3 font-semibold text-xs uppercase tracking-wide" style="color: rgba(255,255,255,0.3);">Ações</th>
+            <tr>
+              <th scope="col" class="text-left">Pedido</th>
+              <th scope="col" class="text-left">Data e hora</th>
+              <th scope="col" class="text-left">Vendedor</th>
+              <th scope="col" class="text-center">Itens</th>
+              <th scope="col" class="text-left">Pagamento</th>
+              <th scope="col" class="text-right">Total</th>
+              <th scope="col" class="text-right">Ações</th>
             </tr>
           </thead>
           <tbody>
-            @for (v of vendas; track v.id) {
-              <tr class="transition-colors group"
-                  [style.background]="vendaEmEdicaoId === v.id ? 'rgba(59,130,246,0.08)' : 'transparent'"
-                  [style.borderLeft]="vendaEmEdicaoId === v.id ? '4px solid #3b82f6' : '4px solid transparent'"
-                  style="border-bottom: 1px solid rgba(255,255,255,0.03);"
-                  onmouseover="if(!this.style.background || this.style.background === 'transparent') this.style.background='rgba(255,255,255,0.02)'"
-                  onmouseout="if(this.style.background === 'rgba(255, 255, 255, 0.02)') this.style.background='transparent'">
-                <td class="py-3.5 px-3">
-                  <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded-md"
-                        style="background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4);">#{{ v.id }}</span>
+            @for (venda of vendasFiltradas; track venda.id) {
+              <tr [class.is-editing]="vendaEmEdicaoId === venda.id" [class.opacity-70]="vendaCancelada(venda)">
+                <td>
+                  <div class="flex flex-col items-start gap-1.5">
+                    <span class="sale-id">#{{ venda.id }}</span>
+                    <span
+                      class="inline-flex rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider"
+                      [class.bg-emerald-50]="!vendaCancelada(venda)"
+                      [class.text-emerald-700]="!vendaCancelada(venda)"
+                      [class.bg-red-50]="vendaCancelada(venda)"
+                      [class.text-red-700]="vendaCancelada(venda)"
+                    >
+                      {{ statusLabel(venda) }}
+                    </span>
+                  </div>
                 </td>
-                <td class="py-3.5 px-3 text-xs" style="color: rgba(255,255,255,0.5);">{{ fmtData(v.criadoEm) }}</td>
-                <td class="py-3.5 px-3 hidden sm:table-cell" style="color: rgba(255,255,255,0.5);">{{ v.vendedor }}</td>
-                <td class="py-3.5 px-3 text-center hidden md:table-cell">
-                  <button (click)="verDetalhes(v)"
-                    class="inline-flex items-center gap-1 text-xs text-primary-400 hover:text-primary-300 font-medium transition-colors">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                    {{ v.itens.length }} item(s)
+                <td class="whitespace-nowrap">{{ fmtData(venda.criadoEm) }}</td>
+                <td>
+                  <div class="flex items-center gap-2.5">
+                    <span class="grid h-8 w-8 place-items-center rounded-full bg-slate-100 text-[10px] font-extrabold text-slate-600">
+                      {{ iniciais(venda.vendedor) }}
+                    </span>
+                    <span class="max-w-[150px] truncate font-semibold text-slate-700">{{ venda.vendedor }}</span>
+                  </div>
+                </td>
+                <td class="text-center">
+                  <button
+                    type="button"
+                    (click)="verDetalhes(venda)"
+                    class="font-bold text-indigo-600 hover:text-indigo-800"
+                  >
+                    {{ venda.itens.length }} {{ venda.itens.length === 1 ? 'item' : 'itens' }}
                   </button>
                 </td>
-                <td class="py-3.5 px-3 text-right">
-                  <span class="font-bold text-sm text-primary-400">R$ {{ fmt(v.total) }}</span>
+                <td class="whitespace-nowrap">
+                  <span class="inline-flex rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-extrabold text-indigo-700">
+                    {{ pagamentoVendaLabel(venda) }}
+                  </span>
+                  @if (taxaPagamentoDaVenda(venda) > 0) {
+                    <p class="mt-1 text-[10px] text-slate-400">
+                      Taxa R$ {{ fmt(taxaPagamentoDaVenda(venda)) }}
+                    </p>
+                  }
                 </td>
-                <td class="py-3.5 px-3">
-                  <div class="flex items-center justify-center gap-1.5">
-                    <!-- Botão Editar (lápis) -->
-                    <button (click)="carregarParaEdicao(v)"
-                      class="p-1.5 rounded-lg transition-all duration-200"
-                      [style.boxShadow]="vendaEmEdicaoId === v.id ? '0 0 0 2px rgba(59,130,246,0.4)' : 'none'"
-                      style="color: #60a5fa;"
-                      onmouseover="this.style.background='rgba(59,130,246,0.1)'" onmouseout="this.style.background='transparent'"
-                      title="Editar venda">
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                <td class="whitespace-nowrap text-right">
+                  <p class="font-extrabold" [class.text-slate-900]="!vendaCancelada(venda)" [class.text-slate-500]="vendaCancelada(venda)">
+                    R$ {{ fmt(venda.total) }}
+                  </p>
+                  @if (vendaCancelada(venda)) {
+                    <p class="mt-1 text-[10px] font-semibold text-red-600">Valor cancelado</p>
+                  } @else {
+                    <p class="mt-1 text-[10px] font-semibold text-emerald-700">
+                      Líquido R$ {{ fmt(valorLiquidoDaVenda(venda)) }}
+                    </p>
+                  }
+                </td>
+                <td>
+                  <div class="flex justify-end gap-1.5">
+                    <button type="button" (click)="verDetalhes(venda)" class="icon-action" title="Ver detalhes" aria-label="Ver detalhes da venda">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                     </button>
-                    <!-- Botão Excluir (lixeira) -->
-                    <button (click)="excluirVenda(v.id)"
-                      class="p-1.5 rounded-lg transition-all duration-200"
-                      style="color: rgba(248,113,113,0.6);"
-                      onmouseover="this.style.background='rgba(239,68,68,0.1)'; this.style.color='#f87171'"
-                      onmouseout="this.style.background='transparent'; this.style.color='rgba(248,113,113,0.6)'"
-                      title="Estornar venda">
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    @if (tenantService.podeGerenciar()) {
+                    <button type="button" (click)="carregarParaEdicao(venda)" [disabled]="vendaCancelada(venda)" class="icon-action" [title]="vendaCancelada(venda) ? 'Venda cancelada' : 'Editar venda'" aria-label="Editar venda">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
                       </svg>
                     </button>
+                    <button type="button" (click)="abrirCancelamento(venda)" [disabled]="vendaCancelada(venda)" class="icon-action is-danger" [title]="vendaCancelada(venda) ? 'Venda já cancelada' : 'Cancelar venda'" aria-label="Cancelar venda">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19.5 9.75l-.853 9.104A2.25 2.25 0 0116.407 21H7.593a2.25 2.25 0 01-2.24-2.146L4.5 9.75m5.25 3v5.25m4.5-5.25v5.25M3.75 6.75h16.5" />
+                      </svg>
+                    </button>
+                    }
                   </div>
                 </td>
               </tr>
@@ -271,84 +714,336 @@
           </tbody>
         </table>
       </div>
+
+      <div class="space-y-3 border-t border-slate-100 p-4 md:hidden">
+        @for (venda of vendasFiltradas; track venda.id) {
+          <article class="history-mobile-card" [class.is-editing]="vendaEmEdicaoId === venda.id" [class.opacity-75]="vendaCancelada(venda)">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="sale-id">#{{ venda.id }}</span>
+                  <span
+                    class="rounded-full px-2 py-0.5 text-[8px] font-extrabold uppercase tracking-wider"
+                    [class.bg-emerald-50]="!vendaCancelada(venda)"
+                    [class.text-emerald-700]="!vendaCancelada(venda)"
+                    [class.bg-red-50]="vendaCancelada(venda)"
+                    [class.text-red-700]="vendaCancelada(venda)"
+                  >
+                    {{ statusLabel(venda) }}
+                  </span>
+                  <span class="text-xs font-semibold text-slate-400">{{ fmtDataCurta(venda.criadoEm) }}</span>
+                </div>
+                <div class="mt-3 flex items-center gap-2">
+                  <span class="grid h-7 w-7 place-items-center rounded-full bg-slate-100 text-[9px] font-extrabold text-slate-600">
+                    {{ iniciais(venda.vendedor) }}
+                  </span>
+                  <span class="max-w-[150px] truncate text-xs font-semibold text-slate-600">{{ venda.vendedor }}</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total</p>
+                <p class="mt-1 font-extrabold text-slate-900">R$ {{ fmt(venda.total) }}</p>
+                @if (vendaCancelada(venda)) {
+                  <p class="mt-1 text-[11px] font-semibold text-red-600">Cancelada</p>
+                } @else {
+                  <p class="mt-1 text-[11px] font-semibold text-emerald-700">
+                    Líquido R$ {{ fmt(valorLiquidoDaVenda(venda)) }}
+                  </p>
+                }
+              </div>
+            </div>
+            <div class="mt-3 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-[11px]">
+              <span class="font-bold text-slate-600">{{ pagamentoVendaLabel(venda) }}</span>
+              <span class="text-slate-400">
+                {{ venda.itens.length }} item(ns)
+                @if (taxaPagamentoDaVenda(venda) > 0) {
+                  · taxa R$ {{ fmt(taxaPagamentoDaVenda(venda)) }}
+                }
+              </span>
+            </div>
+            <div class="mt-4 grid gap-2 border-t border-slate-100 pt-3" [class.grid-cols-3]="tenantService.podeGerenciar()" [class.grid-cols-1]="!tenantService.podeGerenciar()">
+              <button type="button" (click)="verDetalhes(venda)" class="secondary-action !min-h-9 !px-2 text-[11px]">
+                Detalhes
+              </button>
+              @if (tenantService.podeGerenciar()) {
+              <button type="button" (click)="carregarParaEdicao(venda)" [disabled]="vendaCancelada(venda)" class="secondary-action !min-h-9 !px-2 text-[11px]">
+                Editar
+              </button>
+              <button type="button" (click)="abrirCancelamento(venda)" [disabled]="vendaCancelada(venda)" class="secondary-action !min-h-9 !border-red-100 !px-2 text-[11px] !text-red-600">
+                Cancelar
+              </button>
+              }
+            </div>
+          </article>
+        }
+      </div>
     }
-  </div>
+  </section>
 </div>
 
-<!-- ── Modal de Detalhes dos Itens ────────────────────────────────── -->
 @if (showDetalheModal && vendaDetalhe) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
-       (click)="fecharDetalhes()">
-    <div class="absolute inset-0" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);"></div>
-    <div class="relative rounded-2xl shadow-glass w-full max-w-lg animate-slide-up"
-         style="background: rgba(22,27,34,0.95); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px);"
-         (click)="$event.stopPropagation()">
-
-      <!-- Header do modal -->
-      <div class="flex items-center justify-between px-6 py-4" style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+  <div
+    class="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-detalhe-venda"
+    (click)="fecharDetalhes()"
+  >
+    <div class="absolute inset-0 bg-slate-950/50 backdrop-blur-[5px]"></div>
+    <div class="relative max-h-[calc(100vh-16px)] w-full max-w-2xl overflow-y-auto rounded-t-[20px] border border-white/70 bg-white shadow-[0_30px_80px_rgba(15,23,42,.24)] animate-slide-up sm:max-h-[min(760px,calc(100vh-32px))] sm:rounded-[22px]" (click)="$event.stopPropagation()">
+      <header class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-5 sm:px-6">
         <div>
-          <h2 class="text-lg font-bold text-white">Venda #{{ vendaDetalhe.id }}</h2>
-          <p class="text-xs mt-0.5" style="color: rgba(255,255,255,0.3);">
+          <div class="flex items-center gap-2">
+            <span class="sale-id">#{{ vendaDetalhe.id }}</span>
+            <span
+              class="rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider"
+              [class.bg-emerald-50]="!vendaCancelada(vendaDetalhe)"
+              [class.text-emerald-700]="!vendaCancelada(vendaDetalhe)"
+              [class.bg-red-50]="vendaCancelada(vendaDetalhe)"
+              [class.text-red-700]="vendaCancelada(vendaDetalhe)"
+            >
+              {{ statusLabel(vendaDetalhe) }}
+            </span>
+          </div>
+          <h2 id="titulo-detalhe-venda" class="mt-3 text-lg font-extrabold text-slate-900">
+            Detalhes da venda
+          </h2>
+          <p class="mt-1 text-xs text-slate-500">
             {{ fmtData(vendaDetalhe.criadoEm) }} · {{ vendaDetalhe.vendedor }}
           </p>
         </div>
-        <button (click)="fecharDetalhes()" class="p-2 rounded-xl transition-colors"
-                onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
-          <svg class="w-5 h-5" style="color: rgba(255,255,255,0.5);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        <button type="button" (click)="fecharDetalhes()" class="icon-action flex-shrink-0" aria-label="Fechar detalhes">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
-      </div>
+      </header>
 
-      <!-- Itens -->
-      <div class="p-6">
-        <div class="overflow-x-auto rounded-xl" style="border: 1px solid rgba(255,255,255,0.06);">
-          <table class="w-full text-sm">
-            <thead>
-              <tr style="background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06);">
-                <th class="text-left py-2.5 px-4 font-semibold text-xs" style="color: rgba(255,255,255,0.35);">Produto</th>
-                <th class="text-center py-2.5 px-4 font-semibold text-xs" style="color: rgba(255,255,255,0.35);">Qtd</th>
-                <th class="text-right py-2.5 px-4 font-semibold text-xs" style="color: rgba(255,255,255,0.35);">Unit.</th>
-                <th class="text-right py-2.5 px-4 font-semibold text-xs" style="color: rgba(255,255,255,0.35);">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of vendaDetalhe.itens; track item.produtoId) {
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
-                  <td class="py-2.5 px-4 font-medium text-white/90">{{ item.produto }}</td>
-                  <td class="py-2.5 px-4 text-center" style="color: rgba(255,255,255,0.6);">{{ item.quantidade }}</td>
-                  <td class="py-2.5 px-4 text-right" style="color: rgba(255,255,255,0.4);">R$ {{ fmt(item.precoUnitario) }}</td>
-                  <td class="py-2.5 px-4 text-right font-semibold text-primary-400">R$ {{ fmt(item.subtotal) }}</td>
-                </tr>
+      <div class="p-5 sm:p-6">
+        <div class="overflow-hidden rounded-2xl border border-slate-200">
+          <div class="hidden grid-cols-[minmax(0,1fr)_70px_110px] gap-3 bg-slate-50 px-4 py-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 sm:grid">
+            <span>Produto</span>
+            <span class="text-center">Qtd.</span>
+            <span class="text-right">Subtotal</span>
+          </div>
+          @for (item of vendaDetalhe.itens; track item.produtoId) {
+            <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-3 border-t border-slate-100 px-4 py-3.5 first:border-t-0 sm:grid-cols-[minmax(0,1fr)_70px_110px] sm:items-center">
+              <div class="min-w-0">
+                <p class="truncate text-sm font-extrabold text-slate-800">{{ item.produto }}</p>
+                <p class="mt-0.5 text-[11px] text-slate-400">R$ {{ fmt(item.precoUnitario) }} / un.</p>
+              </div>
+              <p class="hidden text-center text-sm font-bold text-slate-600 sm:block">{{ item.quantidade }}</p>
+              <div class="text-right">
+                <p class="text-sm font-extrabold text-slate-900">R$ {{ fmt(item.subtotal) }}</p>
+                <p class="mt-0.5 text-[10px] text-slate-400 sm:hidden">{{ item.quantidade }} un.</p>
+              </div>
+            </div>
+          }
+          <div class="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-4 py-4">
+            <span class="text-sm font-extrabold text-slate-700">Total cobrado</span>
+            <span class="text-lg font-extrabold text-indigo-700">R$ {{ fmt(vendaDetalhe.total) }}</span>
+          </div>
+        </div>
+
+        <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Pagamento</p>
+              <p class="mt-1 text-sm font-extrabold text-slate-700">{{ pagamentoVendaLabel(vendaDetalhe) }}</p>
+            </div>
+            <span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-extrabold text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-200">
+              {{ (vendaDetalhe.pagamentos?.length || 0) > 1 ? (vendaDetalhe.pagamentos?.length + ' formas') : (fmt(vendaDetalhe.taxaPagamentoPercentual || 0) + '% de taxa') }}
+            </span>
+          </div>
+          @if (vendaDetalhe.pagamentos?.length) {
+            <div class="mt-3 space-y-2 border-t border-slate-200 pt-3">
+              @for (pagamento of vendaDetalhe.pagamentos; track pagamento.id) {
+                <div class="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2.5">
+                  <div><p class="text-xs font-extrabold text-slate-700">{{ pagamentoLabel(pagamento.formaPagamento) }}@if (pagamento.parcelas > 1) { · {{ pagamento.parcelas }}x }</p><p class="mt-0.5 text-[10px] text-slate-400">{{ pagamento.adquirenteNome || 'Recebimento direto' }}@if (pagamento.bandeira) { · {{ pagamento.bandeira }} } · taxa {{ fmt(pagamento.taxaValor) }}</p></div>
+                  <div class="text-right"><p class="text-xs font-extrabold text-slate-900">R$ {{ fmt(pagamento.valorBruto) }}</p><p class="mt-0.5 text-[10px] font-semibold text-emerald-700">líquido R$ {{ fmt(pagamento.valorLiquido) }}</p>@if (pagamento.troco && pagamento.troco > 0) { <p class="text-[10px] text-amber-700">troco R$ {{ fmt(pagamento.troco) }}</p> }</div>
+                </div>
               }
-            </tbody>
-            <tfoot>
-              <tr style="border-top: 2px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02);">
-                <td colspan="3" class="py-3 px-4 font-bold text-white text-right">Total</td>
-                <td class="py-3 px-4 text-right font-bold text-primary-400 text-base">R$ {{ fmt(vendaDetalhe.total) }}</td>
-              </tr>
-            </tfoot>
-          </table>
+            </div>
+          }
+          <div class="mt-4 grid grid-cols-2 gap-3 border-t border-slate-200 pt-4">
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Taxa descontada</p>
+              <p class="mt-1 text-sm font-extrabold text-rose-600">− R$ {{ fmt(taxaPagamentoDaVenda(vendaDetalhe)) }}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Líquido recebido</p>
+              <p class="mt-1 text-base font-extrabold text-emerald-700">R$ {{ fmt(valorLiquidoDaVenda(vendaDetalhe)) }}</p>
+            </div>
+          </div>
         </div>
 
         @if (vendaDetalhe.observacao) {
-          <div class="mt-4 p-3 rounded-xl" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
-            <p class="text-xs font-medium mb-1" style="color: rgba(255,255,255,0.35);">Observação</p>
-            <p class="text-sm" style="color: rgba(255,255,255,0.7);">{{ vendaDetalhe.observacao }}</p>
+          <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Observação</p>
+            <p class="mt-1.5 text-sm leading-relaxed text-slate-600">{{ vendaDetalhe.observacao }}</p>
           </div>
         }
 
-        <div class="flex gap-3 mt-5">
-          <button (click)="carregarParaEdicao(vendaDetalhe); fecharDetalhes()"
-            class="flex-1 py-2.5 rounded-xl font-semibold transition-all duration-200 text-sm flex items-center justify-center gap-2"
-            style="background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2);"
-            onmouseover="this.style.background='rgba(59,130,246,0.18)'" onmouseout="this.style.background='rgba(59,130,246,0.1)'">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-            Editar esta venda
+        @if (vendaCancelada(vendaDetalhe)) {
+          <div class="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-500/25 dark:bg-red-500/10">
+            <div class="flex items-start gap-3">
+              <span class="grid h-9 w-9 flex-shrink-0 place-items-center rounded-xl bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+              </span>
+              <div>
+                <p class="text-sm font-extrabold text-red-800 dark:text-red-200">Venda cancelada</p>
+                <p class="mt-1 text-sm leading-relaxed text-red-700 dark:text-red-300">{{ vendaDetalhe.motivoCancelamento || 'Motivo não informado' }}</p>
+                <p class="mt-2 text-[11px] font-semibold text-red-700/70 dark:text-red-300/70">
+                  {{ fmtData(vendaDetalhe.canceladaEm) }}
+                  @if (vendaDetalhe.canceladaPor) {
+                    · por {{ vendaDetalhe.canceladaPor }}
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if ((vendaDetalhe.auditorias || []).length) {
+          <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+            <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Histórico da venda</p>
+            <div class="mt-4 space-y-4">
+              @for (auditoria of vendaDetalhe.auditorias; track auditoria.criadoEm + auditoria.tipo) {
+                <div class="relative flex gap-3 pl-1">
+                  <span class="mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-indigo-500 ring-4 ring-indigo-50"></span>
+                  <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <p class="text-xs font-extrabold text-slate-700">{{ auditoriaLabel(auditoria.tipo) }}</p>
+                      <span class="text-[10px] text-slate-400">{{ fmtData(auditoria.criadoEm) }}</span>
+                    </div>
+                    <p class="mt-1 text-xs leading-relaxed text-slate-500">{{ auditoria.descricao }}</p>
+                    <p class="mt-1 text-[10px] font-semibold text-slate-400">{{ auditoria.responsavel }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          @if (!vendaCancelada(vendaDetalhe) && tenantService.podeGerenciar()) {
+            <button
+              type="button"
+              (click)="carregarParaEdicao(vendaDetalhe); fecharDetalhes()"
+              class="primary-action"
+            >
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+              </svg>
+              Editar esta venda
+            </button>
+            <button type="button" (click)="abrirCancelamento(vendaDetalhe)" class="secondary-action !border-red-200 !text-red-700">
+              Cancelar venda
+            </button>
+          }
+          <button type="button" (click)="fecharDetalhes()" class="secondary-action">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showCancelamentoModal && vendaParaCancelar) {
+  <div
+    class="fixed inset-0 z-[60] flex items-end justify-center p-0 sm:items-center sm:p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-cancelamento-venda"
+    (click)="fecharCancelamento()"
+  >
+    <div class="absolute inset-0 bg-slate-950/55 backdrop-blur-[5px]"></div>
+    <div
+      class="relative w-full max-w-lg rounded-t-[22px] border border-white/70 bg-white shadow-[0_30px_80px_rgba(15,23,42,.3)] animate-slide-up sm:rounded-[22px]"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-5 sm:px-6">
+        <div class="flex items-start gap-3">
+          <span class="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-red-50 text-red-700">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            </svg>
+          </span>
+          <div>
+            <p class="text-[10px] font-extrabold uppercase tracking-wider text-red-600">Ação importante</p>
+            <h2 id="titulo-cancelamento-venda" class="mt-1 text-lg font-extrabold text-slate-900">
+              Cancelar Venda #{{ vendaParaCancelar.id }}
+            </h2>
+            <p class="mt-1 text-xs leading-relaxed text-slate-500">
+              O estoque e os valores financeiros serão revertidos, mantendo o registro para auditoria.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          (click)="fecharCancelamento()"
+          [disabled]="cancelando"
+          class="icon-action flex-shrink-0"
+          aria-label="Fechar cancelamento"
+        >
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="px-5 py-5 sm:px-6">
+        <label for="motivo-cancelamento" class="block text-xs font-extrabold text-slate-700">
+          Motivo do cancelamento <span class="text-red-600">*</span>
+        </label>
+        <p class="mt-1 text-[11px] text-slate-400">Esse texto fará parte do histórico permanente da venda.</p>
+        <textarea
+          id="motivo-cancelamento"
+          [(ngModel)]="motivoCancelamento"
+          (ngModelChange)="erroCancelamento = ''"
+          [disabled]="cancelando"
+          rows="4"
+          maxlength="500"
+          required
+          autofocus
+          class="sales-input mt-3 resize-none"
+          [class.border-red-300]="erroCancelamento"
+          [attr.aria-invalid]="!!erroCancelamento"
+          [attr.aria-describedby]="erroCancelamento ? 'erro-motivo-cancelamento' : null"
+          placeholder="Ex.: cliente desistiu da compra antes da retirada."
+        ></textarea>
+        <div class="mt-1.5 flex items-start justify-between gap-3">
+          <div>
+            @if (erroCancelamento) {
+              <p id="erro-motivo-cancelamento" class="text-xs font-semibold text-red-600" role="alert">
+                {{ erroCancelamento }}
+              </p>
+            }
+          </div>
+          <span class="flex-shrink-0 text-[10px] text-slate-400">{{ motivoCancelamento.length }}/500</span>
+        </div>
+
+        <div class="mt-5 flex flex-col-reverse gap-2 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+          <button type="button" (click)="fecharCancelamento()" [disabled]="cancelando" class="secondary-action">
+            Manter venda
           </button>
-          <button (click)="fecharDetalhes()"
-            class="flex-1 py-2.5 rounded-xl font-semibold transition-all duration-200 text-sm"
-            style="color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.1);"
-            onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='transparent'">
-            Fechar
+          <button
+            type="button"
+            (click)="confirmarCancelamento()"
+            [disabled]="cancelando || !motivoCancelamento.trim()"
+            class="primary-action !bg-none !shadow-none disabled:opacity-50"
+            style="background: #dc2626"
+          >
+            @if (cancelando) {
+              <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4Z"></path>
+              </svg>
+              Cancelando...
+            } @else {
+              Confirmar cancelamento
+            }
           </button>
         </div>
       </div>

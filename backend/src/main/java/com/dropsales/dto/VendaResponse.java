@@ -1,25 +1,38 @@
 package com.dropsales.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.dropsales.model.FormaPagamento;
+import com.dropsales.model.StatusVenda;
+import com.dropsales.model.TipoAuditoriaVenda;
 import lombok.Builder;
 import lombok.Data;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
 public class VendaResponse {
     private Long id;
+    private UUID idempotencyKey;
     private String vendedor;
+    private StatusVenda status;
     private BigDecimal total;
+    private FormaPagamento formaPagamento;
+    private BigDecimal taxaPagamentoPercentual;
+    private BigDecimal taxaPagamentoValor;
+    private BigDecimal valorLiquido;
     private String observacao;
+    private String motivoCancelamento;
+    private String canceladaPor;
+    private OffsetDateTime canceladaEm;
 
-    /** Serializado como ISO-8601 string: "2026-05-15T23:00:00" */
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime criadoEm;
+    /** Serializado em ISO-8601 com offset explicito, sempre normalizado em UTC. */
+    private OffsetDateTime criadoEm;
 
     private List<ItemResponse> itens;
+    private List<PagamentoVendaResponse> pagamentos;
+    private List<AuditoriaResponse> auditorias;
 
     @Data
     @Builder
@@ -29,5 +42,14 @@ public class VendaResponse {
         private Integer quantidade;
         private BigDecimal precoUnitario;
         private BigDecimal subtotal;
+    }
+
+    @Data
+    @Builder
+    public static class AuditoriaResponse {
+        private TipoAuditoriaVenda tipo;
+        private String responsavel;
+        private String descricao;
+        private OffsetDateTime criadoEm;
     }
 }

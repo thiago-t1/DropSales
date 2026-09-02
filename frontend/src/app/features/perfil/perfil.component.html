@@ -1,162 +1,308 @@
-<div class="max-w-2xl mx-auto space-y-5 animate-fade-in">
-  <div>
-    <h1 class="text-2xl lg:text-3xl font-bold text-white">Meu Perfil</h1>
-    <p class="mt-1 text-sm" style="color: rgba(255,255,255,0.35);">Gerencie suas informacoes pessoais e seguranca</p>
-  </div>
+<div class="ds-page max-w-5xl">
+  <header class="ds-page-header">
+    <div>
+      <p class="text-sm font-semibold text-indigo-600">Configurações da conta</p>
+      <h1 class="ds-page-title mt-1">Meu perfil</h1>
+      <p class="ds-page-subtitle">Atualize seus dados pessoais, foto e senha de acesso.</p>
+    </div>
+    @if (!loading && usuario) {
+      <span class="ds-badge-neutral self-start sm:self-auto">
+        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+        Conta ativa
+      </span>
+    }
+  </header>
 
   @if (sucesso) {
-    <div class="p-4 rounded-xl flex items-center gap-3 animate-slide-up"
-         style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #34d399;">
-      <svg class="w-5 h-5 flex-shrink-0" style="color: #10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-      <span class="text-sm font-medium">{{ sucesso }}</span>
+    <div role="status" aria-live="polite" class="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+      <svg class="mt-0.5 h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75l2.25 2.25L15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <span class="font-medium">{{ sucesso }}</span>
     </div>
   }
+
   @if (erro) {
-    <div class="p-4 rounded-xl flex items-center gap-3 animate-slide-up"
-         style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171;">
-      <svg class="w-5 h-5 flex-shrink-0" style="color: #ef4444;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-      <span class="text-sm font-medium">{{ erro }}</span>
+    <div role="alert" aria-live="assertive" class="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <svg class="mt-0.5 h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+      <span class="font-medium">{{ erro }}</span>
     </div>
   }
 
   @if (loading) {
-    <div class="ds-card flex items-center justify-center py-16">
-      <svg class="animate-spin h-8 w-8 text-primary-400" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-      </svg>
+    <div class="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]" aria-label="Carregando perfil">
+      <div class="ds-card flex min-h-72 animate-pulse flex-col items-center">
+        <div class="h-28 w-28 rounded-full bg-slate-200"></div>
+        <div class="mt-5 h-5 w-36 rounded bg-slate-200"></div>
+        <div class="mt-3 h-4 w-48 max-w-full rounded bg-slate-100"></div>
+      </div>
+      <div class="space-y-6">
+        <div class="ds-card animate-pulse space-y-4">
+          <div class="h-5 w-40 rounded bg-slate-200"></div>
+          <div class="h-12 rounded-xl bg-slate-100"></div>
+          <div class="h-12 rounded-xl bg-slate-100"></div>
+        </div>
+        <div class="ds-card animate-pulse space-y-4">
+          <div class="h-5 w-32 rounded bg-slate-200"></div>
+          <div class="h-12 rounded-xl bg-slate-100"></div>
+          <div class="h-12 rounded-xl bg-slate-100"></div>
+        </div>
+      </div>
     </div>
   } @else {
-
-    <!-- Secao: Foto e Dados -->
-    <div class="ds-card">
-      <!-- Foto de Perfil -->
-      <div class="flex flex-col sm:flex-row items-center gap-6 pb-6 mb-6" style="border-bottom: 1px solid rgba(255,255,255,0.06);">
-        <div class="relative group">
+    <div class="grid min-w-0 gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+      <aside class="ds-card h-fit text-center lg:sticky lg:top-24">
+        <div class="relative mx-auto w-fit">
           @if (fotoPreview) {
-            <img [src]="fotoPreview" alt="Foto de perfil"
-              class="w-24 h-24 rounded-full object-cover"
-              style="box-shadow: 0 0 0 4px rgba(99,102,241,0.2), 0 4px 6px rgba(0,0,0,0.3);" />
-          } @else if (usuario?.temFoto) {
-            <img [src]="fotoUrl" alt="Foto de perfil"
-              class="w-24 h-24 rounded-full object-cover"
-              style="box-shadow: 0 0 0 4px rgba(99,102,241,0.2), 0 4px 6px rgba(0,0,0,0.3);" />
+            <img [src]="fotoPreview" alt="Prévia da foto de perfil" class="h-28 w-28 rounded-full border-4 border-white object-cover shadow-lg shadow-slate-200 dark:border-slate-800 dark:shadow-black/20" />
+          } @else if (usuario?.temFoto && fotoUrl && !fotoRemotaFalhou) {
+            <img [src]="fotoUrl" (error)="onFotoRemotaErro()" alt="Foto de perfil" class="h-28 w-28 rounded-full border-4 border-white object-cover shadow-lg shadow-slate-200 dark:border-slate-800 dark:shadow-black/20" />
           } @else {
-            <div class="w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-md"
-                 style="background: linear-gradient(135deg, #6366f1, #06b6d4); box-shadow: 0 0 20px rgba(99,102,241,0.3);">
-              {{ form.nome.charAt(0).toUpperCase() || 'U' }}
+            <div class="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white bg-indigo-600 text-3xl font-bold text-white shadow-lg shadow-slate-200 dark:border-slate-800 dark:shadow-black/20" aria-hidden="true">
+              {{ inicialUsuario }}
             </div>
           }
 
-          <!-- Overlay upload -->
-          <button (click)="abrirSeletor()" [disabled]="uploadingFoto"
-            class="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer disabled:cursor-wait">
+          <button
+            type="button"
+            (click)="abrirSeletor()"
+            [disabled]="uploadingFoto"
+            class="absolute bottom-0 right-0 flex h-11 w-11 items-center justify-center rounded-full border-4 border-white bg-slate-950 text-white shadow-md hover:bg-indigo-700 disabled:cursor-wait disabled:opacity-70 dark:border-slate-800 dark:bg-indigo-600"
+            [attr.aria-label]="uploadingFoto ? 'Enviando foto' : 'Alterar foto de perfil'"
+            title="Alterar foto"
+          >
             @if (uploadingFoto) {
-              <svg class="animate-spin h-6 w-6 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+              <svg class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
             } @else {
-              <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             }
           </button>
 
-          <input #fileInput type="file" accept="image/*" class="hidden" (change)="onFotoSelecionada($event)" />
+          <input
+            #fileInput
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            class="sr-only"
+            aria-label="Selecionar foto de perfil"
+            (change)="onFotoSelecionada($event)"
+          />
         </div>
 
-        <div>
-          <h3 class="text-lg font-semibold text-white">{{ usuario?.nome }}</h3>
-          <p class="text-sm" style="color: rgba(255,255,255,0.4);">{{ usuario?.email }}</p>
-          <span class="inline-block mt-2 text-xs font-semibold px-2.5 py-1 rounded-full"
-                style="background: rgba(99,102,241,0.15); color: #a5b4fc;">{{ usuario?.perfil }}</span>
-          <p class="text-xs mt-2" style="color: rgba(255,255,255,0.25);">Clique na foto para alterar a imagem</p>
-        </div>
-      </div>
+        <h2 class="mt-5 break-words text-lg font-bold text-slate-950">{{ usuario?.nome }}</h2>
+        <p class="mt-1 break-all text-sm text-slate-500">{{ usuario?.email }}</p>
+        <span class="mt-3 inline-flex rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
+          {{ perfilLabel }}
+        </span>
 
-      <!-- Dados Pessoais -->
-      <div class="space-y-4">
-        <h4 class="text-sm font-semibold text-white">Dados Pessoais</h4>
-        <div>
-          <label class="ds-label">Nome completo</label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <svg class="w-4 h-4" style="color: rgba(255,255,255,0.2);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-            </div>
-            <input id="perfil-nome" type="text" [(ngModel)]="form.nome" class="ds-input pl-10" placeholder="Seu nome" />
-          </div>
-        </div>
-        <div>
-          <label class="ds-label">Email</label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <svg class="w-4 h-4" style="color: rgba(255,255,255,0.2);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>
-            </div>
-            <input id="perfil-email" type="email" [(ngModel)]="form.email" class="ds-input pl-10" placeholder="seu@email.com" />
-          </div>
-        </div>
-        <button id="btn-salvar-perfil" (click)="salvar()" [disabled]="saving || !form.nome || !form.email"
-          class="ds-btn-primary flex items-center justify-center gap-2">
-          @if (saving) {
-            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-            Salvando...
-          } @else {
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-            Salvar Alteracoes
-          }
+        <button type="button" (click)="abrirSeletor()" [disabled]="uploadingFoto" class="ds-btn-secondary mt-6 w-full">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.776 48.776 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" /></svg>
+          {{ uploadingFoto ? 'Enviando...' : 'Alterar foto' }}
         </button>
-      </div>
-    </div>
+        <p class="mt-3 text-xs leading-5 text-slate-400">JPG, PNG ou WebP · máximo de 5 MB</p>
+      </aside>
 
-    <!-- Secao: Alterar Senha -->
-    <div class="ds-card">
-      <div class="flex items-center gap-3 mb-5">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center"
-             style="background: rgba(245,158,11,0.12); color: #fbbf24;">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-        </div>
-        <div>
-          <h4 class="font-semibold text-white text-sm">Alterar Senha</h4>
-          <p class="text-xs" style="color: rgba(255,255,255,0.3);">Use uma senha forte com pelo menos 6 caracteres</p>
-        </div>
-      </div>
+      <div class="min-w-0 space-y-6">
+        <section class="ds-card">
+          <div class="mb-6 flex items-start gap-3 border-b border-slate-100 pb-5">
+            <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+            </span>
+            <div>
+              <h2 class="font-bold text-slate-950">Dados pessoais</h2>
+              <p class="mt-1 text-sm text-slate-500">Essas informações identificam sua conta no DropSales.</p>
+            </div>
+          </div>
 
-      @if (sucessoSenha) {
-        <div class="mb-4 p-3 rounded-xl flex items-center gap-2 text-sm"
-             style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #34d399;">
-          <svg class="w-4 h-4 flex-shrink-0" style="color: #10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          {{ sucessoSenha }}
-        </div>
-      }
-      @if (erroSenha) {
-        <div class="mb-4 p-3 rounded-xl flex items-center gap-2 text-sm"
-             style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171;">
-          <svg class="w-4 h-4 flex-shrink-0" style="color: #ef4444;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          {{ erroSenha }}
-        </div>
-      }
+          <form #dadosForm="ngForm" (ngSubmit)="salvar(dadosForm)" class="space-y-5" novalidate>
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label for="perfil-nome" class="ds-label">Nome completo</label>
+                <input
+                  id="perfil-nome"
+                  name="nome"
+                  type="text"
+                  [(ngModel)]="form.nome"
+                  #nomeInput="ngModel"
+                  required
+                  minlength="3"
+                  maxlength="150"
+                  autocomplete="name"
+                  class="ds-input"
+                  placeholder="Seu nome completo"
+                  [attr.aria-invalid]="nomeInput.invalid && (nomeInput.touched || dadosForm.submitted)"
+                  [attr.aria-describedby]="nomeInput.invalid && (nomeInput.touched || dadosForm.submitted) ? 'perfil-nome-error' : null"
+                />
+                @if (nomeInput.invalid && (nomeInput.touched || dadosForm.submitted)) {
+                  <p id="perfil-nome-error" class="mt-1.5 text-xs font-medium text-red-600">
+                    {{ nomeInput.errors?.['required'] ? 'Informe seu nome.' : 'Use pelo menos 3 caracteres.' }}
+                  </p>
+                }
+              </div>
 
-      <div class="space-y-4">
-        <div>
-          <label class="ds-label">Senha Atual</label>
-          <input type="password" [(ngModel)]="senhaForm.senhaAtual" class="ds-input" placeholder="••••••••" autocomplete="current-password" />
-        </div>
-        <div>
-          <label class="ds-label">Nova Senha</label>
-          <input type="password" [(ngModel)]="senhaForm.novaSenha" class="ds-input" placeholder="Min. 6 caracteres" autocomplete="new-password" />
-        </div>
-        <div>
-          <label class="ds-label">Confirmar Nova Senha</label>
-          <input type="password" [(ngModel)]="senhaForm.confirmarSenha" class="ds-input" placeholder="Repita a nova senha" autocomplete="new-password" />
-        </div>
-        <button (click)="alterarSenha()" [disabled]="savingSenha || !senhaForm.senhaAtual || !senhaForm.novaSenha || !senhaForm.confirmarSenha"
-          class="w-full py-3 px-4 rounded-xl font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
-          style="background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 20px rgba(245,158,11,0.3);"
-          onmouseover="this.style.boxShadow='0 6px 30px rgba(245,158,11,0.4)'" onmouseout="this.style.boxShadow='0 4px 20px rgba(245,158,11,0.3)'">
-          @if (savingSenha) {
-            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-            Alterando...
-          } @else {
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
-            Alterar Senha
+              <div>
+                <label for="perfil-email" class="ds-label">E-mail</label>
+                <input
+                  id="perfil-email"
+                  name="email"
+                  type="email"
+                  [(ngModel)]="form.email"
+                  #emailInput="ngModel"
+                  required
+                  email
+                  maxlength="200"
+                  autocomplete="email"
+                  inputmode="email"
+                  class="ds-input"
+                  placeholder="voce@empresa.com.br"
+                  [attr.aria-invalid]="emailInput.invalid && (emailInput.touched || dadosForm.submitted)"
+                  [attr.aria-describedby]="emailInput.invalid && (emailInput.touched || dadosForm.submitted) ? 'perfil-email-error' : null"
+                />
+                @if (emailInput.invalid && (emailInput.touched || dadosForm.submitted)) {
+                  <p id="perfil-email-error" class="mt-1.5 text-xs font-medium text-red-600">
+                    {{ emailInput.errors?.['required'] ? 'Informe seu e-mail.' : 'Digite um e-mail válido.' }}
+                  </p>
+                }
+              </div>
+            </div>
+
+            <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-xs leading-5 text-slate-400">Mantenha seus dados atualizados para facilitar o acesso.</p>
+              <button id="btn-salvar-perfil" type="submit" [disabled]="saving" [attr.aria-busy]="saving" class="ds-btn-primary w-full sm:w-auto">
+                @if (saving) {
+                  <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                  Salvando...
+                } @else {
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                  Salvar alterações
+                }
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section class="ds-card">
+          <div class="mb-6 flex items-start gap-3 border-b border-slate-100 pb-5">
+            <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 10.5h10.5a2.25 2.25 0 002.25-2.25v-6a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6A2.25 2.25 0 006.75 21z" /></svg>
+            </span>
+            <div>
+              <h2 class="font-bold text-slate-950">Segurança</h2>
+              <p class="mt-1 text-sm text-slate-500">Troque sua senha periodicamente para proteger a conta.</p>
+            </div>
+          </div>
+
+          @if (sucessoSenha) {
+            <div role="status" aria-live="polite" class="mb-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-sm text-emerald-700">
+              <svg class="mt-0.5 h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75l2.25 2.25L15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span>{{ sucessoSenha }}</span>
+            </div>
           }
-        </button>
+
+          @if (erroSenha) {
+            <div role="alert" aria-live="assertive" class="mb-5 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3.5 text-sm text-red-700">
+              <svg class="mt-0.5 h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+              <span>{{ erroSenha }}</span>
+            </div>
+          }
+
+          <form #senhaNgForm="ngForm" (ngSubmit)="alterarSenha(senhaNgForm)" class="space-y-5" novalidate>
+            <div>
+              <label for="perfil-senha-atual" class="ds-label">Senha atual</label>
+              <div class="relative">
+                <input
+                  id="perfil-senha-atual"
+                  name="senhaAtual"
+                  [type]="mostrarSenhaAtual ? 'text' : 'password'"
+                  [(ngModel)]="senhaForm.senhaAtual"
+                  #senhaAtualInput="ngModel"
+                  required
+                  maxlength="72"
+                  class="ds-input pr-20"
+                  placeholder="Digite sua senha atual"
+                  autocomplete="current-password"
+                  [attr.aria-invalid]="senhaAtualInput.invalid && (senhaAtualInput.touched || senhaNgForm.submitted)"
+                  [attr.aria-describedby]="senhaAtualInput.invalid && (senhaAtualInput.touched || senhaNgForm.submitted) ? 'senha-atual-error' : null"
+                />
+                <button type="button" (click)="mostrarSenhaAtual = !mostrarSenhaAtual" class="absolute inset-y-0 right-0 min-w-16 rounded-r-xl px-3 text-xs font-semibold text-slate-500 hover:text-indigo-600" [attr.aria-label]="mostrarSenhaAtual ? 'Ocultar senha atual' : 'Mostrar senha atual'">
+                  {{ mostrarSenhaAtual ? 'Ocultar' : 'Mostrar' }}
+                </button>
+              </div>
+              @if (senhaAtualInput.invalid && (senhaAtualInput.touched || senhaNgForm.submitted)) {
+                <p id="senha-atual-error" class="mt-1.5 text-xs font-medium text-red-600">Informe sua senha atual.</p>
+              }
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label for="perfil-nova-senha" class="ds-label">Nova senha</label>
+                <div class="relative">
+                  <input
+                    id="perfil-nova-senha"
+                    name="novaSenha"
+                    [type]="mostrarNovaSenha ? 'text' : 'password'"
+                    [(ngModel)]="senhaForm.novaSenha"
+                    #novaSenhaInput="ngModel"
+                    required
+                    minlength="12"
+                    maxlength="72"
+                    class="ds-input pr-20"
+                    placeholder="Mínimo de 12 caracteres"
+                    autocomplete="new-password"
+                    [attr.aria-invalid]="novaSenhaInput.invalid && (novaSenhaInput.touched || senhaNgForm.submitted)"
+                    [attr.aria-describedby]="novaSenhaInput.invalid && (novaSenhaInput.touched || senhaNgForm.submitted) ? 'nova-senha-error' : null"
+                  />
+                  <button type="button" (click)="mostrarNovaSenha = !mostrarNovaSenha" class="absolute inset-y-0 right-0 min-w-16 rounded-r-xl px-3 text-xs font-semibold text-slate-500 hover:text-indigo-600" [attr.aria-label]="mostrarNovaSenha ? 'Ocultar nova senha' : 'Mostrar nova senha'">
+                    {{ mostrarNovaSenha ? 'Ocultar' : 'Mostrar' }}
+                  </button>
+                </div>
+                @if (novaSenhaInput.invalid && (novaSenhaInput.touched || senhaNgForm.submitted)) {
+                  <p id="nova-senha-error" class="mt-1.5 text-xs font-medium text-red-600">
+                    {{ novaSenhaInput.errors?.['required'] ? 'Crie uma nova senha.' : 'Use pelo menos 12 caracteres.' }}
+                  </p>
+                }
+              </div>
+
+              <div>
+                <label for="perfil-confirmar-senha" class="ds-label">Confirmar nova senha</label>
+                <div class="relative">
+                  <input
+                    id="perfil-confirmar-senha"
+                    name="confirmarSenha"
+                    [type]="mostrarConfirmacaoSenha ? 'text' : 'password'"
+                    [(ngModel)]="senhaForm.confirmarSenha"
+                    #confirmarSenhaInput="ngModel"
+                    required
+                    maxlength="72"
+                    class="ds-input pr-20"
+                    placeholder="Repita a nova senha"
+                    autocomplete="new-password"
+                    [attr.aria-invalid]="(confirmarSenhaInput.invalid || (confirmarSenhaInput.touched && senhaForm.novaSenha !== senhaForm.confirmarSenha)) && (confirmarSenhaInput.touched || senhaNgForm.submitted)"
+                    [attr.aria-describedby]="(confirmarSenhaInput.invalid || senhaForm.novaSenha !== senhaForm.confirmarSenha) && (confirmarSenhaInput.touched || senhaNgForm.submitted) ? 'confirmar-senha-error' : null"
+                  />
+                  <button type="button" (click)="mostrarConfirmacaoSenha = !mostrarConfirmacaoSenha" class="absolute inset-y-0 right-0 min-w-16 rounded-r-xl px-3 text-xs font-semibold text-slate-500 hover:text-indigo-600" [attr.aria-label]="mostrarConfirmacaoSenha ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'">
+                    {{ mostrarConfirmacaoSenha ? 'Ocultar' : 'Mostrar' }}
+                  </button>
+                </div>
+                @if ((confirmarSenhaInput.invalid || senhaForm.novaSenha !== senhaForm.confirmarSenha) && (confirmarSenhaInput.touched || senhaNgForm.submitted)) {
+                  <p id="confirmar-senha-error" class="mt-1.5 text-xs font-medium text-red-600">
+                    {{ confirmarSenhaInput.errors?.['required'] ? 'Confirme a nova senha.' : 'As senhas não coincidem.' }}
+                  </p>
+                }
+              </div>
+            </div>
+
+            <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-xs leading-5 text-slate-400">Use uma senha que você não utiliza em outros serviços.</p>
+              <button type="submit" [disabled]="savingSenha" [attr.aria-busy]="savingSenha" class="ds-btn-secondary w-full sm:w-auto">
+                @if (savingSenha) {
+                  <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                  Alterando...
+                } @else {
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 10.5h10.5a2.25 2.25 0 002.25-2.25v-6a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6A2.25 2.25 0 006.75 21z" /></svg>
+                  Alterar senha
+                }
+              </button>
+            </div>
+          </form>
+        </section>
       </div>
     </div>
   }

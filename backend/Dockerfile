@@ -89,4 +89,4 @@ ENV JAVA_OPTS="-XX:+UseContainerSupport \
 EXPOSE 8080
 
 # --- Entrypoint: executa o JAR com as flags de JVM otimizadas ---
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]

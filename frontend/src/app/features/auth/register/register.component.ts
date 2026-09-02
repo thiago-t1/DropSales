@@ -1,7 +1,7 @@
 ﻿import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -15,17 +15,21 @@ export class RegisterComponent {
   loading = false;
   error = '';
   success = '';
+  showPassword = false;
+  showConfirmPassword = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
   ) {
     this.form = this.fb.group({
-      nome: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['', [Validators.required, Validators.email]],
-      senha: ['', [Validators.required, Validators.minLength(6)]],
-      confirmarSenha: ['', [Validators.required]],
+      nome: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(150)]],
+      nomeEmpresa: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(160)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(200)]],
+      senha: ['', [Validators.required, Validators.minLength(12), Validators.maxLength(72)]],
+      confirmarSenha: ['', [Validators.required, Validators.minLength(12), Validators.maxLength(72)]],
     });
   }
 
@@ -34,21 +38,29 @@ export class RegisterComponent {
   }
 
   onSubmit(): void {
-    if (this.form.invalid || this.senhasNaoBatem) return;
+    if (this.form.invalid || this.senhasNaoBatem) {
+      this.form.markAllAsTouched();
+      return;
+    }
     this.loading = true;
     this.error = '';
     this.success = '';
 
-    const { nome, email, senha } = this.form.value;
+    const { nome, nomeEmpresa, email, senha } = this.form.value;
 
-    this.authService.register({ nome, email, senha }).subscribe({
+    this.authService.register({ nome, nomeEmpresa, email, senha }).subscribe({
       next: () => {
         this.success = 'Conta criada com sucesso! Redirecionando...';
-        setTimeout(() => this.router.navigate(['/login']), 2000);
+        const redirect = this.route.snapshot.queryParamMap.get('redirect');
+        setTimeout(() => this.router.navigate(['/login'], {
+          queryParams: redirect?.startsWith('/') ? { redirect } : undefined,
+        }), 1500);
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.message || 'Erro ao criar conta. Tente novamente.';
+        this.error = err.status === 0 || err.status >= 500
+          ? 'Não foi possível conectar ao DropSales agora. Tente novamente em instantes.'
+          : (err.error?.message || 'Não foi possível criar a conta. Confira os dados e tente novamente.');
       },
     });
   }

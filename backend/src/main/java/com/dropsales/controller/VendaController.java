@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/vendas")
@@ -24,11 +25,14 @@ public class VendaController {
     @PostMapping
     public ResponseEntity<VendaResponse> registrar(
             @Valid @RequestBody VendaRequest request,
+            @RequestHeader("Idempotency-Key") UUID idempotencyKey,
             Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new BusinessException("Autenticacao invalida ou expirada.");
         }
-        return ResponseEntity.ok(vendaService.registrarVenda(request, authentication.getName()));
+        return ResponseEntity.ok(vendaService.registrarVenda(
+                request,
+                idempotencyKey));
     }
 
     /**
@@ -39,7 +43,12 @@ public class VendaController {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new BusinessException("Autenticacao invalida ou expirada.");
         }
-        return ResponseEntity.ok(vendaService.listarVendas(authentication.getName()));
+        return ResponseEntity.ok(vendaService.listarVendas());
+    }
+
+    @GetMapping("/recentes")
+    public ResponseEntity<List<VendaResponse>> listarRecentes() {
+        return ResponseEntity.ok(vendaService.listarVendasRecentes());
     }
 
     @GetMapping("/{id}")
@@ -60,9 +69,10 @@ public class VendaController {
     /**
      * Estorna uma venda: devolve estoque e remove transacoes financeiras.
      */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> cancelar(@PathVariable Long id) {
-        vendaService.cancelarVenda(id);
-        return ResponseEntity.noContent().build();
+    @PatchMapping("/{id}/cancelar")
+    public ResponseEntity<VendaResponse> cancelar(
+            @PathVariable Long id,
+            @Valid @RequestBody CancelarVendaRequest request) {
+        return ResponseEntity.ok(vendaService.cancelarVenda(id, request));
     }
 }

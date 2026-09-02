@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -57,11 +56,7 @@ public class ProdutoController {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        try {
-            ImportResultDTO result = produtoService.importarPlanilha(file);
-            return ResponseEntity.ok(result);
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        ImportResultDTO result = produtoService.importarPlanilha(file);
+        return ResponseEntity.ok(result);
     }
 }

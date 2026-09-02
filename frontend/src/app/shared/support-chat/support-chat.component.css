@@ -1,0 +1,44 @@
+:host { position: relative; z-index: 90; }
+
+.support-assistant { position: fixed; right: 1rem; bottom: 1rem; z-index: 90; display: flex; flex-direction: column; align-items: flex-end; gap: .75rem; }
+.support-panel { width: min(25rem, calc(100vw - 2rem)); height: min(42rem, calc(100dvh - 6.75rem)); overflow: hidden; border: 1px solid var(--ds-border); border-radius: 1.5rem; background: var(--ds-surface); box-shadow: 0 28px 80px rgb(15 23 42 / .24); animation: support-enter 180ms ease-out; transform-origin: bottom right; }
+.support-header { display: flex; align-items: center; gap: .75rem; min-height: 4.5rem; padding: .75rem 1rem; color: white; background: linear-gradient(135deg, #172554 0%, #1d4ed8 58%, #0f766e 130%); }
+.support-header h2 { margin: 0; font-size: .92rem; font-weight: 800; letter-spacing: -.01em; }
+.support-header p { margin: .1rem 0 0; font-size: .7rem; color: rgb(219 234 254 / .82); }
+.support-avatar { display: grid; width: 2.5rem; height: 2.5rem; flex: 0 0 auto; place-items: center; border: 1px solid rgb(255 255 255 / .2); border-radius: .9rem; background: rgb(255 255 255 / .12); }
+.support-avatar svg { width: 1.25rem; height: 1.25rem; }
+.support-online { display: inline-flex; align-items: center; gap: .3rem; padding: .15rem .4rem; border-radius: 999px; background: rgb(15 23 42 / .2); font-size: .58rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.support-online i { width: .38rem; height: .38rem; border-radius: 999px; background: #5eead4; box-shadow: 0 0 0 3px rgb(94 234 212 / .17); }
+.support-close { display: grid; width: 2.25rem; height: 2.25rem; flex: 0 0 auto; place-items: center; border-radius: .75rem; color: white; background: transparent; }
+.support-close:hover { background: rgb(255 255 255 / .12); }
+.support-close svg { width: 1.1rem; height: 1.1rem; }
+.support-body { position: relative; height: calc(100% - 6.75rem); background: #f8fafc; }
+.support-body iframe { position: relative; z-index: 1; width: 100%; height: 100%; border: 0; background: white; }
+.support-loading { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: .75rem; color: var(--ds-muted); font-size: .78rem; }
+.support-loading span { width: 2rem; height: 2rem; border: 3px solid #dbeafe; border-top-color: #2563eb; border-radius: 999px; animation: support-spin .75s linear infinite; }
+.support-privacy { display: flex; height: 2.25rem; align-items: center; justify-content: center; margin: 0; padding: 0 .75rem; border-top: 1px solid var(--ds-border); color: var(--ds-muted); background: var(--ds-surface); font-size: .61rem; }
+.support-trigger { position: relative; display: flex; min-height: 3.75rem; align-items: center; gap: .75rem; padding: .65rem .9rem; border: 1px solid rgb(255 255 255 / .16); border-radius: 1.25rem; color: white; background: linear-gradient(135deg, #172554, #2563eb); box-shadow: 0 14px 34px rgb(30 64 175 / .34); }
+.support-trigger:hover { transform: translateY(-2px); box-shadow: 0 18px 38px rgb(30 64 175 / .42); }
+.support-trigger.is-open { width: 3.5rem; min-height: 3.5rem; justify-content: center; padding: 0; border-radius: 1rem; }
+.support-trigger svg { width: 1.45rem; height: 1.45rem; flex: 0 0 auto; }
+.support-label { display: flex; flex-direction: column; align-items: flex-start; padding-right: .2rem; line-height: 1.15; }
+.support-label strong { font-size: .75rem; }
+.support-label small { margin-top: .2rem; color: #bfdbfe; font-size: .65rem; }
+.support-pulse { position: absolute; top: .25rem; left: 2.35rem; width: .65rem; height: .65rem; border: 2px solid #172554; border-radius: 999px; background: #5eead4; }
+
+:host-context(.dark) .support-panel { box-shadow: 0 32px 90px rgb(0 0 0 / .52); }
+:host-context(.dark) .support-body { background: #081226; }
+
+@keyframes support-enter { from { opacity: 0; transform: translateY(.75rem) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes support-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 639px) {
+  .support-assistant { right: .75rem; bottom: 4.9rem; }
+  .support-panel { width: calc(100vw - 1.5rem); height: calc(100dvh - 7rem); border-radius: 1.25rem; }
+  .support-label { display: none; }
+  .support-trigger { width: 3.5rem; min-height: 3.5rem; justify-content: center; padding: 0; border-radius: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .support-panel, .support-loading span { animation: none; }
+}

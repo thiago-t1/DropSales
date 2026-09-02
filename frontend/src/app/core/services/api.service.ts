@@ -34,14 +34,25 @@ export class ApiService {
 
   // Vendas
   getVendas(): Observable<VendaResponse[]> { return this.http.get<VendaResponse[]>(`${this.API}/vendas`); }
-  registrarVenda(v: VendaRequest): Observable<VendaResponse> { return this.http.post<VendaResponse>(`${this.API}/vendas`, v); }
+  getVendasRecentes(): Observable<VendaResponse[]> {
+    return this.http.get<VendaResponse[]>(`${this.API}/vendas/recentes`);
+  }
+  registrarVenda(v: VendaRequest, idempotencyKey: string): Observable<VendaResponse> {
+    return this.http.post<VendaResponse>(`${this.API}/vendas`, v, {
+      headers: { 'Idempotency-Key': idempotencyKey },
+    });
+  }
   editarVenda(id: number, v: VendaRequest): Observable<VendaResponse> { return this.http.put<VendaResponse>(`${this.API}/vendas/${id}`, v); }
-  cancelarVenda(id: number): Observable<void> { return this.http.delete<void>(`${this.API}/vendas/${id}`); }
+  cancelarVenda(id: number, motivo: string): Observable<VendaResponse> {
+    return this.http.patch<VendaResponse>(`${this.API}/vendas/${id}/cancelar`, { motivo });
+  }
 
   // Usuario / Perfil
   getMe(): Observable<UsuarioResponse> { return this.http.get<UsuarioResponse>(`${this.API}/usuarios/me`); }
   updateMe(data: UsuarioUpdateRequest): Observable<UsuarioResponse> { return this.http.put<UsuarioResponse>(`${this.API}/usuarios/me`, data); }
-  getFotoUrl(): string { return `${this.API}/usuarios/me/foto`; }
+  getFoto(): Observable<Blob> {
+    return this.http.get(`${this.API}/usuarios/me/foto?v=${Date.now()}`, { responseType: 'blob' });
+  }
 
   uploadFoto(file: File): Observable<UsuarioResponse> {
     const form = new FormData();

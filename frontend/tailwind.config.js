@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: ["./src/**/*.{html,ts}"],
   theme: {
     extend: {
@@ -30,13 +31,17 @@ module.exports = {
           900: '#064e3b',
         },
         surface: {
-          50:  '#f0f6fc',
-          100: '#c9d1d9',
-          200: '#8b949e',
-          700: '#8b949e',
-          800: '#c9d1d9',
-          900: '#f0f6fc',
-          950: '#ffffff',
+          50:  '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+          950: '#020617',
         },
         dark: {
           50:  '#f0f6fc',
@@ -55,14 +60,14 @@ module.exports = {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        'soft':         '0 2px 15px -3px rgba(0,0,0,0.3), 0 10px 20px -2px rgba(0,0,0,0.2)',
+        'soft':         '0 2px 15px -3px rgba(15,23,42,0.08), 0 10px 20px -2px rgba(15,23,42,0.05)',
         'glow':         '0 0 20px rgba(99, 102, 241, 0.3)',
         'glow-primary': '0 0 30px rgba(99, 102, 241, 0.25), 0 0 60px rgba(99, 102, 241, 0.1)',
         'glow-accent':  '0 0 30px rgba(16, 185, 129, 0.25), 0 0 60px rgba(16, 185, 129, 0.1)',
         'glow-sm':      '0 0 10px rgba(99, 102, 241, 0.2)',
-        'card':         '0 4px 25px -5px rgba(0,0,0,0.4)',
-        'glass':        '0 8px 32px rgba(0, 0, 0, 0.3)',
-        'glass-sm':     '0 4px 16px rgba(0, 0, 0, 0.2)',
+        'card':         '0 4px 25px -5px rgba(15,23,42,0.10)',
+        'glass':        '0 16px 40px rgba(15,23,42,0.12)',
+        'glass-sm':     '0 8px 24px rgba(15,23,42,0.08)',
       },
       animation: {
         'fade-in':    'fadeIn 0.5s ease-out',

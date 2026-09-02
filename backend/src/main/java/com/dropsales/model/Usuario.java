@@ -3,7 +3,9 @@ package com.dropsales.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 /**
@@ -32,14 +34,15 @@ public class Usuario {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
+    @Builder.Default
     private Perfil perfil = Perfil.OPERADOR;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean ativo = true;
 
-    /** Foto de perfil armazenada como bytes no banco */
-    @Lob
-    @Column(name = "foto_perfil")
+    @JdbcTypeCode(SqlTypes.VARBINARY)
+    @Column(name = "foto_perfil", length = 5 * 1024 * 1024)
     private byte[] fotoPerfil;
 
     @Column(name = "foto_content_type", length = 50)

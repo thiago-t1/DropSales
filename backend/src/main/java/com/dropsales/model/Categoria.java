@@ -7,7 +7,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "categorias")
+@Table(
+        name = "categorias",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uq_categorias_loja_nome",
+                columnNames = {"loja_id", "nome"}))
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder
@@ -17,14 +21,19 @@ public class Categoria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, length = 100)
     private String nome;
 
+    @Column(columnDefinition = "TEXT")
     private String descricao;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "loja_id", nullable = false)
+    private Loja loja;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

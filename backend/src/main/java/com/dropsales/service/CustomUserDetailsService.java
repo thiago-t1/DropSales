@@ -2,6 +2,7 @@ package com.dropsales.service;
 
 import com.dropsales.model.Usuario;
 import com.dropsales.repository.UsuarioRepository;
+import com.dropsales.util.EmailNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
@@ -19,9 +20,21 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        String emailNormalizado = EmailNormalizer.normalize(email);
+        Usuario usuario = usuarioRepository.findByEmailIgnoreCase(emailNormalizado)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario nao encontrado: " + email));
 
+        return toUserDetails(usuario);
+    }
+
+    public UserDetails loadUserById(Long id) throws UsernameNotFoundException {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario nao encontrado: " + id));
+
+        return toUserDetails(usuario);
+    }
+
+    private UserDetails toUserDetails(Usuario usuario) {
         return new User(
                 usuario.getEmail(),
                 usuario.getSenha(),

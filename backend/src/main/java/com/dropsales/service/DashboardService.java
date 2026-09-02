@@ -2,22 +2,29 @@ package com.dropsales.service;
 
 import com.dropsales.dto.DashboardResponse;
 import com.dropsales.dto.ProdutoResponse;
+import com.dropsales.model.Loja;
+import com.dropsales.model.StatusRecebivel;
+import com.dropsales.model.StatusVenda;
+import com.dropsales.model.Transacao;
 import com.dropsales.model.Venda;
+import com.dropsales.repository.PagamentoVendaRepository;
+import com.dropsales.repository.RecebivelRepository;
 import com.dropsales.repository.TransacaoRepository;
 import com.dropsales.repository.VendaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.dropsales.model.Usuario;
-import com.dropsales.repository.UsuarioRepository;
-import com.dropsales.security.SecurityUtils;
-import com.dropsales.exception.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -26,35 +33,53 @@ public class DashboardService {
     private final TransacaoRepository transacaoRepository;
     private final ProdutoService produtoService;
     private final VendaRepository vendaRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final PagamentoVendaRepository pagamentoVendaRepository;
+    private final RecebivelRepository recebivelRepository;
+    private final TenantContextService tenantContext;
 
-    private Usuario getUsuarioLogado() {
-        String email = SecurityUtils.getCurrentUserEmail();
-        if (email == null) throw new com.dropsales.exception.BusinessException("Usuário não autenticado");
-        return usuarioRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
-    }
-
+    @Transactional(readOnly = true)
     public DashboardResponse getDashboard() {
-        Usuario usuario = getUsuarioLogado();
+        Loja loja = tenantContext.atual().loja();
 
-        BigDecimal receitas   = transacaoRepository.somarReceitasPagas(usuario);
-        BigDecimal despesas   = transacaoRepository.somarDespesasPagas(usuario);
-        BigDecimal cmv        = transacaoRepository.somarCMV(usuario);
-        BigDecimal saldo      = receitas.subtract(despesas);
-        BigDecimal lucro      = receitas.subtract(cmv);
+        // Competencia: venda concluida no periodo, independentemente da liquidacao.
+        BigDecimal receitas = valorOuZero(transacaoRepository.somarReceitasPagas(loja));
+        BigDecimal despesasTransacoes = valorOuZero(
+                transacaoRepository.somarDespesasPagas(loja));
+        BigDecimal cmv = valorOuZero(transacaoRepository.somarCMV(loja));
+        BigDecimal taxasPagamento = valorOuZero(
+                pagamentoVendaRepository.somarTaxasAtivasPorLoja(loja));
+        BigDecimal despesas = despesasTransacoes.add(taxasPagamento);
+        BigDecimal saldoOperacional = receitas.subtract(despesas);
+        BigDecimal lucroBruto = receitas.subtract(cmv);
 
-        List<ProdutoResponse>                estoqueBaixo  = produtoService.listarEstoqueBaixo();
-        List<DashboardResponse.VendaDiariaDTO> vendas30d   = calcularVendasDiarias(30, usuario);
-        List<DashboardResponse.VendaDiariaDTO> custos30d   = calcularCustosDiarios(30, usuario);
-        List<DashboardResponse.TopProdutoDTO>  top5         = calcularTop5Produtos(usuario);
-        List<DashboardResponse.VendaRecenteDTO> recentes   = buscarVendasRecentes(usuario);
+        // Caixa: usa exclusivamente os snapshots de recebiveis.
+        BigDecimal recebidoLiquido = valorOuZero(recebivelRepository
+                .somarLiquidoPorStatus(loja, StatusRecebivel.RECEBIDO));
+        BigDecimal aReceber = valorOuZero(recebivelRepository
+                .somarLiquidoPorStatus(loja, StatusRecebivel.PENDENTE));
+
+        List<ProdutoResponse> estoqueBaixo = produtoService.listarEstoqueBaixo();
+        List<DashboardResponse.VendaDiariaDTO> vendas30d =
+                calcularVendasDiarias(30, loja);
+        List<DashboardResponse.VendaDiariaDTO> custos30d =
+                calcularCustosDiarios(30, loja);
+        List<DashboardResponse.TopProdutoDTO> top5 =
+                calcularTop5Produtos(loja);
+        List<DashboardResponse.VendaRecenteDTO> recentes =
+                buscarVendasRecentes(loja);
 
         return DashboardResponse.builder()
                 .receitas(receitas)
+                .receitaBruta(receitas)
                 .despesas(despesas)
                 .cmv(cmv)
-                .saldo(saldo)
-                .lucroLiquido(lucro)
+                .taxasPagamento(taxasPagamento)
+                .saldo(saldoOperacional)
+                .saldoOperacional(saldoOperacional)
+                .lucroLiquido(saldoOperacional)
+                .lucroBruto(lucroBruto)
+                .recebidoLiquido(recebidoLiquido)
+                .aReceber(aReceber)
                 .estoqueBaixo(estoqueBaixo)
                 .vendasDiarias(vendas30d)
                 .custosDiarios(custos30d)
@@ -63,55 +88,79 @@ public class DashboardService {
                 .build();
     }
 
-    private List<DashboardResponse.VendaDiariaDTO> calcularVendasDiarias(int dias, Usuario usuario) {
-        LocalDateTime desde = LocalDate.now().minusDays(dias - 1).atStartOfDay();
-        List<Venda> vendas  = vendaRepository.findVendasDesde(desde, usuario);
+    private BigDecimal valorOuZero(BigDecimal valor) {
+        return valor == null ? BigDecimal.ZERO : valor;
+    }
+
+    private List<DashboardResponse.VendaDiariaDTO> calcularVendasDiarias(
+            int dias,
+            Loja loja) {
+        ZoneId zone = zoneDaLoja(loja);
+        LocalDate hoje = LocalDate.now(zone);
+        OffsetDateTime desde = hoje.minusDays(dias - 1)
+                .atStartOfDay(zone)
+                .withZoneSameInstant(ZoneOffset.UTC)
+                .toOffsetDateTime();
+        List<Venda> vendas = vendaRepository.findVendasDesde(desde, loja);
 
         Map<LocalDate, BigDecimal> porDia = vendas.stream()
                 .collect(Collectors.groupingBy(
-                        v -> v.getCreatedAt().toLocalDate(),
-                        Collectors.reducing(BigDecimal.ZERO, Venda::getTotal, BigDecimal::add)
-                ));
+                        venda -> venda.getCreatedAt()
+                                .atZoneSameInstant(zone)
+                                .toLocalDate(),
+                        Collectors.reducing(
+                                BigDecimal.ZERO,
+                                Venda::getTotal,
+                                BigDecimal::add)));
 
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
         List<DashboardResponse.VendaDiariaDTO> resultado = new ArrayList<>();
         for (int i = dias - 1; i >= 0; i--) {
-            LocalDate dia = LocalDate.now().minusDays(i);
+            LocalDate dia = hoje.minusDays(i);
             resultado.add(DashboardResponse.VendaDiariaDTO.builder()
-                    .data(dia.format(fmt))
+                    .data(dia.format(formatter))
                     .total(porDia.getOrDefault(dia, BigDecimal.ZERO))
                     .build());
         }
         return resultado;
     }
 
-    private List<DashboardResponse.VendaDiariaDTO> calcularCustosDiarios(int dias, Usuario usuario) {
-        LocalDateTime desde = LocalDate.now().minusDays(dias - 1).atStartOfDay();
-        List<Object[]> rows = transacaoRepository.somarCustosDiariosDesde(desde, usuario);
+    private List<DashboardResponse.VendaDiariaDTO> calcularCustosDiarios(
+            int dias,
+            Loja loja) {
+        ZoneId zone = zoneDaLoja(loja);
+        LocalDate hoje = LocalDate.now(zone);
+        OffsetDateTime desde = hoje.minusDays(dias - 1)
+                .atStartOfDay(zone)
+                .withZoneSameInstant(ZoneOffset.UTC)
+                .toOffsetDateTime();
+        List<Transacao> custos = transacaoRepository.findCustosDesde(desde, loja);
 
-        Map<LocalDate, BigDecimal> porDia = new HashMap<>();
-        for (Object[] row : rows) {
-            LocalDate dia   = ((java.sql.Date) row[0]).toLocalDate();
-            BigDecimal valor = (BigDecimal) row[1];
-            porDia.put(dia, valor);
-        }
+        Map<LocalDate, BigDecimal> porDia = custos.stream()
+                .collect(Collectors.groupingBy(
+                        transacao -> transacao.getCreatedAt()
+                                .atZoneSameInstant(zone)
+                                .toLocalDate(),
+                        Collectors.reducing(
+                                BigDecimal.ZERO,
+                                Transacao::getValor,
+                                BigDecimal::add)));
 
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
         List<DashboardResponse.VendaDiariaDTO> resultado = new ArrayList<>();
         for (int i = dias - 1; i >= 0; i--) {
-            LocalDate dia = LocalDate.now().minusDays(i);
+            LocalDate dia = hoje.minusDays(i);
             resultado.add(DashboardResponse.VendaDiariaDTO.builder()
-                    .data(dia.format(fmt))
+                    .data(dia.format(formatter))
                     .total(porDia.getOrDefault(dia, BigDecimal.ZERO))
                     .build());
         }
         return resultado;
     }
 
-    private List<DashboardResponse.TopProdutoDTO> calcularTop5Produtos(Usuario usuario) {
-        List<Object[]> rows = vendaRepository.findTop5ProdutosPorQuantidade(usuario);
+    private List<DashboardResponse.TopProdutoDTO> calcularTop5Produtos(Loja loja) {
         List<DashboardResponse.TopProdutoDTO> resultado = new ArrayList<>();
-        for (Object[] row : rows) {
+        for (Object[] row : vendaRepository.findTop5ProdutosPorQuantidade(loja)) {
             resultado.add(DashboardResponse.TopProdutoDTO.builder()
                     .nome((String) row[0])
                     .totalUnidades(((Number) row[1]).longValue())
@@ -120,16 +169,31 @@ public class DashboardService {
         return resultado;
     }
 
-    private List<DashboardResponse.VendaRecenteDTO> buscarVendasRecentes(Usuario usuario) {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        return vendaRepository.findTop5ByUsuarioOrderByCreatedAtDesc(usuario).stream()
-                .map(v -> DashboardResponse.VendaRecenteDTO.builder()
-                        .id(v.getId())
-                        .vendedor(v.getUsuario().getNome())
-                        .data(v.getCreatedAt().format(fmt))
-                        .valor(v.getTotal())
-                        .totalItens(v.getItens().stream().mapToInt(i -> i.getQuantidade()).sum())
+    private List<DashboardResponse.VendaRecenteDTO> buscarVendasRecentes(Loja loja) {
+        ZoneId zone = zoneDaLoja(loja);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        return vendaRepository.findTop5ByLojaAndStatusOrderByCreatedAtDesc(
+                        loja,
+                        StatusVenda.CONCLUIDA).stream()
+                .map(venda -> DashboardResponse.VendaRecenteDTO.builder()
+                        .id(venda.getId())
+                        .vendedor(venda.getUsuario().getNome())
+                        .data(venda.getCreatedAt()
+                                .atZoneSameInstant(zone)
+                                .format(formatter))
+                        .valor(venda.getTotal())
+                        .totalItens(venda.getItens().stream()
+                                .mapToInt(item -> item.getQuantidade())
+                                .sum())
                         .build())
                 .toList();
+    }
+
+    private ZoneId zoneDaLoja(Loja loja) {
+        try {
+            return ZoneId.of(loja.getTimezone());
+        } catch (RuntimeException ex) {
+            return ZoneId.of("America/Sao_Paulo");
+        }
     }
 }

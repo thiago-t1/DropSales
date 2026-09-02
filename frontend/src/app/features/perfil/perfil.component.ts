@@ -1,8 +1,12 @@
 ﻿import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { OnDestroy } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
+import { AuthService } from '../../core/services/auth.service';
+import { TenantService } from '../../core/services/tenant.service';
 import { UsuarioResponse, UsuarioUpdateRequest, AlterarSenhaRequest } from '../../core/models/api.models';
+import { ProfilePhotoService } from '../../core/services/profile-photo.service';
 
 @Component({
   selector: 'app-perfil',
@@ -10,8 +14,11 @@ import { UsuarioResponse, UsuarioUpdateRequest, AlterarSenhaRequest } from '../.
   imports: [CommonModule, FormsModule],
   templateUrl: './perfil.component.html',
 })
-export class PerfilComponent implements OnInit {
+export class PerfilComponent implements OnInit, OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
+  private readonly maxFotoBytes = 5 * 1024 * 1024;
+  private readonly tiposFotoPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
 
   usuario: UsuarioResponse | null = null;
   form: UsuarioUpdateRequest = { nome: '', email: '' };
@@ -25,14 +32,21 @@ export class PerfilComponent implements OnInit {
   sucessoSenha = '';
   erroSenha = '';
   uploadingFoto = false;
+  fotoRemotaFalhou = false;
+  mostrarSenhaAtual = false;
+  mostrarNovaSenha = false;
+  mostrarConfirmacaoSenha = false;
 
-  // Preview da foto
   fotoPreview: string | null = null;
-  readonly fotoUrl: string;
+  fotoUrl: string | null = null;
+  private destruido = false;
 
-  constructor(private apiService: ApiService) {
-    this.fotoUrl = this.apiService.getFotoUrl();
-  }
+  constructor(
+    private apiService: ApiService,
+    private authService: AuthService,
+    private readonly tenantService: TenantService,
+    private readonly profilePhotoService: ProfilePhotoService,
+  ) {}
 
   ngOnInit(): void {
     this.apiService.getMe().subscribe({
@@ -40,74 +54,154 @@ export class PerfilComponent implements OnInit {
         this.usuario = u;
         this.form = { nome: u.nome, email: u.email };
         this.loading = false;
+        if (u.temFoto) this.carregarFotoRemota();
       },
       error: () => { this.erro = 'Erro ao carregar perfil.'; this.loading = false; },
     });
   }
 
-  abrirSeletor(): void { this.fileInput.nativeElement.click(); }
+  ngOnDestroy(): void {
+    this.destruido = true;
+    this.revogarFotoPreview();
+    this.revogarFotoRemota();
+  }
+
+  get inicialUsuario(): string {
+    return (this.form.nome || this.usuario?.nome || 'U').trim().charAt(0).toUpperCase() || 'U';
+  }
+
+  get perfilLabel(): string {
+    if (this.tenantService.contexto()) return this.tenantService.papelLabel();
+    if (this.usuario?.perfil === 'ADMIN') return 'Administrador';
+    if (this.usuario?.perfil === 'OPERADOR') return 'Operador';
+    if (this.usuario?.perfil === 'USUARIO') return 'Usuário';
+    return this.usuario?.perfil || 'Usuário';
+  }
+
+  abrirSeletor(): void {
+    if (!this.uploadingFoto) this.fileInput.nativeElement.click();
+  }
+
+  onFotoRemotaErro(): void {
+    this.fotoRemotaFalhou = true;
+    this.revogarFotoRemota();
+  }
 
   onFotoSelecionada(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
 
-    // Preview local
-    const reader = new FileReader();
-    reader.onload = (e) => { this.fotoPreview = e.target?.result as string; };
-    reader.readAsDataURL(file);
+    this.erro = '';
+    this.sucesso = '';
 
-    // Upload
+    if (!this.tiposFotoPermitidos.includes(file.type)) {
+      this.erro = 'Escolha uma imagem JPG, PNG ou WebP.';
+      input.value = '';
+      return;
+    }
+
+    if (file.size > this.maxFotoBytes) {
+      this.erro = 'A imagem deve ter no máximo 5 MB.';
+      input.value = '';
+      return;
+    }
+
+    this.revogarFotoPreview();
+    this.fotoPreview = URL.createObjectURL(file);
+
     this.uploadingFoto = true;
     this.apiService.uploadFoto(file).subscribe({
       next: (u) => {
         this.usuario = u;
-        this.sucesso = 'Foto atualizada!';
+        this.profilePhotoService.definir(file);
+        this.fotoRemotaFalhou = false;
+        this.carregarFotoRemota(true);
+        this.sucesso = 'Foto atualizada com sucesso.';
         this.uploadingFoto = false;
+        input.value = '';
         setTimeout(() => (this.sucesso = ''), 3000);
       },
       error: () => {
-        this.fotoPreview = null;
-        this.erro = 'Erro ao fazer upload da foto.';
+        this.revogarFotoPreview();
+        this.erro = 'Não foi possível atualizar a foto. Tente novamente.';
         this.uploadingFoto = false;
+        input.value = '';
         setTimeout(() => (this.erro = ''), 4000);
       },
     });
   }
 
-  salvar(): void {
-    if (!this.form.nome || !this.form.email) return;
+  private carregarFotoRemota(limparPreviewAoConcluir = false): void {
+    this.fotoRemotaFalhou = false;
+    this.apiService.getFoto().subscribe({
+      next: (foto) => {
+        if (this.destruido) return;
+        this.revogarFotoRemota();
+        this.fotoUrl = URL.createObjectURL(foto);
+        if (limparPreviewAoConcluir) this.revogarFotoPreview();
+      },
+      error: () => {
+        if (this.destruido) return;
+        this.fotoRemotaFalhou = true;
+        this.revogarFotoRemota();
+      },
+    });
+  }
+
+  private revogarFotoPreview(): void {
+    if (this.fotoPreview) URL.revokeObjectURL(this.fotoPreview);
+    this.fotoPreview = null;
+  }
+
+  private revogarFotoRemota(): void {
+    if (this.fotoUrl) URL.revokeObjectURL(this.fotoUrl);
+    this.fotoUrl = null;
+  }
+
+  salvar(dadosForm?: NgForm): void {
+    if (dadosForm?.invalid || !this.form.nome.trim() || !this.form.email.trim()) {
+      dadosForm?.form.markAllAsTouched();
+      this.erro = 'Revise os dados destacados antes de salvar.';
+      return;
+    }
+    this.form = { nome: this.form.nome.trim(), email: this.form.email.trim() };
     this.saving = true; this.sucesso = ''; this.erro = '';
     this.apiService.updateMe(this.form).subscribe({
       next: (u) => {
         this.usuario = u;
+        if (u.token) this.authService.replaceToken(u.token);
         this.sucesso = 'Perfil atualizado com sucesso!';
         this.saving = false;
-        const raw = localStorage.getItem('ds_user');
-        if (raw) {
-          const user = JSON.parse(raw);
-          user.nome = u.nome; user.email = u.email;
-          localStorage.setItem('ds_user', JSON.stringify(user));
-        }
+        this.authService.updateStoredUser({ nome: u.nome, email: u.email });
         setTimeout(() => (this.sucesso = ''), 4000);
       },
       error: (e) => { this.erro = e.error?.message || 'Erro ao atualizar.'; this.saving = false; setTimeout(() => (this.erro = ''), 4000); },
     });
   }
 
-  alterarSenha(): void {
+  alterarSenha(senhaNgForm?: NgForm): void {
     this.erroSenha = ''; this.sucessoSenha = '';
-    if (this.senhaForm.novaSenha !== this.senhaForm.confirmarSenha) {
-      this.erroSenha = 'As senhas nao coincidem.'; return;
+    if (senhaNgForm?.invalid || !this.senhaForm.senhaAtual || !this.senhaForm.novaSenha || !this.senhaForm.confirmarSenha) {
+      senhaNgForm?.form.markAllAsTouched();
+      this.erroSenha = 'Preencha os três campos de senha.';
+      return;
     }
-    if (this.senhaForm.novaSenha.length < 6) {
-      this.erroSenha = 'Nova senha deve ter no minimo 6 caracteres.'; return;
+    if (this.senhaForm.novaSenha !== this.senhaForm.confirmarSenha) {
+      this.erroSenha = 'As senhas não coincidem.'; return;
+    }
+    if (this.senhaForm.novaSenha.length < 12) {
+      this.erroSenha = 'A nova senha deve ter no mínimo 12 caracteres.'; return;
     }
     this.savingSenha = true;
     this.apiService.alterarSenha(this.senhaForm).subscribe({
       next: () => {
         this.sucessoSenha = 'Senha alterada com sucesso!';
         this.senhaForm = { senhaAtual: '', novaSenha: '', confirmarSenha: '' };
+        senhaNgForm?.resetForm(this.senhaForm);
+        this.mostrarSenhaAtual = false;
+        this.mostrarNovaSenha = false;
+        this.mostrarConfirmacaoSenha = false;
         this.savingSenha = false;
         setTimeout(() => (this.sucessoSenha = ''), 4000);
       },

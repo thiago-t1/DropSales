@@ -24,17 +24,25 @@ public class CorsConfig {
                 .map(String::trim)
                 .filter(s -> !s.isBlank())
                 .toList();
+        if (origins.isEmpty() || origins.stream().anyMatch(origin -> origin.contains("*"))) {
+            throw new IllegalStateException(
+                    "CORS_ALLOWED_ORIGINS deve conter apenas origens HTTPS explicitas");
+        }
         config.setAllowedOrigins(origins);
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // Lista explícita — nunca usar wildcard "*" com allowCredentials=true
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
+        // Lista explicita: somente headers realmente enviados pelo frontend.
+        config.setAllowedHeaders(List.of(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "X-Requested-With",
+                "X-Loja-Id",
+                "Idempotency-Key"));
 
-        // Expõe o header Authorization para que o Angular consiga ler o JWT da resposta
-        config.setExposedHeaders(List.of("Authorization"));
-
-        config.setAllowCredentials(true);
+        // A API usa Bearer token no header e nao depende de cookies cross-origin.
+        config.setAllowCredentials(false);
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

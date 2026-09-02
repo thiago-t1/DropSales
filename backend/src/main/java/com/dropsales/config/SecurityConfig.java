@@ -1,6 +1,7 @@
 package com.dropsales.config;
 
 import com.dropsales.security.JwtAuthenticationFilter;
+import com.dropsales.security.PublicEndpointRateLimitFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
@@ -24,6 +27,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+    private final PublicEndpointRateLimitFilter publicEndpointRateLimitFilter;
     private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
@@ -31,7 +35,19 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(csrf -> csrf.disable())
+            .headers(headers -> headers
+                .contentSecurityPolicy(csp -> csp.policyDirectives(
+                    "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"))
+                .frameOptions(frame -> frame.deny())
+                .referrerPolicy(referrer -> referrer.policy(
+                    ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
+                .addHeaderWriter(new StaticHeadersWriter(
+                    "Permissions-Policy",
+                    "camera=(), microphone=(), geolocation=(), payment=()")))
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint((request, response, authException) ->
+                    response.sendError(401, "Nao autenticado")))
             .authorizeHttpRequests(auth -> auth
                 // CORS preflight: o navegador envia OPTIONS antes de toda requisição.
                 // O Spring Security DEVE liberar OPTIONS sem autenticação,
@@ -40,14 +56,15 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(publicEndpointRateLimitFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(jwtAuthFilter, PublicEndpointRateLimitFilter.class);
 
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(12);
     }
 
     @Bean

@@ -1,0 +1,607 @@
+<div class="mx-auto w-full max-w-[1600px] space-y-6">
+  <header class="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+    <div>
+      <div class="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-300">
+        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-500/15">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M3.75 7.5h16.5v10.25a2 2 0 0 1-2 2H5.75a2 2 0 0 1-2-2V7.5Zm0 3.25h16.5M7 15h3.5" />
+          </svg>
+        </span>
+        Controle financeiro
+      </div>
+      <h1 class="text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-3xl">Caixa</h1>
+      <p class="mt-1 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+        Acompanhe o que entrou, organize valores a receber e confira o movimento diário da loja.
+      </p>
+    </div>
+    <button
+      type="button"
+      (click)="carregar()"
+      [disabled]="loading"
+      class="ds-btn-secondary dark:!border-slate-700 dark:!bg-slate-900 dark:!text-slate-200">
+      <svg class="h-4 w-4" [class.animate-spin]="loading" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 0 1-15.357-2m15.357 2H15" />
+      </svg>
+      Atualizar caixa
+    </button>
+  </header>
+
+  <nav
+    class="ds-card overflow-hidden p-1.5 dark:!border-slate-800 dark:!bg-slate-900"
+    role="tablist"
+    aria-label="Áreas do caixa">
+    <div class="flex min-w-max gap-1 overflow-x-auto lg:grid lg:min-w-0 lg:grid-cols-4">
+      @for (aba of abas; track aba.id) {
+        <button
+          type="button"
+          role="tab"
+          [id]="'caixa-tab-' + aba.id"
+          [attr.aria-selected]="abaAtiva === aba.id"
+          [attr.aria-controls]="'caixa-painel-' + aba.id"
+          [attr.tabindex]="abaAtiva === aba.id ? 0 : -1"
+          (click)="selecionarAba(aba.id)"
+          (keydown)="navegarAbas($event, aba.id)"
+          class="group flex min-h-[58px] w-[172px] shrink-0 items-center gap-3 rounded-xl px-3 text-left outline-none transition focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 lg:w-auto"
+          [ngClass]="abaAtiva === aba.id
+            ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200/60 dark:bg-indigo-500 dark:shadow-black/20'
+            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'">
+          <span
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+            [ngClass]="abaAtiva === aba.id ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-white dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700'">
+            @if (aba.id === 'visao-geral') {
+              <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 19V9m5 10V5m5 14v-7m5 7V3" /></svg>
+            }
+            @if (aba.id === 'a-receber') {
+              <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+            }
+            @if (aba.id === 'movimentacoes') {
+              <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 7h16M7 4l-3 3 3 3m10 4 3 3-3 3M4 17h16" /></svg>
+            }
+            @if (aba.id === 'fechamento') {
+              <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M6 3h12a2 2 0 0 1 2 2v16l-4-2-4 2-4-2-4 2V5a2 2 0 0 1 2-2Zm2 5h8m-8 4h8m-8 4h4" /></svg>
+            }
+          </span>
+          <span class="min-w-0">
+            <span class="block text-sm font-extrabold">{{ aba.label }}</span>
+            <span
+              class="mt-0.5 block truncate text-[10px] font-semibold"
+              [ngClass]="abaAtiva === aba.id ? 'text-indigo-100' : 'text-slate-400 dark:text-slate-500'">
+              {{ aba.descricao }}
+            </span>
+          </span>
+        </button>
+      }
+    </div>
+  </nav>
+
+  @if (erro) {
+    <div role="alert" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 dark:border-rose-500/25 dark:bg-rose-500/10 dark:text-rose-300">{{ erro }}</div>
+  }
+  @if (sucesso) {
+    <div role="status" class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300">{{ sucesso }}</div>
+  }
+
+  @if (loading) {
+    <section class="space-y-4" aria-label="Carregando dados do caixa">
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        @for (_ of [1, 2, 3, 4]; track $index) {
+          <div class="h-36 animate-pulse rounded-[24px] bg-slate-200/70 dark:bg-slate-800"></div>
+        }
+      </div>
+      <div class="h-80 animate-pulse rounded-[24px] bg-slate-200/70 dark:bg-slate-800"></div>
+    </section>
+  } @else {
+    @switch (abaAtiva) {
+      @case ('visao-geral') {
+        <div
+          role="tabpanel"
+          id="caixa-painel-visao-geral"
+          aria-labelledby="caixa-tab-visao-geral"
+          class="space-y-6">
+          <section class="grid gap-4 md:grid-cols-2 2xl:grid-cols-12" aria-label="Resumo do caixa">
+            <article class="relative overflow-hidden rounded-[24px] border border-indigo-400/20 bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-700 p-5 text-white shadow-lg shadow-indigo-200/40 dark:from-indigo-600 dark:via-indigo-700 dark:to-slate-900 dark:shadow-black/20 sm:p-6 md:col-span-2 2xl:col-span-5">
+              <span class="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/15 blur-2xl" aria-hidden="true"></span>
+              <span class="pointer-events-none absolute -bottom-16 left-1/3 h-32 w-32 rounded-full bg-teal-300/15 blur-2xl" aria-hidden="true"></span>
+              <div class="relative">
+                <div class="flex items-start justify-between gap-4">
+                  <div>
+                    <p class="text-[11px] font-extrabold uppercase tracking-[0.14em] text-indigo-100">Entradas confirmadas</p>
+                    <p class="mt-2 text-3xl font-extrabold tracking-tight tabular-nums sm:text-4xl">R$ {{ fmt(recebido) }}</p>
+                    <p class="mt-1 text-xs font-medium text-indigo-100/85">
+                      {{ recebidosQuantidade }} {{ recebidosQuantidade === 1 ? 'movimentação recebida' : 'movimentações recebidas' }}
+                    </p>
+                  </div>
+                  <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/12 text-white ring-1 ring-white/15">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="m5 12 4 4L19 6" /></svg>
+                  </span>
+                </div>
+                <div class="mt-7 grid gap-3 border-t border-white/15 pt-4 min-[430px]:grid-cols-2">
+                  <div>
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-100/70">Próxima entrada</p>
+                    <p class="mt-1 text-sm font-bold">{{ proximaEntrada ? fmtData(proximaEntrada.dataPrevista) : 'Nenhuma prevista' }}</p>
+                  </div>
+                  <div>
+                    <div class="flex items-center justify-between gap-2">
+                      <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-100/70">Já confirmado</p>
+                      <p class="text-xs font-extrabold">{{ percentualRecebido }}%</p>
+                    </div>
+                    <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15" role="progressbar" aria-label="Percentual confirmado" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="percentualRecebido">
+                      <span class="block h-full rounded-full bg-teal-300 transition-all" [style.width.%]="percentualRecebido"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="ds-card flex flex-col justify-between p-5 dark:!border-slate-800 dark:!bg-slate-900 sm:p-6 2xl:col-span-3">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <p class="ds-kpi-label">A receber</p>
+                  <p class="mt-2 text-2xl font-extrabold tabular-nums text-slate-950 dark:text-white">R$ {{ fmt(pendente) }}</p>
+                </div>
+                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300">
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                </span>
+              </div>
+              <div class="mt-7 border-t border-slate-100 pt-4 dark:border-slate-800">
+                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">{{ pendentesQuantidade }} {{ pendentesQuantidade === 1 ? 'entrada prevista' : 'entradas previstas' }}</p>
+                <button type="button" (click)="selecionarAba('a-receber')" class="mt-2 text-xs font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-200">Ver agenda →</button>
+              </div>
+            </article>
+
+            <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2 2xl:col-span-4">
+              <article class="ds-card p-5 dark:!border-slate-800 dark:!bg-slate-900">
+                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-500/15 dark:text-teal-300">
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M8 7V3m8 4V3M5 11h14M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" /></svg>
+                </span>
+                <p class="mt-4 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 dark:text-slate-500">Próximos 7 dias</p>
+                <p class="mt-1 text-xl font-extrabold tabular-nums text-slate-950 dark:text-white">R$ {{ fmt(proximosSeteDias) }}</p>
+                <p class="mt-2 text-xs leading-5 text-slate-400 dark:text-slate-500">Previsão líquida de curto prazo</p>
+              </article>
+
+              <article class="ds-card p-5 dark:!border-slate-800 dark:!bg-slate-900">
+                <span class="flex h-10 w-10 items-center justify-center rounded-xl" [ngClass]="vencidos > 0 ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'">
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M12 9v3.5m0 3.5h.01M5.07 19h13.86a2 2 0 0 0 1.73-3L13.73 4a2 2 0 0 0-3.46 0L3.34 16a2 2 0 0 0 1.73 3Z" /></svg>
+                </span>
+                <p class="mt-4 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 dark:text-slate-500">Precisam de atenção</p>
+                <p class="mt-1 text-xl font-extrabold tabular-nums" [ngClass]="vencidos > 0 ? 'text-rose-600 dark:text-rose-300' : 'text-slate-950 dark:text-white'">{{ vencidos }}</p>
+                <p class="mt-2 text-xs leading-5 text-slate-400 dark:text-slate-500">Entradas previstas com data ultrapassada</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="grid gap-4 xl:grid-cols-12">
+            <article class="ds-card overflow-hidden dark:!border-slate-800 dark:!bg-slate-900 xl:col-span-7">
+              <div class="flex items-center justify-between gap-3 border-b border-slate-100 p-5 dark:border-slate-800">
+                <div>
+                  <h2 class="font-bold text-slate-900 dark:text-white">Próximas entradas</h2>
+                  <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">Agenda financeira mais próxima</p>
+                </div>
+                <button type="button" (click)="selecionarAba('a-receber')" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-300">Ver tudo</button>
+              </div>
+              @if (proximasEntradas.length === 0) {
+                <div class="ds-empty-state py-12">
+                  <span class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="m5 12 4 4L19 6" /></svg>
+                  </span>
+                  <p class="font-semibold text-slate-700 dark:text-slate-200">Nenhuma entrada pendente</p>
+                  <p class="mt-1 text-sm text-slate-400 dark:text-slate-500">A agenda está em dia.</p>
+                </div>
+              } @else {
+                <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                  @for (item of proximasEntradas; track item.id) {
+                    <div class="flex items-center justify-between gap-3 p-4 sm:px-5">
+                      <div class="flex min-w-0 items-center gap-3">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+                          <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M8 7V3m8 4V3M5 11h14M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" /></svg>
+                        </span>
+                        <div class="min-w-0">
+                          <p class="truncate text-sm font-bold text-slate-800 dark:text-slate-100">Venda #{{ item.vendaId }} · {{ pagamentoLabel(item.formaPagamento) }}</p>
+                          <p class="mt-0.5 text-xs text-slate-400">{{ fmtData(item.dataPrevista) }} · parcela {{ item.numeroParcela }}/{{ item.totalParcelas }}</p>
+                        </div>
+                      </div>
+                      <p class="shrink-0 text-sm font-extrabold tabular-nums text-slate-950 dark:text-white">R$ {{ fmt(item.valorLiquido) }}</p>
+                    </div>
+                  }
+                </div>
+              }
+            </article>
+
+            <article class="ds-card overflow-hidden dark:!border-slate-800 dark:!bg-slate-900 xl:col-span-5">
+              <div class="border-b border-slate-100 p-5 dark:border-slate-800">
+                <h2 class="font-bold text-slate-900 dark:text-white">Composição das entradas</h2>
+                <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">Valores líquidos já confirmados</p>
+              </div>
+              @if (totaisPorForma.length === 0) {
+                <div class="ds-empty-state py-12">
+                  <p class="font-semibold text-slate-700 dark:text-slate-200">Sem entradas confirmadas</p>
+                  <p class="mt-1 text-sm text-slate-400 dark:text-slate-500">As formas de pagamento aparecerão aqui.</p>
+                </div>
+              } @else {
+                <div class="space-y-5 p-5">
+                  @for (forma of totaisPorForma; track forma.formaPagamento) {
+                    <div>
+                      <div class="mb-2 flex items-center justify-between gap-3">
+                        <div>
+                          <p class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ pagamentoLabel(forma.formaPagamento) }}</p>
+                          <p class="text-[11px] text-slate-400">{{ forma.quantidade }} {{ forma.quantidade === 1 ? 'entrada' : 'entradas' }}</p>
+                        </div>
+                        <div class="text-right">
+                          <p class="text-sm font-extrabold tabular-nums text-slate-900 dark:text-white">R$ {{ fmt(forma.valorLiquido) }}</p>
+                          <p class="text-[11px] font-bold text-indigo-600 dark:text-indigo-300">{{ percentualForma(forma.valorLiquido) }}%</p>
+                        </div>
+                      </div>
+                      <div class="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                        <span class="block h-full rounded-full bg-gradient-to-r from-indigo-600 to-teal-400" [style.width.%]="percentualForma(forma.valorLiquido)"></span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </article>
+          </section>
+        </div>
+      }
+
+      @case ('a-receber') {
+        <section
+          role="tabpanel"
+          id="caixa-painel-a-receber"
+          aria-labelledby="caixa-tab-a-receber"
+          class="ds-card overflow-hidden dark:!border-slate-800 dark:!bg-slate-900">
+          <div class="flex flex-col gap-4 border-b border-slate-100 p-4 dark:border-slate-800 lg:flex-row lg:items-center lg:justify-between sm:p-5">
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 class="text-lg font-extrabold text-slate-900 dark:text-white">Agenda a receber</h2>
+                <span class="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">R$ {{ fmt(pendente) }} pendentes</span>
+              </div>
+              <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">{{ agendaFiltrada.length }} {{ agendaFiltrada.length === 1 ? 'registro encontrado' : 'registros encontrados' }}</p>
+            </div>
+            <div class="flex flex-col gap-2 sm:flex-row">
+              <label class="relative block">
+                <span class="sr-only">Buscar entrada</span>
+                <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg>
+                <input [(ngModel)]="busca" class="ds-input min-h-[42px] pl-9 dark:!border-slate-700 dark:!bg-slate-950 dark:!text-white" placeholder="Venda, forma ou adquirente" />
+              </label>
+              <select [(ngModel)]="filtroStatus" class="ds-input min-h-[42px] dark:!border-slate-700 dark:!bg-slate-950 dark:!text-white" aria-label="Filtrar status">
+                @for (option of statusOptions; track option.value) {
+                  <option [ngValue]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          @if (agendaFiltrada.length === 0) {
+            <div class="ds-empty-state py-16">
+              <span class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M9 14l2 2 4-4m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+              </span>
+              <p class="font-semibold text-slate-700 dark:text-slate-200">Nenhuma entrada neste filtro</p>
+              <p class="mt-1 text-sm text-slate-400 dark:text-slate-500">As previsões das novas vendas aparecerão aqui.</p>
+            </div>
+          } @else {
+            <div class="hidden overflow-x-auto md:block">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50/80 text-[11px] uppercase tracking-wider text-slate-400 dark:bg-slate-950/40 dark:text-slate-500">
+                  <tr>
+                    <th scope="col" class="px-5 py-3">Venda</th>
+                    <th scope="col" class="px-5 py-3">Pagamento</th>
+                    <th scope="col" class="px-5 py-3">Parcela</th>
+                    <th scope="col" class="px-5 py-3">Previsão</th>
+                    <th scope="col" class="px-5 py-3 text-right">Taxa</th>
+                    <th scope="col" class="px-5 py-3 text-right">Líquido</th>
+                    <th scope="col" class="px-5 py-3">Status</th>
+                    <th scope="col" class="px-5 py-3 text-right">Ação</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                  @for (item of agendaFiltrada; track item.id) {
+                    <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/50">
+                      <td class="px-5 py-4 font-bold text-slate-800 dark:text-slate-100">#{{ item.vendaId }}</td>
+                      <td class="px-5 py-4">
+                        <p class="font-semibold text-slate-700 dark:text-slate-200">{{ pagamentoLabel(item.formaPagamento) }}</p>
+                        <p class="text-xs text-slate-400">{{ item.adquirente || 'Entrada direta' }}</p>
+                      </td>
+                      <td class="px-5 py-4 text-slate-500 dark:text-slate-400">{{ item.numeroParcela }}/{{ item.totalParcelas }}</td>
+                      <td class="px-5 py-4 text-slate-600 dark:text-slate-300">{{ fmtData(item.dataPrevista) }}</td>
+                      <td class="px-5 py-4 text-right tabular-nums text-rose-500">− R$ {{ fmt(item.taxaValor) }}</td>
+                      <td class="px-5 py-4 text-right font-bold tabular-nums text-slate-900 dark:text-white">R$ {{ fmt(item.valorLiquido) }}</td>
+                      <td class="px-5 py-4">
+                        <span
+                          class="rounded-full px-2.5 py-1 text-xs font-bold"
+                          [ngClass]="item.status === 'PENDENTE'
+                            ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'
+                            : item.status === 'RECEBIDO'
+                              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+                              : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'">
+                          {{ statusLabel(item.status) }}
+                        </span>
+                      </td>
+                      <td class="px-5 py-4 text-right">
+                        @if (item.status === 'PENDENTE' && tenant.podeGerenciar()) {
+                          <button type="button" (click)="confirmar(item)" [disabled]="processandoId !== null" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 disabled:opacity-50 dark:text-indigo-300">
+                            {{ processandoId === item.id ? 'Confirmando…' : 'Confirmar' }}
+                          </button>
+                        } @else {
+                          <span class="text-xs text-slate-300 dark:text-slate-600">—</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div class="divide-y divide-slate-100 dark:divide-slate-800 md:hidden">
+              @for (item of agendaFiltrada; track item.id) {
+                <article class="p-4">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                      <p class="truncate font-bold text-slate-900 dark:text-white">Venda #{{ item.vendaId }} · {{ item.numeroParcela }}/{{ item.totalParcelas }}</p>
+                      <p class="mt-0.5 text-xs text-slate-400">{{ pagamentoLabel(item.formaPagamento) }} · {{ fmtData(item.dataPrevista) }}</p>
+                    </div>
+                    <span class="shrink-0 rounded-full bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ statusLabel(item.status) }}</span>
+                  </div>
+                  <div class="mt-4 flex flex-col gap-3 min-[430px]:flex-row min-[430px]:items-end min-[430px]:justify-between">
+                    <div>
+                      <p class="text-[11px] uppercase tracking-wide text-slate-400">Valor líquido</p>
+                      <p class="text-lg font-extrabold tabular-nums text-slate-950 dark:text-white">R$ {{ fmt(item.valorLiquido) }}</p>
+                      <p class="text-xs text-rose-500">Taxa: R$ {{ fmt(item.taxaValor) }}</p>
+                    </div>
+                    @if (item.status === 'PENDENTE' && tenant.podeGerenciar()) {
+                      <button type="button" (click)="confirmar(item)" [disabled]="processandoId !== null" class="ds-btn-primary w-full px-3 py-2 text-xs min-[430px]:w-auto">
+                        {{ processandoId === item.id ? 'Confirmando…' : 'Confirmar entrada' }}
+                      </button>
+                    }
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @case ('movimentacoes') {
+        <div
+          role="tabpanel"
+          id="caixa-painel-movimentacoes"
+          aria-labelledby="caixa-tab-movimentacoes"
+          class="space-y-4">
+          <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <article class="ds-card p-5 dark:!border-slate-800 dark:!bg-slate-900">
+              <p class="ds-kpi-label">Líquido confirmado</p>
+              <p class="mt-2 text-2xl font-extrabold tabular-nums text-slate-950 dark:text-white">R$ {{ fmt(recebido) }}</p>
+              <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">Valor efetivamente recebido</p>
+            </article>
+            <article class="ds-card p-5 dark:!border-slate-800 dark:!bg-slate-900">
+              <p class="ds-kpi-label">Taxas descontadas</p>
+              <p class="mt-2 text-2xl font-extrabold tabular-nums text-rose-600 dark:text-rose-300">R$ {{ fmt(taxasConfirmadas) }}</p>
+              <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">Custos das operações confirmadas</p>
+            </article>
+            <article class="ds-card p-5 sm:col-span-2 dark:!border-slate-800 dark:!bg-slate-900 xl:col-span-1">
+              <p class="ds-kpi-label">Movimentações</p>
+              <p class="mt-2 text-2xl font-extrabold tabular-nums text-slate-950 dark:text-white">{{ recebidosQuantidade }}</p>
+              <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">Entradas confirmadas no caixa</p>
+            </article>
+          </section>
+
+          <section class="ds-card overflow-hidden dark:!border-slate-800 dark:!bg-slate-900">
+            <div class="flex flex-col gap-4 border-b border-slate-100 p-4 dark:border-slate-800 lg:flex-row lg:items-center lg:justify-between sm:p-5">
+              <div>
+                <h2 class="text-lg font-extrabold text-slate-900 dark:text-white">Entradas recebidas</h2>
+                <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">Somente valores efetivamente confirmados · {{ movimentacoesFiltradas.length }} registros</p>
+              </div>
+              <div class="flex flex-col gap-2 sm:flex-row">
+                <label class="relative block">
+                  <span class="sr-only">Buscar movimentação</span>
+                  <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg>
+                  <input [(ngModel)]="busca" class="ds-input min-h-[42px] pl-9 dark:!border-slate-700 dark:!bg-slate-950 dark:!text-white" placeholder="Venda, forma ou adquirente" />
+                </label>
+                <select [(ngModel)]="filtroPagamento" class="ds-input min-h-[42px] dark:!border-slate-700 dark:!bg-slate-950 dark:!text-white" aria-label="Filtrar forma de pagamento">
+                  @for (option of pagamentoOptions; track option.value) {
+                    <option [ngValue]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            @if (movimentacoesFiltradas.length === 0) {
+              <div class="ds-empty-state py-16">
+                <span class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
+                  <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M4 7h16M7 4l-3 3 3 3m10 4 3 3-3 3M4 17h16" /></svg>
+                </span>
+                <p class="font-semibold text-slate-700 dark:text-slate-200">Nenhuma movimentação encontrada</p>
+                <p class="mt-1 text-sm text-slate-400 dark:text-slate-500">Altere os filtros ou confirme uma entrada pendente.</p>
+              </div>
+            } @else {
+              <div class="hidden overflow-x-auto md:block">
+                <table class="w-full text-left text-sm">
+                  <thead class="bg-slate-50/80 text-[11px] uppercase tracking-wider text-slate-400 dark:bg-slate-950/40 dark:text-slate-500">
+                    <tr>
+                      <th scope="col" class="px-5 py-3">Movimentação</th>
+                      <th scope="col" class="px-5 py-3">Forma</th>
+                      <th scope="col" class="px-5 py-3">Confirmada em</th>
+                      <th scope="col" class="px-5 py-3 text-right">Bruto</th>
+                      <th scope="col" class="px-5 py-3 text-right">Taxa</th>
+                      <th scope="col" class="px-5 py-3 text-right">Líquido</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    @for (item of movimentacoesFiltradas; track item.id) {
+                      <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/50">
+                        <td class="px-5 py-4">
+                          <p class="font-bold text-slate-800 dark:text-slate-100">Entrada da venda #{{ item.vendaId }}</p>
+                          <p class="mt-0.5 text-xs text-slate-400">Parcela {{ item.numeroParcela }}/{{ item.totalParcelas }}</p>
+                        </td>
+                        <td class="px-5 py-4">
+                          <p class="font-semibold text-slate-700 dark:text-slate-200">{{ pagamentoLabel(item.formaPagamento) }}</p>
+                          <p class="text-xs text-slate-400">{{ item.adquirente || 'Entrada direta' }}</p>
+                        </td>
+                        <td class="px-5 py-4 text-slate-500 dark:text-slate-400">{{ fmtDataHora(item.recebidoEm) }}</td>
+                        <td class="px-5 py-4 text-right tabular-nums text-slate-600 dark:text-slate-300">R$ {{ fmt(item.valorBruto) }}</td>
+                        <td class="px-5 py-4 text-right tabular-nums text-rose-500">− R$ {{ fmt(item.taxaValor) }}</td>
+                        <td class="px-5 py-4 text-right font-extrabold tabular-nums text-emerald-600 dark:text-emerald-300">+ R$ {{ fmt(item.valorLiquido) }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="divide-y divide-slate-100 dark:divide-slate-800 md:hidden">
+                @for (item of movimentacoesFiltradas; track item.id) {
+                  <article class="p-4">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="truncate font-bold text-slate-900 dark:text-white">Venda #{{ item.vendaId }} · {{ pagamentoLabel(item.formaPagamento) }}</p>
+                        <p class="mt-0.5 text-xs text-slate-400">{{ fmtDataHora(item.recebidoEm) }}</p>
+                      </div>
+                      <span class="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">Entrada</span>
+                    </div>
+                    <div class="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-slate-50 p-3 dark:bg-slate-950/50">
+                      <div>
+                        <p class="text-[10px] font-bold uppercase text-slate-400">Bruto</p>
+                        <p class="mt-1 text-xs font-bold tabular-nums text-slate-700 dark:text-slate-200">R$ {{ fmt(item.valorBruto) }}</p>
+                      </div>
+                      <div>
+                        <p class="text-[10px] font-bold uppercase text-slate-400">Taxa</p>
+                        <p class="mt-1 text-xs font-bold tabular-nums text-rose-500">R$ {{ fmt(item.taxaValor) }}</p>
+                      </div>
+                      <div class="text-right">
+                        <p class="text-[10px] font-bold uppercase text-slate-400">Líquido</p>
+                        <p class="mt-1 text-xs font-extrabold tabular-nums text-emerald-600 dark:text-emerald-300">R$ {{ fmt(item.valorLiquido) }}</p>
+                      </div>
+                    </div>
+                  </article>
+                }
+              </div>
+            }
+          </section>
+        </div>
+      }
+
+      @case ('fechamento') {
+        <div
+          role="tabpanel"
+          id="caixa-painel-fechamento"
+          aria-labelledby="caixa-tab-fechamento"
+          class="space-y-4">
+          <section class="ds-card flex flex-col gap-4 p-5 dark:!border-slate-800 dark:!bg-slate-900 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex min-w-0 items-start gap-3">
+              <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M6 3h12a2 2 0 0 1 2 2v16l-4-2-4 2-4-2-4 2V5a2 2 0 0 1 2-2Zm2 5h8m-8 4h8m-8 4h4" /></svg>
+              </span>
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <h2 class="text-lg font-extrabold text-slate-900 dark:text-white">Prévia de fechamento</h2>
+                  <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-slate-500 dark:bg-slate-800 dark:text-slate-400">Somente leitura</span>
+                </div>
+                <p class="mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400">Consolidação das entradas confirmadas na data selecionada, usando o fuso da unidade.</p>
+              </div>
+            </div>
+            <label class="block shrink-0">
+              <span class="ds-label">Data da conferência</span>
+              <input type="date" [ngModel]="dataFechamento" (ngModelChange)="alterarDataFechamento($event)" [max]="hoje" class="ds-input min-h-[44px] dark:!border-slate-700 dark:!bg-slate-950 dark:!text-white" />
+            </label>
+          </section>
+
+          @if (resumoFechamento.quantidade === 0) {
+            <section class="ds-card ds-empty-state py-20 dark:!border-slate-800 dark:!bg-slate-900">
+              <span class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
+                <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M8 7V3m8 4V3M5 11h14M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" /></svg>
+              </span>
+              <p class="font-bold text-slate-700 dark:text-slate-200">Nenhuma entrada confirmada em {{ fmtData(dataFechamento) }}</p>
+              <p class="mt-1 max-w-md text-sm text-slate-400 dark:text-slate-500">Selecione outra data ou confira se as entradas pendentes já foram baixadas.</p>
+            </section>
+          } @else {
+            <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Resumo do fechamento">
+              <article class="ds-card p-5 dark:!border-slate-800 dark:!bg-slate-900">
+                <p class="ds-kpi-label">Entradas brutas</p>
+                <p class="mt-2 text-2xl font-extrabold tabular-nums text-slate-950 dark:text-white">R$ {{ fmt(resumoFechamento.valorBruto) }}</p>
+                <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">{{ resumoFechamento.quantidade }} movimentações no dia</p>
+              </article>
+              <article class="ds-card p-5 dark:!border-slate-800 dark:!bg-slate-900">
+                <p class="ds-kpi-label">Taxas</p>
+                <p class="mt-2 text-2xl font-extrabold tabular-nums text-rose-600 dark:text-rose-300">− R$ {{ fmt(resumoFechamento.taxaValor) }}</p>
+                <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">Descontos das operações</p>
+              </article>
+              <article class="ds-card p-5 dark:!border-slate-800 dark:!bg-slate-900">
+                <p class="ds-kpi-label">Líquido do dia</p>
+                <p class="mt-2 text-2xl font-extrabold tabular-nums text-emerald-600 dark:text-emerald-300">R$ {{ fmt(resumoFechamento.valorLiquido) }}</p>
+                <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">Total efetivamente confirmado</p>
+              </article>
+              <article class="ds-card p-5 dark:!border-slate-800 dark:!bg-slate-900">
+                <p class="ds-kpi-label">Dinheiro físico</p>
+                <p class="mt-2 text-2xl font-extrabold tabular-nums text-slate-950 dark:text-white">R$ {{ fmt(resumoFechamento.dinheiro) }}</p>
+                <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">Sem estimar saldo inicial ou sangrias</p>
+              </article>
+            </section>
+
+            <section class="grid gap-4 xl:grid-cols-12">
+              <article class="ds-card overflow-hidden dark:!border-slate-800 dark:!bg-slate-900 xl:col-span-7">
+                <div class="border-b border-slate-100 p-5 dark:border-slate-800">
+                  <h3 class="font-bold text-slate-900 dark:text-white">Entradas por forma de pagamento</h3>
+                  <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">Composição líquida da data selecionada</p>
+                </div>
+                <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                  @for (forma of resumoFechamento.formas; track forma.formaPagamento) {
+                    <div class="flex items-center justify-between gap-4 p-5">
+                      <div class="flex min-w-0 items-center gap-3">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                          @if (forma.formaPagamento === 'PIX') {
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m12 3 3.2 3.2L12 9.4 8.8 6.2 12 3Zm5.8 5.8L21 12l-3.2 3.2-3.2-3.2 3.2-3.2ZM6.2 8.8 9.4 12l-3.2 3.2L3 12l3.2-3.2ZM12 14.6l3.2 3.2L12 21l-3.2-3.2 3.2-3.2Z" /></svg>
+                          } @else if (forma.formaPagamento === 'DINHEIRO') {
+                            <span class="text-base font-black">$</span>
+                          } @else {
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M3 7h18v10H3V7Zm0 4h18" /></svg>
+                          }
+                        </span>
+                        <div class="min-w-0">
+                          <p class="truncate text-sm font-bold text-slate-800 dark:text-slate-100">{{ pagamentoLabel(forma.formaPagamento) }}</p>
+                          <p class="mt-0.5 text-xs text-slate-400">{{ forma.quantidade }} {{ forma.quantidade === 1 ? 'entrada' : 'entradas' }} · taxa R$ {{ fmt(forma.taxaValor) }}</p>
+                        </div>
+                      </div>
+                      <div class="shrink-0 text-right">
+                        <p class="font-extrabold tabular-nums text-slate-950 dark:text-white">R$ {{ fmt(forma.valorLiquido) }}</p>
+                        <p class="mt-0.5 text-[11px] text-slate-400">Bruto R$ {{ fmt(forma.valorBruto) }}</p>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </article>
+
+              <aside class="space-y-4 xl:col-span-5">
+                <article class="rounded-[24px] border border-slate-200 bg-slate-950 p-5 text-white shadow-sm dark:border-slate-800 sm:p-6">
+                  <p class="text-[11px] font-extrabold uppercase tracking-[0.14em] text-slate-400">Conferência da data</p>
+                  <div class="mt-5 space-y-3">
+                    <div class="flex items-center justify-between gap-3 text-sm"><span class="text-slate-400">Dinheiro</span><strong class="tabular-nums">R$ {{ fmt(resumoFechamento.dinheiro) }}</strong></div>
+                    <div class="flex items-center justify-between gap-3 text-sm"><span class="text-slate-400">Pix</span><strong class="tabular-nums">R$ {{ fmt(resumoFechamento.pix) }}</strong></div>
+                    <div class="flex items-center justify-between gap-3 text-sm"><span class="text-slate-400">Cartões</span><strong class="tabular-nums">R$ {{ fmt(resumoFechamento.cartoes) }}</strong></div>
+                  </div>
+                  <div class="mt-5 flex items-end justify-between gap-3 border-t border-slate-800 pt-5">
+                    <div>
+                      <p class="text-xs font-semibold text-slate-400">Total líquido</p>
+                      <p class="mt-1 text-2xl font-extrabold tabular-nums">R$ {{ fmt(resumoFechamento.valorLiquido) }}</p>
+                    </div>
+                    <span class="rounded-full bg-indigo-400/10 px-2.5 py-1 text-[11px] font-bold text-indigo-300">Prévia</span>
+                  </div>
+                </article>
+
+                <article class="rounded-[20px] border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10">
+                  <div class="flex items-start gap-3">
+                    <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white text-indigo-600 shadow-sm dark:bg-slate-800 dark:text-indigo-300">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9h.01M11 12h1v4h1m8-4a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                    </span>
+                    <div>
+                      <p class="text-sm font-bold text-indigo-950 dark:text-indigo-100">Prévia financeira, sem encerrar turno</p>
+                      <p class="mt-1 text-xs leading-5 text-indigo-700/80 dark:text-indigo-200/70">Abertura, saldo inicial, reforço, sangria e dinheiro contado exigem uma sessão operacional de caixa. Nenhum desses valores é estimado nesta tela.</p>
+                    </div>
+                  </div>
+                </article>
+              </aside>
+            </section>
+          }
+        </div>
+      }
+    }
+  }
+</div>

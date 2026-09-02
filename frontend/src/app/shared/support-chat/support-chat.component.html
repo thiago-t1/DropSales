@@ -1,0 +1,71 @@
+<aside class="support-assistant" aria-label="Suporte inteligente DropSales">
+  @if (aberto()) {
+    <section
+      id="dropsales-support-panel"
+      class="support-panel"
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby="dropsales-support-title"
+    >
+      <header class="support-header">
+        <div class="support-avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M8 10h.01M12 10h.01M16 10h.01M7 16l-3 3v-4a7 7 0 01-2-5c0-4.42 4.48-8 10-8s10 3.58 10 8-4.48 8-10 8a12 12 0 01-5-.99" />
+          </svg>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <h2 id="dropsales-support-title">Assistente Drop</h2>
+            <span class="support-online"><i></i>Online</span>
+          </div>
+          <p>Suporte inteligente, disponível 24 horas</p>
+        </div>
+        <button type="button" class="support-close" aria-label="Fechar assistente" (click)="fechar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="support-body">
+        @if (!carregado()) {
+          <div class="support-loading" role="status">
+            <span></span>
+            <p>Preparando seu atendimento…</p>
+          </div>
+        }
+        <iframe
+          [src]="chatUrl"
+          title="Chat de suporte DropSales"
+          referrerpolicy="no-referrer"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
+          allow="clipboard-write"
+          (load)="marcarCarregado()"
+        ></iframe>
+      </div>
+      <p class="support-privacy">Não envie senhas, dados bancários ou documentos pessoais.</p>
+    </section>
+  }
+
+  <button
+    type="button"
+    class="support-trigger"
+    [class.is-open]="aberto()"
+    [attr.aria-expanded]="aberto()"
+    aria-controls="dropsales-support-panel"
+    [attr.aria-label]="aberto() ? 'Fechar suporte inteligente' : 'Abrir suporte inteligente 24 horas'"
+    (click)="alternar()"
+  >
+    @if (aberto()) {
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    } @else {
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M8 10h.01M12 10h.01M16 10h.01M7 16l-3 3v-4a7 7 0 01-2-5c0-4.42 4.48-8 10-8s10 3.58 10 8-4.48 8-10 8a12 12 0 01-5-.99" />
+      </svg>
+      <span class="support-pulse"></span>
+      <span class="support-label"><strong>Precisa de ajuda?</strong><small>Fale com a Drop IA</small></span>
+    }
+  </button>
+</aside>

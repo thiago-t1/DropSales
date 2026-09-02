@@ -1,312 +1,551 @@
 package com.dropsales.service;
 
-import com.dropsales.dto.*;
-import com.dropsales.exception.*;
+import com.dropsales.dto.CancelarVendaRequest;
+import com.dropsales.dto.ItemVendaRequest;
+import com.dropsales.dto.PagamentoVendaRequest;
+import com.dropsales.dto.VendaRequest;
+import com.dropsales.dto.VendaResponse;
+import com.dropsales.exception.BusinessException;
+import com.dropsales.exception.ConflictException;
+import com.dropsales.exception.ResourceNotFoundException;
 import com.dropsales.model.*;
-import com.dropsales.repository.*;
-import com.dropsales.security.SecurityUtils;
-import jakarta.persistence.EntityManager;
+import com.dropsales.repository.ProdutoRepository;
+import com.dropsales.repository.TransacaoRepository;
+import com.dropsales.repository.VendaRepository;
+import com.dropsales.repository.LojaRepository;
+import com.dropsales.util.VendaRequestFingerprint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.math.RoundingMode;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class VendaService {
 
+    private static final BigDecimal CEM = new BigDecimal("100");
+    private static final int ESCALA_MONETARIA = 2;
+
     private final VendaRepository vendaRepository;
     private final ProdutoRepository produtoRepository;
-    private final UsuarioRepository usuarioRepository;
     private final TransacaoRepository transacaoRepository;
-    private final EntityManager entityManager;
-
-    private Usuario getUsuarioLogado() {
-        String email = SecurityUtils.getCurrentUserEmail();
-        if (email == null) throw new BusinessException("Usuário não autenticado");
-        return usuarioRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
-    }
+    private final LojaRepository lojaRepository;
+    private final TenantContextService tenantContext;
+    private final PagamentoVendaService pagamentoVendaService;
 
     /**
-     * Registra uma nova venda:
-     * 1. Valida estoque de cada item antes de qualquer escrita
-     * 2. Salva a Venda (shell) para obter ID persistido
-     * 3. Cria e associa cada ItemVenda com referencia a Venda salva
-     * 4. Atualiza estoque de cada Produto
-     * 5. Gera Transacao RECEITA (valor total) e Transacao DESPESA (CMV)
+     * O bloqueio pessimista do usuario serializa a verificacao da chave e a criacao.
+     * Assim, duas requisicoes concorrentes com a mesma chave nunca baixam estoque
+     * nem geram transacoes duas vezes.
      */
     @Transactional(rollbackFor = Exception.class)
-    public VendaResponse registrarVenda(VendaRequest request, String emailUsuario) {
-        log.info("Registrando venda para o usuario: {}", emailUsuario);
-
-        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado: " + emailUsuario));
-
-        if (request.getItens() == null || request.getItens().isEmpty()) {
-            throw new BusinessException("A venda deve ter ao menos um item.");
+    public VendaResponse registrarVenda(
+            VendaRequest request,
+            UUID idempotencyKey) {
+        if (idempotencyKey == null) {
+            throw new BusinessException("Idempotency-Key e obrigatoria.");
         }
 
-        // Passo 1: Valida estoque de todos os itens antes de persistir qualquer coisa
-        for (ItemVendaRequest itemReq : request.getItens()) {
-            Produto produto = produtoRepository.findById(itemReq.getProdutoId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Produto nao encontrado: " + itemReq.getProdutoId()));
-            if (produto.getQuantidadeEstoque() < itemReq.getQuantidade()) {
-                throw new BusinessException("Estoque insuficiente para: " + produto.getNome()
-                        + " (disponivel: " + produto.getQuantidadeEstoque()
-                        + ", solicitado: " + itemReq.getQuantidade() + ")");
-            }
-        }
+        TenantContextService.ContextoAtual contexto = tenantContext.atual();
+        Loja loja = lojaRepository.findByIdForUpdate(contexto.loja().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Loja nao encontrada"));
+        String requestHash = VendaRequestFingerprint.calcular(request);
 
-        // Passo 2: Salva Venda shell para obter ID (total = 0, sem itens ainda)
+        return vendaRepository.findByLojaAndIdempotencyKey(loja, idempotencyKey)
+                .map(vendaExistente -> {
+                    if (!requestHash.equals(vendaExistente.getIdempotencyRequestHash())) {
+                        throw new ConflictException(
+                                "A Idempotency-Key informada ja foi usada com outro payload.");
+                    }
+                    log.info("Repeticao idempotente da venda #{}", vendaExistente.getId());
+                    return toResponse(vendaExistente);
+                })
+                .orElseGet(() -> criarVenda(
+                        request,
+                        contexto.usuario(),
+                        loja,
+                        idempotencyKey,
+                        requestHash));
+    }
+
+    private VendaResponse criarVenda(
+            VendaRequest request,
+            Usuario usuario,
+            Loja loja,
+            UUID idempotencyKey,
+            String requestHash) {
+        validarItens(request);
+        Map<Produto, Integer> produtosDaVenda = carregarProdutosDaVenda(
+                request,
+                loja,
+                Set.of());
+
         Venda venda = Venda.builder()
                 .usuario(usuario)
+                .loja(loja)
+                .idempotencyKey(idempotencyKey)
+                .idempotencyRequestHash(requestHash)
+                .status(StatusVenda.CONCLUIDA)
                 .observacao(request.getObservacao())
                 .total(BigDecimal.ZERO)
+                .formaPagamento(FormaPagamento.PIX)
+                .taxaPagamentoPercentual(BigDecimal.ZERO)
+                .taxaPagamentoValor(BigDecimal.ZERO)
+                .valorLiquido(BigDecimal.ZERO)
                 .build();
-        venda = vendaRepository.saveAndFlush(venda);
-        log.debug("Venda #{} salva (shell)", venda.getId());
+        venda.adicionarAuditoria(novaAuditoria(
+                TipoAuditoriaVenda.CRIADA,
+                usuario,
+                "Venda criada"));
 
-        // Passo 3: Constroi itens com referencia a Venda ja persistida
+        venda = vendaRepository.saveAndFlush(venda);
+
         BigDecimal custoTotal = BigDecimal.ZERO;
         BigDecimal totalVenda = BigDecimal.ZERO;
-
-        for (ItemVendaRequest itemReq : request.getItens()) {
-            Produto produto = produtoRepository.findById(itemReq.getProdutoId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Produto nao encontrado: " + itemReq.getProdutoId()));
-
+        for (Map.Entry<Produto, Integer> entrada : produtosDaVenda.entrySet()) {
+            Produto produto = entrada.getKey();
+            int quantidade = entrada.getValue();
             BigDecimal subtotal = produto.getPrecoVenda()
-                    .multiply(BigDecimal.valueOf(itemReq.getQuantidade()));
+                    .multiply(BigDecimal.valueOf(quantidade));
 
-            ItemVenda item = ItemVenda.builder()
+            venda.getItens().add(ItemVenda.builder()
                     .venda(venda)
                     .produto(produto)
-                    .quantidade(itemReq.getQuantidade())
+                    .quantidade(quantidade)
                     .precoUnitario(produto.getPrecoVenda())
                     .subtotal(subtotal)
-                    .build();
-            venda.getItens().add(item);
+                    .build());
 
             totalVenda = totalVenda.add(subtotal);
             custoTotal = custoTotal.add(
-                    produto.getPrecoCusto()
-                           .multiply(BigDecimal.valueOf(itemReq.getQuantidade())));
-
-            // Atualiza estoque do produto
-            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemReq.getQuantidade());
+                    produto.getPrecoCusto().multiply(BigDecimal.valueOf(quantidade)));
+            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - quantidade);
             produtoRepository.save(produto);
         }
 
-        // Passo 4: Atualiza total e salva venda com os itens em cascade
-        venda.setTotal(totalVenda);
-        // saveAndFlush garante que @CreationTimestamp e os IDs dos itens sejam populados
+        venda.setTotal(moeda(totalVenda));
         Venda vendaSalva = vendaRepository.saveAndFlush(venda);
-        // refresh sincroniza o estado gerenciado com o banco (popula createdAt)
-        entityManager.refresh(vendaSalva);
-        log.info("Venda #{} finalizada. Total: R$ {} | CMV: R$ {}",
-                vendaSalva.getId(), totalVenda, custoTotal);
-        final Venda vendaFinal = vendaSalva;
+        List<PagamentoVenda> pagamentos = pagamentoVendaService.processar(
+                vendaSalva,
+                loja,
+                normalizarPagamentos(request, vendaSalva.getTotal()));
+        aplicarResumoPagamentos(vendaSalva, pagamentos);
+        vendaSalva = vendaRepository.saveAndFlush(vendaSalva);
+        criarTransacoesFinanceiras(vendaSalva, usuario, custoTotal, false);
 
-        // Passo 5a: Transacao RECEITA
-        transacaoRepository.save(Transacao.builder()
-                .descricao("Venda #" + vendaFinal.getId())
-                .valor(vendaFinal.getTotal())
-                .tipo(TipoTransacao.RECEITA)
-                .status(StatusTransacao.PAGO)
-                .usuario(usuario)
-                .venda(vendaFinal)
-                .build());
-
-        // Passo 5b: Transacao DESPESA (CMV) — apenas se houver custo real
-        if (custoTotal.compareTo(BigDecimal.ZERO) > 0) {
-            transacaoRepository.save(Transacao.builder()
-                    .descricao("Custo de Mercadorias - Venda #" + vendaFinal.getId())
-                    .valor(custoTotal)
-                    .tipo(TipoTransacao.DESPESA)
-                    .status(StatusTransacao.PAGO)
-                    .usuario(usuario)
-                    .venda(vendaFinal)
-                    .build());
-        }
-
-        return toResponse(vendaFinal);
-    }
-
-    /**
-     * Edita uma venda existente:
-     * 1. Devolve estoque dos itens antigos
-     * 2. Remove itens e transacoes antigas
-     * 3. Valida estoque para novos itens
-     * 4. Aplica novos itens, atualiza estoque, recria transacoes
-     */
-    @Transactional(rollbackFor = Exception.class)
-    public VendaResponse editarVenda(Long vendaId, VendaRequest request) {
-        log.info("Editando venda #{}", vendaId);
-        Usuario usuarioLogado = getUsuarioLogado();
-
-        Venda venda = vendaRepository.findById(vendaId)
-                .orElseThrow(() -> new ResourceNotFoundException("Venda nao encontrada: " + vendaId));
-
-        if (!venda.getUsuario().getId().equals(usuarioLogado.getId())) {
-            throw new ResourceNotFoundException("Venda nao encontrada: " + vendaId);
-        }
-
-        if (request.getItens() == null || request.getItens().isEmpty()) {
-            throw new BusinessException("A venda deve ter ao menos um item.");
-        }
-
-        // 1) Devolve estoque dos itens antigos
-        for (ItemVenda oldItem : venda.getItens()) {
-            Produto p = oldItem.getProduto();
-            p.setQuantidadeEstoque(p.getQuantidadeEstoque() + oldItem.getQuantidade());
-            produtoRepository.save(p);
-        }
-
-        // 2) Remove itens e transacoes antigas
-        venda.getItens().clear();
-        List<Transacao> transacoes = transacaoRepository.findByVenda(venda);
-        transacaoRepository.deleteAll(transacoes);
-        venda = vendaRepository.saveAndFlush(venda);
-
-        // 3) Valida estoque para novos itens
-        for (ItemVendaRequest itemReq : request.getItens()) {
-            Produto produto = produtoRepository.findById(itemReq.getProdutoId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Produto nao encontrado: " + itemReq.getProdutoId()));
-            if (produto.getQuantidadeEstoque() < itemReq.getQuantidade()) {
-                throw new BusinessException("Estoque insuficiente para: " + produto.getNome()
-                        + " (disponivel: " + produto.getQuantidadeEstoque() + ")");
-            }
-        }
-
-        // 4) Aplica novos itens
-        venda.setObservacao(request.getObservacao());
-        BigDecimal custoTotal = BigDecimal.ZERO;
-        BigDecimal totalVenda = BigDecimal.ZERO;
-
-        for (ItemVendaRequest itemReq : request.getItens()) {
-            Produto produto = produtoRepository.findById(itemReq.getProdutoId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Produto: " + itemReq.getProdutoId()));
-
-            BigDecimal subtotal = produto.getPrecoVenda()
-                    .multiply(BigDecimal.valueOf(itemReq.getQuantidade()));
-
-            ItemVenda item = ItemVenda.builder()
-                    .venda(venda)
-                    .produto(produto)
-                    .quantidade(itemReq.getQuantidade())
-                    .precoUnitario(produto.getPrecoVenda())
-                    .subtotal(subtotal)
-                    .build();
-            venda.getItens().add(item);
-
-            totalVenda = totalVenda.add(subtotal);
-            custoTotal = custoTotal.add(
-                    produto.getPrecoCusto()
-                           .multiply(BigDecimal.valueOf(itemReq.getQuantidade())));
-
-            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemReq.getQuantidade());
-            produtoRepository.save(produto);
-        }
-
-        venda.setTotal(totalVenda);
-        final Venda vendaSalva = vendaRepository.save(venda);
-
-        // 5) Recria transacoes financeiras
-        transacaoRepository.save(Transacao.builder()
-                .descricao("Venda #" + vendaSalva.getId() + " (editada)")
-                .valor(vendaSalva.getTotal())
-                .tipo(TipoTransacao.RECEITA)
-                .status(StatusTransacao.PAGO)
-                .usuario(venda.getUsuario())
-                .venda(vendaSalva)
-                .build());
-
-        if (custoTotal.compareTo(BigDecimal.ZERO) > 0) {
-            transacaoRepository.save(Transacao.builder()
-                    .descricao("Custo de Mercadorias - Venda #" + vendaSalva.getId() + " (editada)")
-                    .valor(custoTotal)
-                    .tipo(TipoTransacao.DESPESA)
-                    .status(StatusTransacao.PAGO)
-                    .usuario(venda.getUsuario())
-                    .venda(vendaSalva)
-                    .build());
-        }
-
+        log.info("Venda #{} concluida na loja #{}",
+                vendaSalva.getId(),
+                loja.getId());
         return toResponse(vendaSalva);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void cancelarVenda(Long id) {
-        log.info("Cancelando venda #{}", id);
-        Usuario usuarioLogado = getUsuarioLogado();
+    public VendaResponse editarVenda(Long vendaId, VendaRequest request) {
+        TenantContextService.ContextoAtual contexto = tenantContext.exigirGerencia();
+        Usuario usuario = contexto.usuario();
+        Loja loja = contexto.loja();
+        Venda venda = vendaRepository.findByIdAndLojaForUpdate(vendaId, loja)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Venda nao encontrada: " + vendaId));
 
-        Venda venda = vendaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Venda nao encontrada: " + id));
-
-        if (!venda.getUsuario().getId().equals(usuarioLogado.getId())) {
-            throw new ResourceNotFoundException("Venda nao encontrada: " + id);
+        if (venda.getStatus() == StatusVenda.CANCELADA) {
+            throw new BusinessException("Uma venda cancelada nao pode ser editada.");
         }
 
-        for (ItemVenda item : venda.getItens()) {
-            Produto produto = item.getProduto();
-            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() + item.getQuantidade());
+        validarItens(request);
+        bloquearProdutosDaEdicaoEmOrdemGlobal(venda, request, loja);
+        BigDecimal totalAnterior = venda.getTotal();
+        FormaPagamento formaAnterior = venda.getFormaPagamento();
+        Map<Long, BigDecimal> precosHistoricos = venda.getItens().stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        item -> item.getProduto().getId(),
+                        ItemVenda::getPrecoUnitario,
+                        (primeiro, ignorado) -> primeiro,
+                        TreeMap::new));
+
+        devolverEstoque(venda, loja);
+        venda.getItens().clear();
+        cancelarTransacoesFinanceiras(venda);
+        venda = vendaRepository.saveAndFlush(venda);
+
+        Map<Produto, Integer> produtosDaVenda = carregarProdutosDaVenda(
+                request,
+                loja,
+                precosHistoricos.keySet());
+        venda.setObservacao(request.getObservacao());
+        BigDecimal custoTotal = BigDecimal.ZERO;
+        BigDecimal totalVenda = BigDecimal.ZERO;
+
+        for (Map.Entry<Produto, Integer> entrada : produtosDaVenda.entrySet()) {
+            Produto produto = entrada.getKey();
+            int quantidade = entrada.getValue();
+            BigDecimal precoUnitario = precosHistoricos.getOrDefault(
+                    produto.getId(),
+                    produto.getPrecoVenda());
+            BigDecimal subtotal = precoUnitario
+                    .multiply(BigDecimal.valueOf(quantidade));
+
+            venda.getItens().add(ItemVenda.builder()
+                    .venda(venda)
+                    .produto(produto)
+                    .quantidade(quantidade)
+                    .precoUnitario(precoUnitario)
+                    .subtotal(subtotal)
+                    .build());
+
+            totalVenda = totalVenda.add(subtotal);
+            custoTotal = custoTotal.add(
+                    produto.getPrecoCusto().multiply(BigDecimal.valueOf(quantidade)));
+            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - quantidade);
             produtoRepository.save(produto);
         }
 
-        transacaoRepository.deleteAll(transacaoRepository.findByVenda(venda));
-        vendaRepository.delete(venda);
+        venda.setTotal(moeda(totalVenda));
+        List<PagamentoVenda> pagamentos = pagamentoVendaService.substituir(
+                venda,
+                loja,
+                normalizarPagamentos(request, venda.getTotal()));
+        aplicarResumoPagamentos(venda, pagamentos);
+        venda.adicionarAuditoria(novaAuditoria(
+                TipoAuditoriaVenda.EDITADA,
+                usuario,
+                "Venda editada. Total anterior: R$ " + totalAnterior
+                        + "; novo total: R$ " + venda.getTotal()
+                        + "; forma anterior: " + formaAnterior
+                        + "; nova forma: " + venda.getFormaPagamento()));
+        Venda vendaSalva = vendaRepository.saveAndFlush(venda);
+        criarTransacoesFinanceiras(vendaSalva, usuario, custoTotal, true);
+        return toResponse(vendaSalva);
     }
 
-    public List<VendaResponse> listarVendas(String emailUsuario) {
-        Usuario usuario = usuarioRepository.findByEmail(emailUsuario)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado: " + emailUsuario));
+    @Transactional(rollbackFor = Exception.class)
+    public VendaResponse cancelarVenda(Long id, CancelarVendaRequest request) {
+        TenantContextService.ContextoAtual contexto = tenantContext.exigirGerencia();
+        Usuario usuario = contexto.usuario();
+        Loja loja = contexto.loja();
+        Venda venda = vendaRepository.findByIdAndLojaForUpdate(id, loja)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Venda nao encontrada: " + id));
 
-        return vendaRepository.findByUsuarioOrderByCreatedAtDesc(usuario).stream()
+        if (venda.getStatus() == StatusVenda.CANCELADA) {
+            return toResponse(venda);
+        }
+
+        String motivo = request == null || request.getMotivo() == null
+                ? ""
+                : request.getMotivo().trim();
+        if (motivo.isBlank()) {
+            throw new BusinessException("O motivo do cancelamento e obrigatorio.");
+        }
+        if (motivo.length() > 500) {
+            throw new BusinessException(
+                    "O motivo do cancelamento deve ter no maximo 500 caracteres.");
+        }
+
+        devolverEstoque(venda, loja);
+        cancelarTransacoesFinanceiras(venda);
+        pagamentoVendaService.cancelar(venda);
+
+        OffsetDateTime agoraUtc = OffsetDateTime.now(ZoneOffset.UTC);
+        venda.setStatus(StatusVenda.CANCELADA);
+        venda.setMotivoCancelamento(motivo);
+        venda.setCanceladaPor(usuario);
+        venda.setCanceladaEm(agoraUtc);
+        venda.adicionarAuditoria(VendaAuditoria.builder()
+                .tipo(TipoAuditoriaVenda.CANCELADA)
+                .responsavel(usuario)
+                .descricao("Venda cancelada. Motivo: " + motivo)
+                .createdAt(agoraUtc)
+                .build());
+
+        Venda cancelada = vendaRepository.saveAndFlush(venda);
+        log.info("Venda #{} cancelada pelo usuario #{}", id, usuario.getId());
+        return toResponse(cancelada);
+    }
+
+    /**
+     * O historico operacional inclui canceladas para preservar rastreabilidade.
+     * Somente metricas e consultas analiticas do dashboard filtram CONCLUIDA.
+     */
+    @Transactional(readOnly = true)
+    public List<VendaResponse> listarVendas() {
+        Loja loja = tenantContext.atual().loja();
+        return vendaRepository.findByLojaOrderByCreatedAtDesc(loja).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    public VendaResponse buscarPorId(Long id) {
-        Usuario usuarioLogado = getUsuarioLogado();
-        Venda venda = vendaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Venda nao encontrada: " + id));
+    @Transactional(readOnly = true)
+    public List<VendaResponse> listarVendasRecentes() {
+        Loja loja = tenantContext.atual().loja();
+        return vendaRepository
+                .findTop5ByLojaAndStatusOrderByCreatedAtDesc(
+                        loja,
+                        StatusVenda.CONCLUIDA)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
 
-        if (!venda.getUsuario().getId().equals(usuarioLogado.getId())) {
-            throw new ResourceNotFoundException("Venda nao encontrada: " + id);
-        }
+    @Transactional(readOnly = true)
+    public VendaResponse buscarPorId(Long id) {
+        Loja loja = tenantContext.atual().loja();
+        Venda venda = vendaRepository.findByIdAndLoja(id, loja)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Venda nao encontrada: " + id));
         return toResponse(venda);
+    }
+
+    private void validarItens(VendaRequest request) {
+        if (request.getItens() == null || request.getItens().isEmpty()) {
+            throw new BusinessException("A venda deve ter ao menos um item.");
+        }
+    }
+
+    private void bloquearProdutosDaEdicaoEmOrdemGlobal(
+            Venda venda,
+            VendaRequest request,
+            Loja loja) {
+        TreeSet<Long> produtoIds = venda.getItens().stream()
+                .map(item -> item.getProduto().getId())
+                .collect(java.util.stream.Collectors.toCollection(TreeSet::new));
+        request.getItens().stream()
+                .map(ItemVendaRequest::getProdutoId)
+                .forEach(produtoIds::add);
+        produtoIds.forEach(produtoId ->
+                buscarProdutoDaLojaParaAtualizacao(produtoId, loja));
+    }
+
+    private Map<Produto, Integer> carregarProdutosDaVenda(
+            VendaRequest request,
+            Loja loja,
+            Set<Long> produtosHistoricosPermitidos) {
+        Map<Long, Integer> quantidadesPorProduto = new TreeMap<>();
+        for (ItemVendaRequest item : request.getItens()) {
+            try {
+                quantidadesPorProduto.merge(
+                        item.getProdutoId(),
+                        item.getQuantidade(),
+                        Math::addExact);
+            } catch (ArithmeticException ex) {
+                throw new BusinessException(
+                        "Quantidade total por produto excede o limite permitido.");
+            }
+        }
+
+        Map<Produto, Integer> produtos = new LinkedHashMap<>();
+        for (Map.Entry<Long, Integer> entrada : quantidadesPorProduto.entrySet()) {
+            Produto produto = buscarProdutoDaLojaParaAtualizacao(
+                    entrada.getKey(),
+                    loja);
+            if (!Boolean.TRUE.equals(produto.getAtivo())
+                    && !produtosHistoricosPermitidos.contains(produto.getId())) {
+                throw new BusinessException(
+                        "Produto inativo nao pode ser adicionado a venda: "
+                                + produto.getNome());
+            }
+            int quantidade = entrada.getValue();
+            if (produto.getQuantidadeEstoque() < quantidade) {
+                throw new BusinessException(
+                        "Estoque insuficiente para: " + produto.getNome()
+                                + " (disponivel: " + produto.getQuantidadeEstoque()
+                                + ", solicitado: " + quantidade + ")");
+            }
+            produtos.put(produto, quantidade);
+        }
+        return produtos;
+    }
+
+    private void devolverEstoque(Venda venda, Loja loja) {
+        venda.getItens().stream()
+                .sorted(Comparator.comparing(item -> item.getProduto().getId()))
+                .forEach(item -> {
+                    Produto produto = buscarProdutoDaLojaParaAtualizacao(
+                            item.getProduto().getId(),
+                            loja);
+                    produto.setQuantidadeEstoque(
+                            produto.getQuantidadeEstoque() + item.getQuantidade());
+                    produtoRepository.save(produto);
+                });
+    }
+
+    private Produto buscarProdutoDaLojaParaAtualizacao(
+            Long produtoId,
+            Loja loja) {
+        return produtoRepository.findByIdAndLojaForUpdate(produtoId, loja)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Produto nao encontrado: " + produtoId));
+    }
+
+    private void cancelarTransacoesFinanceiras(Venda venda) {
+        List<Transacao> transacoes = transacaoRepository.findByVenda(venda);
+        transacoes.stream()
+                .filter(transacao -> transacao.getStatus() != StatusTransacao.CANCELADO)
+                .forEach(transacao -> transacao.setStatus(StatusTransacao.CANCELADO));
+        transacaoRepository.saveAll(transacoes);
+    }
+
+    private void criarTransacoesFinanceiras(
+            Venda venda,
+            Usuario usuario,
+            BigDecimal custoTotal,
+            boolean editada) {
+        String sufixo = editada ? " (editada)" : "";
+        transacaoRepository.save(Transacao.builder()
+                .descricao("Venda #" + venda.getId() + sufixo)
+                .valor(venda.getTotal())
+                .tipo(TipoTransacao.RECEITA)
+                .status(StatusTransacao.PAGO)
+                .usuario(usuario)
+                .loja(venda.getLoja())
+                .venda(venda)
+                .build());
+
+        if (custoTotal.compareTo(BigDecimal.ZERO) > 0) {
+            transacaoRepository.save(Transacao.builder()
+                    .descricao("Custo de Mercadorias - Venda #"
+                            + venda.getId() + sufixo)
+                    .valor(custoTotal)
+                    .tipo(TipoTransacao.DESPESA)
+                    .status(StatusTransacao.PAGO)
+                    .usuario(usuario)
+                    .loja(venda.getLoja())
+                    .venda(venda)
+                    .build());
+        }
+    }
+
+    private VendaAuditoria novaAuditoria(
+            TipoAuditoriaVenda tipo,
+            Usuario responsavel,
+            String descricao) {
+        return VendaAuditoria.builder()
+                .tipo(tipo)
+                .responsavel(responsavel)
+                .descricao(descricao)
+                .createdAt(OffsetDateTime.now(ZoneOffset.UTC))
+                .build();
     }
 
     private VendaResponse toResponse(Venda venda) {
         List<VendaResponse.ItemResponse> itens = venda.getItens().stream()
-                .map(i -> VendaResponse.ItemResponse.builder()
-                        .produtoId(i.getProduto().getId())
-                        .produto(i.getProduto().getNome())
-                        .quantidade(i.getQuantidade())
-                        .precoUnitario(i.getPrecoUnitario())
-                        .subtotal(i.getSubtotal())
+                .map(item -> VendaResponse.ItemResponse.builder()
+                        .produtoId(item.getProduto().getId())
+                        .produto(item.getProduto().getNome())
+                        .quantidade(item.getQuantidade())
+                        .precoUnitario(item.getPrecoUnitario())
+                        .subtotal(item.getSubtotal())
                         .build())
                 .toList();
 
-        // Garante que criadoEm nunca seja null na resposta
-        LocalDateTime criadoEm = venda.getCreatedAt() != null
-                ? venda.getCreatedAt()
-                : LocalDateTime.now();
+        List<VendaResponse.AuditoriaResponse> auditorias = venda.getAuditorias().stream()
+                .map(auditoria -> VendaResponse.AuditoriaResponse.builder()
+                        .tipo(auditoria.getTipo())
+                        .responsavel(auditoria.getResponsavel().getNome())
+                        .descricao(auditoria.getDescricao())
+                        .criadoEm(normalizarUtc(auditoria.getCreatedAt()))
+                        .build())
+                .toList();
 
         return VendaResponse.builder()
                 .id(venda.getId())
+                .idempotencyKey(venda.getIdempotencyKey())
                 .vendedor(venda.getUsuario().getNome())
+                .status(venda.getStatus())
                 .total(venda.getTotal())
+                .formaPagamento(venda.getFormaPagamento())
+                .taxaPagamentoPercentual(venda.getTaxaPagamentoPercentual())
+                .taxaPagamentoValor(venda.getTaxaPagamentoValor())
+                .valorLiquido(venda.getValorLiquido())
                 .observacao(venda.getObservacao())
-                .criadoEm(criadoEm)
+                .motivoCancelamento(venda.getMotivoCancelamento())
+                .canceladaPor(venda.getCanceladaPor() == null
+                        ? null
+                        : venda.getCanceladaPor().getNome())
+                .canceladaEm(normalizarUtc(venda.getCanceladaEm()))
+                .criadoEm(normalizarUtc(venda.getCreatedAt()))
                 .itens(itens)
+                .pagamentos(pagamentoVendaService.listar(venda))
+                .auditorias(auditorias)
                 .build();
+    }
+
+    private OffsetDateTime normalizarUtc(OffsetDateTime timestamp) {
+        return timestamp == null
+                ? null
+                : timestamp.withOffsetSameInstant(ZoneOffset.UTC);
+    }
+
+    private List<PagamentoVendaRequest> normalizarPagamentos(
+            VendaRequest request,
+            BigDecimal total) {
+        if (total == null || total.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException(
+                    "O total da venda deve ser maior que zero para registrar pagamentos");
+        }
+        if (request.getPagamentos() != null && !request.getPagamentos().isEmpty()) {
+            return request.getPagamentos();
+        }
+
+        FormaPagamento formaLegada = request.getFormaPagamento();
+        if (formaLegada == null || !formaLegada.isFormaIndividual()) {
+            throw new BusinessException("Informe ao menos uma forma de pagamento");
+        }
+        PagamentoVendaRequest pagamento = new PagamentoVendaRequest();
+        pagamento.setFormaPagamento(formaLegada);
+        pagamento.setValor(moeda(total));
+        pagamento.setParcelas(1);
+        if (formaLegada == FormaPagamento.DINHEIRO) {
+            pagamento.setValorRecebido(moeda(total));
+        }
+        return List.of(pagamento);
+    }
+
+    private void aplicarResumoPagamentos(
+            Venda venda,
+            List<PagamentoVenda> pagamentos) {
+        if (pagamentos == null || pagamentos.isEmpty()) {
+            throw new BusinessException("A venda deve possuir ao menos um pagamento");
+        }
+        BigDecimal taxaTotal = pagamentos.stream()
+                .map(PagamentoVenda::getTaxaValor)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal liquidoTotal = pagamentos.stream()
+                .map(PagamentoVenda::getValorLiquido)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        long formasDistintas = pagamentos.stream()
+                .map(PagamentoVenda::getFormaPagamento)
+                .distinct()
+                .count();
+        FormaPagamento formaResumo = formasDistintas == 1
+                ? pagamentos.get(0).getFormaPagamento()
+                : FormaPagamento.MISTO;
+        BigDecimal taxaEfetiva = venda.getTotal().compareTo(BigDecimal.ZERO) == 0
+                ? BigDecimal.ZERO
+                : taxaTotal.multiply(CEM)
+                        .divide(venda.getTotal(), 2, RoundingMode.HALF_UP);
+
+        venda.setFormaPagamento(formaResumo);
+        venda.setTaxaPagamentoPercentual(taxaEfetiva);
+        venda.setTaxaPagamentoValor(moeda(taxaTotal));
+        venda.setValorLiquido(moeda(liquidoTotal));
+    }
+
+    private BigDecimal moeda(BigDecimal valor) {
+        return valor.setScale(ESCALA_MONETARIA, RoundingMode.HALF_UP);
     }
 }

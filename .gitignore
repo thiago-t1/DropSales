@@ -12,6 +12,10 @@ backend/src/main/resources/application-staging.properties
 
 # --- Java / Maven ---
 backend/target/
+target/
+.m2-local/
+.local-tools/
+apache-maven-*-bin.zip
 *.class
 *.jar
 *.war
@@ -22,6 +26,8 @@ backend/target/
 frontend/node_modules/
 frontend/dist/
 frontend/.angular/
+frontend/proxy.audit.conf.json
+frontend/proxy.*preview*.json
 
 # --- IDEs ---
 .idea/

@@ -1,258 +1,924 @@
-<div class="space-y-6 animate-fade-in">
-  <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
-      <h1 class="text-2xl lg:text-3xl font-bold text-white">Produtos</h1>
-      <p class="mt-1" style="color: rgba(255,255,255,0.35);">Gerencie seu catalogo de produtos</p>
+<div class="mx-auto w-full max-w-[1600px] space-y-5 text-slate-900 animate-fade-in dark:text-slate-100">
+  <!-- Page heading -->
+  <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div class="min-w-0">
+      <div class="mb-2 flex items-center gap-2">
+        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600" aria-hidden="true">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </span>
+        <span class="text-xs font-bold uppercase tracking-[0.16em] text-indigo-600">Catálogo & estoque</span>
+      </div>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">Produtos</h1>
+      <p class="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
+        Organize seu catálogo, acompanhe o estoque e mantenha os preços sempre atualizados.
+      </p>
     </div>
-    <div class="flex items-center gap-2">
-      <!-- Import Excel -->
-      <input #importInput type="file" accept=".xlsx,.xls" class="hidden" (change)="onImportFile($event)" />
-      <button id="btn-importar-excel" (click)="abrirImport()" [disabled]="importing"
-        class="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold
-               active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:cursor-wait"
-        style="background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2);"
-        onmouseover="this.style.background='rgba(16,185,129,0.18)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'">
+
+    @if (tenantService.podeGerenciar()) {
+    <div class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
+      <input
+        #importInput
+        type="file"
+        accept=".xlsx,.xls"
+        class="hidden"
+        aria-label="Selecionar planilha de produtos"
+        (change)="onImportFile($event)"
+      />
+      <button
+        id="btn-importar-excel"
+        type="button"
+        (click)="abrirImport()"
+        [disabled]="importing"
+        [attr.aria-busy]="importing"
+        class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:cursor-wait disabled:opacity-60 sm:px-4"
+      >
         @if (importing) {
-          <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-          Importando...
+          <svg class="h-4 w-4 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <span>Importando</span>
         } @else {
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-          Importar Excel
+          <svg class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 15v3a2 2 0 002 2h10a2 2 0 002-2v-3" />
+          </svg>
+          <span>Importar</span>
+          <span class="hidden sm:inline">planilha</span>
         }
       </button>
-      <button id="btn-novo-produto" (click)="abrirNovo()"
-        class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white
-               active:scale-[0.98] transition-all duration-200"
-        style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%); box-shadow: 0 4px 20px rgba(99,102,241,0.35);"
-        onmouseover="this.style.boxShadow='0 6px 30px rgba(99,102,241,0.45)'; this.style.transform='translateY(-1px)'"
-        onmouseout="this.style.boxShadow='0 4px 20px rgba(99,102,241,0.35)'; this.style.transform='none'">
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-        Novo Produto
+
+      <button
+        id="btn-novo-produto"
+        type="button"
+        (click)="abrirNovo()"
+        class="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-indigo-600 px-3.5 text-sm font-semibold text-white shadow-sm shadow-indigo-200 transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 active:scale-[0.98] sm:px-4"
+      >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.25" d="M12 5v14m7-7H5" />
+        </svg>
+        Novo produto
       </button>
     </div>
+    } @else {
+      <span class="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+        <svg class="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-10 0v2H6a2 2 0 00-2 2v8a2 2 0 002 2zm3-12V7a3 3 0 016 0v2H9z" />
+        </svg>
+        Catálogo em modo de consulta
+      </span>
+    }
+  </header>
+
+  <!-- Feedback -->
+  <div class="space-y-2" aria-live="polite">
+    @if (sucesso) {
+      <div
+        role="status"
+        class="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800 shadow-sm animate-slide-up"
+      >
+        <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75l2 2 4-4.5m6 1.75a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="text-sm font-medium">{{ sucesso }}</span>
+      </div>
+    }
+
+    @if (erro && !showModal) {
+      <div
+        role="alert"
+        class="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-800 shadow-sm animate-slide-up"
+      >
+        <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 3h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+        </svg>
+        <div class="min-w-0">
+          <p class="text-sm font-semibold">Não foi possível concluir</p>
+          <p class="mt-0.5 text-sm text-rose-700">{{ erro }}</p>
+        </div>
+      </div>
+    }
   </div>
 
-  <!-- Alerts -->
-  @if (sucesso) {
-    <div class="p-4 rounded-xl flex items-center gap-3 animate-slide-up"
-         style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: #34d399;">
-      <svg class="w-5 h-5 flex-shrink-0" style="color: #10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-      <span class="text-sm font-medium">{{ sucesso }}</span>
-    </div>
-  }
-  @if (erro && !showModal) {
-    <div class="p-4 rounded-xl flex items-center gap-3 animate-slide-up"
-         style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171;">
-      <svg class="w-5 h-5 flex-shrink-0" style="color: #ef4444;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-      <span class="text-sm font-medium">{{ erro }}</span>
-    </div>
-  }
+  <!-- Inventory overview -->
+  <section aria-label="Resumo do estoque" class="grid grid-cols-2 gap-3 xl:grid-cols-4">
+    <article class="product-surface p-4 sm:p-5">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Produtos</p>
+          <p class="mt-2 text-2xl font-bold tracking-tight text-slate-950">{{ produtos.length }}</p>
+          <p class="mt-1 text-xs leading-4 text-slate-500">
+            {{ categorias.length }} {{ categorias.length === 1 ? 'categoria' : 'categorias' }}
+          </p>
+        </div>
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </span>
+      </div>
+    </article>
 
-  <!-- Products Table Card -->
-  <div class="ds-card">
+    <article class="product-surface p-4 sm:p-5">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Unidades</p>
+          <p class="mt-2 text-2xl font-bold tracking-tight text-slate-950">{{ totalUnidades }}</p>
+          <p class="mt-1 text-xs leading-4 text-slate-500">Disponíveis em estoque</p>
+        </div>
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 8h14M5 8a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v1a2 2 0 01-2 2M5 8v11a2 2 0 002 2h10a2 2 0 002-2V8m-8 4h6" />
+          </svg>
+        </span>
+      </div>
+    </article>
+
+    <article class="product-surface p-4 sm:p-5">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Atenção</p>
+          <p class="mt-2 text-2xl font-bold tracking-tight" [class.text-amber-600]="produtosEstoqueBaixo + produtosEsgotados > 0" [class.text-slate-950]="produtosEstoqueBaixo + produtosEsgotados === 0">
+            {{ produtosEstoqueBaixo + produtosEsgotados }}
+          </p>
+          <p class="mt-1 text-xs leading-4 text-slate-500">{{ produtosEstoqueBaixo }} baixo · {{ produtosEsgotados }} esgotados</p>
+        </div>
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v4m0 3h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          </svg>
+        </span>
+      </div>
+    </article>
+
+    <article class="product-surface p-4 sm:p-5">
+      <div class="flex items-start justify-between gap-2 sm:gap-3">
+        <div class="min-w-0">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Capital em estoque</p>
+          <p class="mt-2 whitespace-nowrap text-base font-bold tracking-tight tabular-nums text-slate-950 min-[380px]:text-lg sm:text-2xl">R$ {{ fmt(valorEmEstoque) }}</p>
+          <p class="mt-1 text-xs leading-4 text-slate-500">Calculado pelo preço de custo</p>
+        </div>
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 sm:h-10 sm:w-10">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6V4m0 2c-2.21 0-4 1.12-4 2.5S9.79 11 12 11s4 1.12 4 2.5S14.21 16 12 16m0-10c1.48 0 2.77.5 3.46 1.25M12 16v2m0-2c-1.48 0-2.77-.5-3.46-1.25M5 21h14" />
+          </svg>
+        </span>
+      </div>
+    </article>
+  </section>
+
+  <!-- Catalog -->
+  <section class="product-surface overflow-hidden" aria-labelledby="catalogo-titulo">
+    <div class="border-b border-slate-200 p-4 sm:p-5">
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 id="catalogo-titulo" class="font-bold text-slate-900">Catálogo de produtos</h2>
+          <p class="mt-0.5 text-xs text-slate-500">
+            {{ produtosFiltrados.length }} de {{ produtos.length }} produtos exibidos
+          </p>
+        </div>
+        @if (temFiltrosAtivos) {
+          <button
+            type="button"
+            (click)="limparFiltros()"
+            class="mt-1 inline-flex items-center gap-1.5 self-start rounded-lg px-2 py-1.5 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 sm:mt-0"
+          >
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Limpar filtros
+          </button>
+        }
+      </div>
+
+      <div class="mt-4 grid gap-2 md:grid-cols-[minmax(240px,1fr)_180px_190px]">
+        <label class="relative block">
+          <span class="sr-only">Buscar produtos</span>
+          <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m2.35-5.65a8 8 0 11-16 0 8 8 0 0116 0z" />
+          </svg>
+          <input
+            id="input-busca-produto"
+            type="search"
+            name="buscaProduto"
+            [(ngModel)]="busca"
+            class="product-input !pl-10"
+            placeholder="Buscar por nome, SKU ou categoria"
+            autocomplete="off"
+          />
+        </label>
+
+        <label>
+          <span class="sr-only">Filtrar por categoria</span>
+          <select
+            id="filtro-categoria-produto"
+            name="filtroCategoria"
+            [(ngModel)]="filtroCategoria"
+            class="product-input cursor-pointer"
+            aria-label="Filtrar por categoria"
+          >
+            <option value="todas">Todas as categorias</option>
+            @for (categoria of categorias; track categoria) {
+              <option [value]="categoria">{{ categoria }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span class="sr-only">Ordenar produtos</span>
+          <select
+            id="ordenacao-produto"
+            name="ordenacaoProduto"
+            [(ngModel)]="ordenacao"
+            class="product-input cursor-pointer"
+            aria-label="Ordenar produtos"
+          >
+            <option value="nome">Nome: A–Z</option>
+            <option value="estoque-asc">Menor estoque</option>
+            <option value="estoque-desc">Maior estoque</option>
+            <option value="preco-asc">Menor preço</option>
+            <option value="preco-desc">Maior preço</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="product-scrollbar -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1" aria-label="Filtrar por situação do estoque">
+        <button
+          type="button"
+          (click)="filtroEstoque = 'todos'"
+          [ngClass]="filtroEstoque === 'todos' ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+          class="inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+        >
+          Todos <span [ngClass]="filtroEstoque === 'todos' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'" class="rounded-full px-1.5 py-0.5 text-[10px]">{{ produtos.length }}</span>
+        </button>
+        <button
+          type="button"
+          (click)="filtroEstoque = 'ok'"
+          [ngClass]="filtroEstoque === 'ok' ? 'border-emerald-600 bg-emerald-600 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+          class="inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+        >
+          Em dia
+          <span [ngClass]="filtroEstoque === 'ok' ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-700'" class="rounded-full px-1.5 py-0.5 text-[10px]">{{ produtos.length - produtosEstoqueBaixo - produtosEsgotados }}</span>
+        </button>
+        <button
+          type="button"
+          (click)="filtroEstoque = 'baixo'"
+          [ngClass]="filtroEstoque === 'baixo' ? 'border-amber-500 bg-amber-500 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+          class="inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+        >
+          Estoque baixo
+          <span [ngClass]="filtroEstoque === 'baixo' ? 'bg-white/20 text-white' : 'bg-amber-50 text-amber-700'" class="rounded-full px-1.5 py-0.5 text-[10px]">{{ produtosEstoqueBaixo }}</span>
+        </button>
+        <button
+          type="button"
+          (click)="filtroEstoque = 'esgotado'"
+          [ngClass]="filtroEstoque === 'esgotado' ? 'border-rose-600 bg-rose-600 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+          class="inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+        >
+          Esgotados
+          <span [ngClass]="filtroEstoque === 'esgotado' ? 'bg-white/20 text-white' : 'bg-rose-50 text-rose-700'" class="rounded-full px-1.5 py-0.5 text-[10px]">{{ produtosEsgotados }}</span>
+        </button>
+      </div>
+    </div>
+
     @if (loading) {
-      <div class="flex items-center justify-center py-12">
-        <svg class="animate-spin h-8 w-8 text-primary-400" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-        </svg>
+      <div class="space-y-3 p-4 sm:p-5" role="status" aria-label="Carregando produtos">
+        @for (item of [1, 2, 3, 4, 5]; track item) {
+          <div class="flex animate-pulse items-center gap-3 rounded-xl border border-slate-100 p-3">
+            <div class="h-10 w-10 rounded-xl bg-slate-100"></div>
+            <div class="min-w-0 flex-1 space-y-2">
+              <div class="h-3 w-1/3 rounded bg-slate-100"></div>
+              <div class="h-2.5 w-1/5 rounded bg-slate-100"></div>
+            </div>
+            <div class="hidden h-3 w-20 rounded bg-slate-100 sm:block"></div>
+          </div>
+        }
+        <span class="sr-only">Carregando catálogo...</span>
       </div>
     } @else if (produtos.length === 0) {
-      <div class="text-center py-12">
-        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(255,255,255,0.04);">
-          <svg class="w-8 h-8" style="color: rgba(255,255,255,0.15);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+      <div class="flex flex-col items-center px-5 py-14 text-center sm:py-16">
+        <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-500" aria-hidden="true">
+          <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </span>
+        <h3 class="mt-4 text-base font-bold text-slate-900">Seu catálogo começa aqui</h3>
+        <p class="mt-1 max-w-sm text-sm leading-6 text-slate-500">
+          Cadastre seu primeiro produto manualmente ou importe uma planilha para começar mais rápido.
+        </p>
+        @if (tenantService.podeGerenciar()) {
+        <div class="mt-5 flex flex-wrap justify-center gap-2">
+          <button type="button" (click)="abrirNovo()" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+            Cadastrar produto
+          </button>
+          <button type="button" (click)="abrirImport()" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+            Importar planilha
+          </button>
         </div>
-        <p class="text-sm mb-4" style="color: rgba(255,255,255,0.3);">Nenhum produto cadastrado ainda.</p>
-        <button (click)="abrirNovo()" class="text-primary-400 hover:text-primary-300 font-semibold text-sm transition-colors">
-          + Cadastrar primeiro produto
+        }
+      </div>
+    } @else if (produtosFiltrados.length === 0) {
+      <div class="flex flex-col items-center px-5 py-14 text-center">
+        <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500" aria-hidden="true">
+          <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="m21 21-4.35-4.35m2.35-5.65a8 8 0 11-16 0 8 8 0 0116 0z" />
+          </svg>
+        </span>
+        <h3 class="mt-4 text-base font-bold text-slate-900">Nenhum produto encontrado</h3>
+        <p class="mt-1 text-sm text-slate-500">Tente outro termo ou remova os filtros aplicados.</p>
+        <button type="button" (click)="limparFiltros()" class="mt-4 rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+          Limpar filtros
         </button>
       </div>
     } @else {
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
-              <th class="text-left py-3 px-3 font-medium" style="color: rgba(255,255,255,0.35);">Produto</th>
-              <th class="text-center py-3 px-3 font-medium hidden sm:table-cell" style="color: rgba(255,255,255,0.35);">SKU</th>
-              <th class="text-right py-3 px-3 font-medium" style="color: rgba(255,255,255,0.35);">Preco</th>
-              <th class="text-center py-3 px-3 font-medium" style="color: rgba(255,255,255,0.35);">Estoque</th>
-              <th class="text-center py-3 px-3 font-medium" style="color: rgba(255,255,255,0.35);">Status</th>
-              <th class="text-center py-3 px-3 font-medium" style="color: rgba(255,255,255,0.35);">Acoes</th>
+      <!-- Desktop table -->
+      <div class="hidden overflow-x-auto lg:block">
+        <table class="w-full min-w-[900px] text-left">
+          <caption class="sr-only">Lista de produtos cadastrados</caption>
+          <thead class="bg-slate-50/80 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <tr class="border-b border-slate-200">
+              <th scope="col" class="px-5 py-3.5">Produto</th>
+              <th scope="col" class="px-4 py-3.5">Categoria</th>
+              <th scope="col" class="px-4 py-3.5">Preço de venda</th>
+              <th scope="col" class="px-4 py-3.5">Estoque</th>
+              <th scope="col" class="px-4 py-3.5">Situação</th>
+              @if (tenantService.podeGerenciar()) {
+                <th scope="col" class="px-5 py-3.5 text-right">Ações</th>
+              }
             </tr>
           </thead>
-          <tbody>
-            @for (p of produtos; track p.id) {
-              <tr class="transition-colors" style="border-bottom: 1px solid rgba(255,255,255,0.03);"
-                  onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
-                <td class="py-3 px-3">
-                  <div>
-                    <p class="font-medium text-white/90">{{ p.nome }}</p>
-                    @if (p.categoria) {
-                      <p class="text-xs" style="color: rgba(255,255,255,0.3);">{{ p.categoria }}</p>
-                    }
+          <tbody class="divide-y divide-slate-100">
+            @for (p of produtosFiltrados; track p.id) {
+              <tr class="group transition hover:bg-slate-50/80 dark:hover:bg-slate-800/50">
+                <td class="px-5 py-4">
+                  <div class="flex min-w-0 items-center gap-3">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-sm font-bold text-indigo-600">
+                      {{ p.nome.charAt(0).toUpperCase() }}
+                    </span>
+                    <div class="min-w-0">
+                      <p class="max-w-[260px] truncate text-sm font-semibold text-slate-900" [title]="p.nome">{{ p.nome }}</p>
+                      <p class="mt-0.5 font-mono text-[11px] text-slate-400">SKU {{ p.sku || 'não informado' }}</p>
+                    </div>
                   </div>
                 </td>
-                <td class="text-center py-3 px-3 hidden sm:table-cell font-mono text-xs" style="color: rgba(255,255,255,0.4);">{{ p.sku || '-' }}</td>
-                <td class="text-right py-3 px-3 font-semibold text-white">R$ {{ fmt(p.precoVenda) }}</td>
-                <td class="text-center py-3 px-3 font-semibold"
-                    [style.color]="p.estoqueBaixo ? '#f87171' : 'rgba(255,255,255,0.8)'">
-                  {{ p.quantidadeEstoque }}
-                </td>
-                <td class="text-center py-3 px-3">
-                  @if (p.quantidadeEstoque === 0) {
-                    <span class="ds-badge-danger">Esgotado</span>
-                  } @else if (p.estoqueBaixo) {
-                    <span class="ds-badge-warning">Baixo</span>
+                <td class="px-4 py-4">
+                  @if (p.categoria) {
+                    <span class="inline-flex rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{{ p.categoria }}</span>
                   } @else {
-                    <span class="ds-badge-success">OK</span>
+                    <span class="text-xs text-slate-400">Sem categoria</span>
                   }
                 </td>
-                <td class="text-center py-3 px-3">
-                  <div class="flex items-center justify-center gap-1">
-                    <button (click)="abrirEditar(p)" class="p-1.5 rounded-lg transition-all duration-200" title="Editar"
-                            style="color: #818cf8;"
-                            onmouseover="this.style.background='rgba(99,102,241,0.1)'; this.style.color='#a5b4fc'"
-                            onmouseout="this.style.background='transparent'; this.style.color='#818cf8'">
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <td class="px-4 py-4">
+                  <p class="whitespace-nowrap text-sm font-bold text-slate-900">R$ {{ fmt(p.precoVenda) }}</p>
+                  @if (p.precoCusto > 0) {
+                    <p class="mt-0.5 text-[11px] text-slate-400">
+                      Custo R$ {{ fmt(p.precoCusto) }} ·
+                      <span [class.text-emerald-600]="margemProduto(p) >= 0" [class.text-rose-600]="margemProduto(p) < 0">
+                        {{ margemProduto(p).toFixed(0) }}% margem
+                      </span>
+                    </p>
+                  }
+                </td>
+                <td class="px-4 py-4">
+                  <p class="text-sm font-bold text-slate-900">{{ p.quantidadeEstoque }} <span class="font-normal text-slate-400">un.</span></p>
+                  <p class="mt-0.5 text-[11px] text-slate-400">Mínimo: {{ p.estoqueMinimo }}</p>
+                </td>
+                <td class="px-4 py-4">
+                  @if (p.quantidadeEstoque === 0) {
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">
+                      <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>Esgotado
+                    </span>
+                  } @else if (p.estoqueBaixo) {
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                      <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>Estoque baixo
+                    </span>
+                  } @else {
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                      <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Em dia
+                    </span>
+                  }
+                </td>
+                @if (tenantService.podeGerenciar()) {
+                <td class="px-5 py-4">
+                  <div class="flex items-center justify-end gap-1">
+                    <button
+                      type="button"
+                      (click)="abrirEditar(p)"
+                      class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                      [attr.aria-label]="'Editar ' + p.nome"
+                      title="Editar produto"
+                    >
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 3.487a2.1 2.1 0 113 2.97L8.25 18.07 4 19l.93-4.25L16.862 3.487z" />
+                      </svg>
                     </button>
-                    <button (click)="excluir(p.id)" class="p-1.5 rounded-lg transition-all duration-200" title="Excluir"
-                            style="color: rgba(248,113,113,0.6);"
-                            onmouseover="this.style.background='rgba(239,68,68,0.1)'; this.style.color='#f87171'"
-                            onmouseout="this.style.background='transparent'; this.style.color='rgba(248,113,113,0.6)'">
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    <button
+                      type="button"
+                      (click)="solicitarExclusao(p)"
+                      class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+                      [attr.aria-label]="'Excluir ' + p.nome"
+                      title="Excluir produto"
+                    >
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.75 12a2 2 0 01-2 2H7.75a2 2 0 01-2-2L5 7m4 4v6m6-6v6M9 7V4.75A1.75 1.75 0 0110.75 3h2.5A1.75 1.75 0 0115 4.75V7M4 7h16" />
+                      </svg>
                     </button>
                   </div>
                 </td>
+                }
               </tr>
             }
           </tbody>
         </table>
       </div>
-    }
-  </div>
 
-  <!-- Modal -->
-  @if (showModal) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" (click)="fecharModal()"
-         style="background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);">
-      <div class="rounded-2xl shadow-glass w-full max-w-lg p-6 animate-slide-up" (click)="$event.stopPropagation()"
-           style="background: rgba(22,27,34,0.95); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px);">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-bold text-white">{{ editId ? 'Editar Produto' : 'Novo Produto' }}</h2>
-          <button (click)="fecharModal()" class="p-2 rounded-xl transition-colors"
-                  onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
-            <svg class="w-5 h-5" style="color: rgba(255,255,255,0.5);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-          </button>
-        </div>
+      <!-- Mobile and tablet cards -->
+      <div class="divide-y divide-slate-100 lg:hidden">
+        @for (p of produtosFiltrados; track p.id) {
+          <article class="p-4 sm:p-5">
+            <div class="flex items-start gap-3">
+              <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-sm font-bold text-indigo-600">
+                {{ p.nome.charAt(0).toUpperCase() }}
+              </span>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <h3 class="truncate text-sm font-bold text-slate-900">{{ p.nome }}</h3>
+                    <p class="mt-0.5 truncate text-xs text-slate-500">
+                      {{ p.categoria || 'Sem categoria' }} · <span class="font-mono">{{ p.sku || 'Sem SKU' }}</span>
+                    </p>
+                  </div>
+                  @if (p.quantidadeEstoque === 0) {
+                    <span class="shrink-0 rounded-full bg-rose-50 px-2 py-1 text-[10px] font-bold text-rose-700">Esgotado</span>
+                  } @else if (p.estoqueBaixo) {
+                    <span class="shrink-0 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">Baixo</span>
+                  } @else {
+                    <span class="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">Em dia</span>
+                  }
+                </div>
+              </div>
+            </div>
 
-        @if (erro && showModal) {
-          <div class="mb-4 p-3 rounded-xl text-sm" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171;">{{ erro }}</div>
-        }
+            <div class="mt-4 grid grid-cols-2 divide-x divide-slate-100 rounded-xl border border-slate-100 bg-slate-50/70 py-3">
+              <div class="px-3">
+                <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Preço</p>
+                <p class="mt-1 text-sm font-bold text-slate-900">R$ {{ fmt(p.precoVenda) }}</p>
+                @if (p.precoCusto > 0) {
+                  <p class="mt-0.5 text-[10px] text-slate-500">{{ margemProduto(p).toFixed(0) }}% de margem</p>
+                }
+              </div>
+              <div class="px-3">
+                <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Estoque</p>
+                <p class="mt-1 text-sm font-bold" [class.text-rose-600]="p.quantidadeEstoque === 0" [class.text-amber-600]="p.quantidadeEstoque > 0 && p.estoqueBaixo" [class.text-slate-900]="!p.estoqueBaixo">
+                  {{ p.quantidadeEstoque }} unidades
+                </p>
+                <p class="mt-0.5 text-[10px] text-slate-500">Mínimo recomendado: {{ p.estoqueMinimo }}</p>
+              </div>
+            </div>
 
-        <div class="space-y-4">
-          <div>
-            <label class="ds-label">Nome *</label>
-            <input id="input-produto-nome" [(ngModel)]="form.nome" class="ds-input" placeholder="Nome do produto" />
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="ds-label">SKU</label>
-              <input id="input-produto-sku" [(ngModel)]="form.sku" class="ds-input" placeholder="EX-001" />
+            @if (tenantService.podeGerenciar()) {
+            <div class="mt-3 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                (click)="abrirEditar(p)"
+                class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                [attr.aria-label]="'Editar ' + p.nome"
+              >
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.862 3.487a2.1 2.1 0 113 2.97L8.25 18.07 4 19l.93-4.25L16.862 3.487z" />
+                </svg>
+                Editar
+              </button>
+              <button
+                type="button"
+                (click)="solicitarExclusao(p)"
+                class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+                [attr.aria-label]="'Excluir ' + p.nome"
+              >
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.75 12a2 2 0 01-2 2H7.75a2 2 0 01-2-2L5 7m4 4v6m6-6v6M9 7V4.75A1.75 1.75 0 0110.75 3h2.5A1.75 1.75 0 0115 4.75V7M4 7h16" />
+                </svg>
+                Excluir
+              </button>
             </div>
-            <div>
-              <label class="ds-label">Preco Custo (R$)</label>
-              <input id="input-produto-custo" type="number" [(ngModel)]="form.precoCusto" class="ds-input" min="0" step="0.01" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="ds-label">Preco Venda (R$) *</label>
-              <input id="input-produto-venda" type="number" [(ngModel)]="form.precoVenda" class="ds-input" min="0.01" step="0.01" />
-            </div>
-            <div>
-              <label class="ds-label">Qtd Estoque *</label>
-              <input id="input-produto-estoque" type="number" [(ngModel)]="form.quantidadeEstoque" class="ds-input" min="0" />
-            </div>
-          </div>
-          <div>
-            <label class="ds-label">Estoque Minimo</label>
-            <input id="input-produto-minimo" type="number" [(ngModel)]="form.estoqueMinimo" class="ds-input" min="0" />
-          </div>
-          <div>
-            <label class="ds-label">Descricao</label>
-            <textarea id="input-produto-desc" [(ngModel)]="form.descricao" rows="2" class="ds-input resize-none" placeholder="Descricao do produto (opcional)"></textarea>
-          </div>
-        </div>
-
-        <div class="flex gap-3 mt-6">
-          <button (click)="fecharModal()" class="flex-1 py-3 rounded-xl font-semibold transition-all duration-200"
-                  style="color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.1);"
-                  onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='transparent'">
-            Cancelar
-          </button>
-          <button id="btn-salvar-produto" (click)="salvar()" [disabled]="saving || !form.nome || !form.precoVenda"
-            class="flex-1 ds-btn-primary flex items-center justify-center gap-2">
-            @if (saving) {
-              <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-              Salvando...
-            } @else {
-              Salvar
             }
-          </button>
-        </div>
+          </article>
+        }
       </div>
+
+      <footer class="flex flex-col gap-1 border-t border-slate-100 bg-slate-50/60 px-4 py-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <span>Exibindo {{ produtosFiltrados.length }} {{ produtosFiltrados.length === 1 ? 'produto' : 'produtos' }}</span>
+        <span>{{ totalUnidades }} unidades no estoque total</span>
+      </footer>
+    }
+  </section>
+
+  <!-- Product form modal -->
+  @if (showModal) {
+    <div
+      class="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/50 p-0 backdrop-blur-[2px] animate-fade-in sm:items-center sm:p-5"
+      (click)="fecharModal()"
+    >
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="produto-modal-titulo"
+        class="product-modal flex max-h-[94vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl animate-slide-up sm:max-h-[90vh] sm:rounded-2xl"
+        (click)="$event.stopPropagation()"
+      >
+        <header class="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4 sm:px-6 sm:py-5">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600" aria-hidden="true">
+                <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  @if (editId) {
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16.862 3.487a2.1 2.1 0 113 2.97L8.25 18.07 4 19l.93-4.25L16.862 3.487z" />
+                  } @else {
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 5v14m7-7H5" />
+                  }
+                </svg>
+              </span>
+              <div>
+                <h2 id="produto-modal-titulo" class="text-lg font-bold text-slate-950 sm:text-xl">
+                  {{ editId ? 'Editar produto' : 'Novo produto' }}
+                </h2>
+                <p class="mt-0.5 text-xs text-slate-500">
+                  {{ editId ? 'Atualize as informações do item.' : 'Adicione um novo item ao seu catálogo.' }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="fecharModal()"
+            class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            aria-label="Fechar formulário"
+          >
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </header>
+
+        <form
+          #produtoForm="ngForm"
+          class="product-scrollbar overflow-y-auto"
+          (ngSubmit)="salvar(produtoForm)"
+        >
+          <div class="space-y-6 px-5 py-5 sm:px-6">
+            @if (erro && showModal) {
+              <div role="alert" class="flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-3 text-sm text-rose-700">
+                <svg class="mt-0.5 h-4 w-4 shrink-0 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 3h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+                <span>{{ erro }}</span>
+              </div>
+            }
+
+            <fieldset>
+              <legend class="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Informações básicas</legend>
+              <div class="space-y-4">
+                <div>
+                  <label for="input-produto-nome" class="product-label">Nome do produto <span class="text-rose-500">*</span></label>
+                  <input
+                    #produtoNomeInput
+                    #produtoNome="ngModel"
+                    id="input-produto-nome"
+                    name="produtoNome"
+                    [(ngModel)]="form.nome"
+                    class="product-input"
+                    placeholder="Ex.: Camiseta básica preta"
+                    maxlength="200"
+                    required
+                    autocomplete="off"
+                    [class.border-rose-400]="produtoNome.invalid && produtoNome.touched"
+                    [attr.aria-invalid]="produtoNome.invalid && produtoNome.touched"
+                  />
+                  @if (produtoNome.invalid && produtoNome.touched) {
+                    <p class="mt-1.5 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      Informe um nome com até 200 caracteres.
+                    </p>
+                  }
+                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label for="input-produto-sku" class="product-label">Código / SKU</label>
+                    <input
+                      id="input-produto-sku"
+                      name="produtoSku"
+                      [(ngModel)]="form.sku"
+                      class="product-input font-mono"
+                      placeholder="EX-001"
+                      maxlength="50"
+                      autocomplete="off"
+                    />
+                    <p class="mt-1.5 text-[11px] leading-4 text-slate-400">Use um código único para facilitar buscas.</p>
+                  </div>
+                  <div>
+                    <label for="input-produto-desc" class="product-label">Descrição</label>
+                    <textarea
+                      id="input-produto-desc"
+                      name="produtoDescricao"
+                      [(ngModel)]="form.descricao"
+                      rows="2"
+                      class="product-input min-h-[44px] resize-y"
+                      placeholder="Detalhes opcionais"
+                      maxlength="500"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend class="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Preços</legend>
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label for="input-produto-custo" class="product-label">Preço de custo <span class="text-rose-500">*</span></label>
+                  <div class="relative">
+                    <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">R$</span>
+                    <input
+                      #produtoCusto="ngModel"
+                      id="input-produto-custo"
+                      name="produtoCusto"
+                      type="number"
+                      [(ngModel)]="form.precoCusto"
+                      class="product-input !pl-10"
+                      min="0"
+                      max="9999999999.99"
+                      step="0.01"
+                      inputmode="decimal"
+                      required
+                      [class.border-rose-400]="produtoCusto.touched && (produtoCusto.invalid || !precoFormularioValido(form.precoCusto, 0))"
+                      [attr.aria-invalid]="produtoCusto.touched && (produtoCusto.invalid || !precoFormularioValido(form.precoCusto, 0))"
+                    />
+                  </div>
+                  @if (produtoCusto.touched && (produtoCusto.invalid || !precoFormularioValido(form.precoCusto, 0))) {
+                    <p class="mt-1.5 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      Use um valor válido, igual ou maior que zero.
+                    </p>
+                  }
+                </div>
+                <div>
+                  <label for="input-produto-venda" class="product-label">Preço de venda <span class="text-rose-500">*</span></label>
+                  <div class="relative">
+                    <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">R$</span>
+                    <input
+                      #produtoVenda="ngModel"
+                      id="input-produto-venda"
+                      name="produtoVenda"
+                      type="number"
+                      [(ngModel)]="form.precoVenda"
+                      class="product-input !pl-10"
+                      min="0.01"
+                      max="9999999999.99"
+                      step="0.01"
+                      inputmode="decimal"
+                      required
+                      [class.border-rose-400]="produtoVenda.touched && (produtoVenda.invalid || !precoFormularioValido(form.precoVenda, 0.01))"
+                      [attr.aria-invalid]="produtoVenda.touched && (produtoVenda.invalid || !precoFormularioValido(form.precoVenda, 0.01))"
+                    />
+                  </div>
+                  @if (produtoVenda.touched && (produtoVenda.invalid || !precoFormularioValido(form.precoVenda, 0.01))) {
+                    <p class="mt-1.5 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      Informe um valor maior que zero.
+                    </p>
+                  }
+                </div>
+              </div>
+              @if (form.precoCusto > 0 && form.precoVenda > 0) {
+                <div class="mt-3 flex items-center justify-between rounded-xl bg-slate-50 px-3.5 py-2.5 text-xs">
+                  <span class="text-slate-500">Margem bruta estimada</span>
+                  <span
+                    class="font-bold"
+                    [class.text-emerald-600]="form.precoVenda >= form.precoCusto"
+                    [class.text-rose-600]="form.precoVenda < form.precoCusto"
+                  >
+                    {{ (((form.precoVenda - form.precoCusto) / form.precoVenda) * 100).toFixed(1) }}%
+                  </span>
+                </div>
+              }
+            </fieldset>
+
+            <fieldset>
+              <legend class="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Controle de estoque</legend>
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label for="input-produto-estoque" class="product-label">Quantidade atual <span class="text-rose-500">*</span></label>
+                  <input
+                    #produtoEstoque="ngModel"
+                    id="input-produto-estoque"
+                    name="produtoEstoque"
+                    type="number"
+                    [(ngModel)]="form.quantidadeEstoque"
+                    class="product-input"
+                    min="0"
+                    step="1"
+                    inputmode="numeric"
+                    required
+                    [class.border-rose-400]="produtoEstoque.touched && (produtoEstoque.invalid || !inteiroFormularioValido(form.quantidadeEstoque))"
+                    [attr.aria-invalid]="produtoEstoque.touched && (produtoEstoque.invalid || !inteiroFormularioValido(form.quantidadeEstoque))"
+                  />
+                  @if (produtoEstoque.touched && (produtoEstoque.invalid || !inteiroFormularioValido(form.quantidadeEstoque))) {
+                    <p class="mt-1.5 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      Informe uma quantidade inteira igual ou maior que zero.
+                    </p>
+                  }
+                </div>
+                <div>
+                  <label for="input-produto-minimo" class="product-label">Alerta de estoque mínimo <span class="text-rose-500">*</span></label>
+                  <input
+                    #produtoMinimo="ngModel"
+                    id="input-produto-minimo"
+                    name="produtoMinimo"
+                    type="number"
+                    [(ngModel)]="form.estoqueMinimo"
+                    class="product-input"
+                    min="0"
+                    step="1"
+                    inputmode="numeric"
+                    required
+                    [class.border-rose-400]="produtoMinimo.touched && (produtoMinimo.invalid || !inteiroFormularioValido(form.estoqueMinimo))"
+                    [attr.aria-invalid]="produtoMinimo.touched && (produtoMinimo.invalid || !inteiroFormularioValido(form.estoqueMinimo))"
+                  />
+                  <p class="mt-1.5 text-[11px] leading-4 text-slate-400">Você será avisado quando atingir este limite.</p>
+                  @if (produtoMinimo.touched && (produtoMinimo.invalid || !inteiroFormularioValido(form.estoqueMinimo))) {
+                    <p class="mt-1.5 text-xs font-medium text-rose-600 dark:text-rose-400">
+                      Informe um limite inteiro igual ou maior que zero.
+                    </p>
+                  }
+                </div>
+              </div>
+            </fieldset>
+          </div>
+
+          <footer class="sticky bottom-0 grid grid-cols-2 gap-3 border-t border-slate-200 bg-white px-5 py-4 sm:flex sm:justify-end sm:px-6">
+            <button
+              type="button"
+              (click)="fecharModal()"
+              class="min-h-11 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+            >
+              Cancelar
+            </button>
+            <button
+              id="btn-salvar-produto"
+              type="submit"
+              [disabled]="saving || produtoForm.invalid"
+              [attr.aria-busy]="saving"
+              class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white shadow-sm shadow-indigo-200 transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none sm:min-w-36"
+            >
+              @if (saving) {
+                <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Salvando...
+              } @else {
+                {{ editId ? 'Salvar alterações' : 'Cadastrar produto' }}
+              }
+            </button>
+          </footer>
+        </form>
+      </section>
     </div>
   }
 
-  <!-- Import Result Modal -->
+  <!-- Import summary modal -->
   @if (showImportResult && importResult) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in" (click)="fecharImportResult()"
-         style="background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);">
-      <div class="rounded-2xl shadow-glass w-full max-w-md p-6 animate-slide-up" (click)="$event.stopPropagation()"
-           style="background: rgba(22,27,34,0.95); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(20px);">
-        <div class="flex items-center justify-between mb-5">
-          <h2 class="text-xl font-bold text-white">Resultado da Importacao</h2>
-          <button (click)="fecharImportResult()" class="p-2 rounded-xl transition-colors"
-                  onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'">
-            <svg class="w-5 h-5" style="color: rgba(255,255,255,0.5);" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+    <div
+      class="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/50 p-0 backdrop-blur-[2px] animate-fade-in sm:items-center sm:p-5"
+      (click)="fecharImportResult()"
+    >
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="importacao-modal-titulo"
+        class="product-modal w-full max-w-md rounded-t-3xl p-5 animate-slide-up sm:rounded-2xl sm:p-6"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600" aria-hidden="true">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75l2 2 4-4.5m6 1.75a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </span>
+            <div>
+              <h2 id="importacao-modal-titulo" class="text-lg font-bold text-slate-950">Importação concluída</h2>
+              <p class="mt-0.5 text-xs text-slate-500">Confira o resultado da sua planilha.</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="fecharImportResult()"
+            class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            aria-label="Fechar resultado da importação"
+          >
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
-        <div class="grid grid-cols-3 gap-3 mb-5">
-          <div class="text-center p-3 rounded-xl" style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2);">
-            <p class="text-2xl font-bold" style="color: #34d399;">{{ importResult.importados }}</p>
-            <p class="text-xs font-medium mt-1" style="color: rgba(16,185,129,0.8);">Novos</p>
+        <div class="mt-5 grid grid-cols-3 gap-2.5">
+          <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-center">
+            <p class="text-2xl font-bold text-emerald-700">{{ importResult.importados }}</p>
+            <p class="mt-1 text-[10px] font-bold uppercase tracking-wide text-emerald-600">Novos</p>
           </div>
-          <div class="text-center p-3 rounded-xl" style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);">
-            <p class="text-2xl font-bold" style="color: #60a5fa;">{{ importResult.atualizados }}</p>
-            <p class="text-xs font-medium mt-1" style="color: rgba(59,130,246,0.8);">Atualizados</p>
+          <div class="rounded-xl border border-indigo-100 bg-indigo-50 p-3 text-center">
+            <p class="text-2xl font-bold text-indigo-700">{{ importResult.atualizados }}</p>
+            <p class="mt-1 text-[10px] font-bold uppercase tracking-wide text-indigo-600">Atualizados</p>
           </div>
-          <div class="text-center p-3 rounded-xl" style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2);">
-            <p class="text-2xl font-bold" style="color: #fbbf24;">{{ importResult.ignorados }}</p>
-            <p class="text-xs font-medium mt-1" style="color: rgba(245,158,11,0.8);">Ignorados</p>
+          <div class="rounded-xl border border-amber-100 bg-amber-50 p-3 text-center">
+            <p class="text-2xl font-bold text-amber-700">{{ importResult.ignorados }}</p>
+            <p class="mt-1 text-[10px] font-bold uppercase tracking-wide text-amber-600">Ignorados</p>
           </div>
         </div>
 
         @if (importResult.erros && importResult.erros.length > 0) {
-          <div class="mb-5">
-            <p class="text-xs font-semibold mb-2" style="color: #f87171;">Erros encontrados ({{ importResult.erros.length }}):</p>
-            <div class="max-h-40 overflow-y-auto space-y-1">
-              @for (erro of importResult.erros; track $index) {
-                <div class="text-xs rounded-lg px-3 py-1.5" style="background: rgba(239,68,68,0.08); color: #fca5a5;">{{ erro }}</div>
+          <div class="mt-5">
+            <div class="mb-2 flex items-center justify-between">
+              <p class="text-xs font-bold text-rose-700">Linhas com erro</p>
+              <span class="rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700">{{ importResult.erros.length }}</span>
+            </div>
+            <div class="product-scrollbar max-h-40 space-y-1.5 overflow-y-auto rounded-xl border border-rose-100 bg-rose-50/60 p-2">
+              @for (itemErro of importResult.erros; track $index) {
+                <div class="rounded-lg bg-white px-3 py-2 text-xs leading-5 text-rose-700 shadow-sm">{{ itemErro }}</div>
               }
             </div>
           </div>
+        } @else {
+          <div class="mt-5 flex items-center gap-2 rounded-xl bg-emerald-50 px-3.5 py-3 text-xs font-medium text-emerald-700">
+            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12l4 4L19 6" />
+            </svg>
+            Nenhum erro encontrado na importação.
+          </div>
         }
 
-        <button (click)="fecharImportResult()"
-          class="w-full py-2.5 rounded-xl font-semibold transition-all duration-200"
-          style="color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.1);"
-          onmouseover="this.style.background='rgba(255,255,255,0.04)'" onmouseout="this.style.background='transparent'">
-          Fechar
+        <button
+          type="button"
+          (click)="fecharImportResult()"
+          class="mt-5 min-h-11 w-full rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+        >
+          Concluir
         </button>
-      </div>
+      </section>
     </div>
   }
 
+  <!-- Delete confirmation -->
+  @if (produtoParaExcluir) {
+    <div
+      class="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/50 p-0 backdrop-blur-[2px] animate-fade-in sm:items-center sm:p-5"
+      (click)="cancelarExclusao()"
+    >
+      <section
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="excluir-produto-titulo"
+        aria-describedby="excluir-produto-descricao"
+        class="product-modal w-full max-w-md rounded-t-3xl p-5 animate-slide-up sm:rounded-2xl sm:p-6"
+        (click)="$event.stopPropagation()"
+      >
+        <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-600" aria-hidden="true">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.75 12a2 2 0 01-2 2H7.75a2 2 0 01-2-2L5 7m4 4v6m6-6v6M9 7V4.75A1.75 1.75 0 0110.75 3h2.5A1.75 1.75 0 0115 4.75V7M4 7h16" />
+          </svg>
+        </span>
+        <h2 id="excluir-produto-titulo" class="mt-4 text-lg font-bold text-slate-950">Excluir produto?</h2>
+        <p id="excluir-produto-descricao" class="mt-1.5 text-sm leading-6 text-slate-500">
+          O produto <strong class="font-semibold text-slate-700">{{ produtoParaExcluir.nome }}</strong> será removido do catálogo. Esta ação não pode ser desfeita.
+        </p>
+        <div class="mt-6 grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            (click)="cancelarExclusao()"
+            [disabled]="deleting"
+            class="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            (click)="confirmarExclusao()"
+            [disabled]="deleting"
+            [attr.aria-busy]="deleting"
+            class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500/30 disabled:cursor-wait disabled:opacity-60"
+          >
+            @if (deleting) {
+              <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              Excluindo...
+            } @else {
+              Excluir produto
+            }
+          </button>
+        </div>
+      </section>
+    </div>
+  }
 </div>

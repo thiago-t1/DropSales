@@ -11,4 +11,5 @@ public class UsuarioResponse {
     private String email;
     private String perfil;
     private boolean temFoto;
+    private String token;
 }

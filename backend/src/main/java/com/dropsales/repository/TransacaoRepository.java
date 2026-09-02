@@ -1,43 +1,38 @@
 package com.dropsales.repository;
 
 import com.dropsales.model.Transacao;
-import com.dropsales.model.TipoTransacao;
 import com.dropsales.model.Venda;
+import com.dropsales.model.Loja;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
-
-import com.dropsales.model.Usuario;
 
 public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
 
-    List<Transacao> findByTipoAndUsuario(TipoTransacao tipo, Usuario usuario);
-
     List<Transacao> findByVenda(Venda venda);
 
-    @Query("SELECT COALESCE(SUM(t.valor), 0) FROM Transacao t WHERE t.tipo = 'RECEITA' AND t.status = 'PAGO' AND t.usuario = :usuario")
-    BigDecimal somarReceitasPagas(@Param("usuario") Usuario usuario);
+    @Query("SELECT COALESCE(SUM(t.valor), 0) FROM Transacao t WHERE t.tipo = 'RECEITA' AND t.status = 'PAGO' AND t.loja = :loja")
+    BigDecimal somarReceitasPagas(@Param("loja") Loja loja);
 
-    @Query("SELECT COALESCE(SUM(t.valor), 0) FROM Transacao t WHERE t.tipo = 'DESPESA' AND t.status = 'PAGO' AND t.usuario = :usuario")
-    BigDecimal somarDespesasPagas(@Param("usuario") Usuario usuario);
+    @Query("SELECT COALESCE(SUM(t.valor), 0) FROM Transacao t WHERE t.tipo = 'DESPESA' AND t.status = 'PAGO' AND t.loja = :loja")
+    BigDecimal somarDespesasPagas(@Param("loja") Loja loja);
 
     /** Custo de Mercadoria Vendida: apenas despesas atreladas a vendas */
-    @Query("SELECT COALESCE(SUM(t.valor), 0) FROM Transacao t WHERE t.tipo = 'DESPESA' AND t.status = 'PAGO' AND t.venda IS NOT NULL AND t.usuario = :usuario")
-    BigDecimal somarCMV(@Param("usuario") Usuario usuario);
+    @Query("SELECT COALESCE(SUM(t.valor), 0) FROM Transacao t WHERE t.tipo = 'DESPESA' AND t.status = 'PAGO' AND t.venda IS NOT NULL AND t.loja = :loja")
+    BigDecimal somarCMV(@Param("loja") Loja loja);
 
-    /** Custos diarios (CMV) agrupados por data, a partir de uma data */
     @Query("""
-        SELECT CAST(t.createdAt AS date), COALESCE(SUM(t.valor), 0)
-        FROM Transacao t
+        SELECT t FROM Transacao t
         WHERE t.tipo = 'DESPESA' AND t.status = 'PAGO'
           AND t.venda IS NOT NULL
-          AND t.usuario = :usuario
+          AND t.loja = :loja
           AND t.createdAt >= :desde
-        GROUP BY CAST(t.createdAt AS date)
-        ORDER BY CAST(t.createdAt AS date) ASC
+        ORDER BY t.createdAt ASC
     """)
-    List<Object[]> somarCustosDiariosDesde(@Param("desde") LocalDateTime desde, @Param("usuario") Usuario usuario);
+    List<Transacao> findCustosDesde(
+            @Param("desde") OffsetDateTime desde,
+            @Param("loja") Loja loja);
 }
