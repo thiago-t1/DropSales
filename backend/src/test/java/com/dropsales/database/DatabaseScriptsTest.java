@@ -50,6 +50,16 @@ class DatabaseScriptsTest {
                 .contains("foto_perfil OID"));
     }
 
+    @Test
+    void bootstrapLegadoPreparaColunasAntesDoHibernate() throws IOException {
+        String compatibilitySql = Files.readString(Path.of(
+                "src", "main", "resources", "legacy-schema-compatibility.sql"));
+
+        assertTrue(compatibilitySql.contains("ADD COLUMN IF NOT EXISTS loja_id BIGINT"));
+        assertTrue(compatibilitySql.contains("ADD COLUMN IF NOT EXISTS forma_pagamento"));
+        assertTrue(compatibilitySql.contains("ADD COLUMN IF NOT EXISTS idempotency_request_hash"));
+    }
+
     private String ler(String relativePath) throws IOException {
         return Files.readString(DATABASE_DIR.resolve(relativePath));
     }
