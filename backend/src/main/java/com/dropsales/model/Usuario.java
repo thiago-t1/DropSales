@@ -3,9 +3,7 @@ package com.dropsales.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 
 /**
@@ -41,8 +39,8 @@ public class Usuario {
     @Builder.Default
     private Boolean ativo = true;
 
-    @JdbcTypeCode(SqlTypes.VARBINARY)
-    @Column(name = "foto_perfil", length = 5 * 1024 * 1024)
+    @Lob
+    @Column(name = "foto_perfil")
     private byte[] fotoPerfil;
 
     @Column(name = "foto_content_type", length = 50)

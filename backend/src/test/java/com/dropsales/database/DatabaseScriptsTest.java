@@ -43,6 +43,13 @@ class DatabaseScriptsTest {
                 "CHECK (parcelas BETWEEN 1 AND 18)"));
     }
 
+    @Test
+    void fotoDePerfilMantemCompatibilidadeComPostgresqlOid() throws IOException {
+        assertTrue(ler("init.sql").contains("foto_perfil         OID"));
+        assertTrue(ler("migrations/004_empresa_loja_equipe_multitenancy.sql")
+                .contains("foto_perfil OID"));
+    }
+
     private String ler(String relativePath) throws IOException {
         return Files.readString(DATABASE_DIR.resolve(relativePath));
     }

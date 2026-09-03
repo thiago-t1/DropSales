@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS convites_empresa (
 );
 
 ALTER TABLE usuarios
-    ADD COLUMN IF NOT EXISTS foto_perfil BYTEA,
+    ADD COLUMN IF NOT EXISTS foto_perfil OID,
     ADD COLUMN IF NOT EXISTS foto_content_type VARCHAR(50);
 ALTER TABLE categorias ADD COLUMN IF NOT EXISTS usuario_id BIGINT;
 ALTER TABLE produtos ADD COLUMN IF NOT EXISTS usuario_id BIGINT;

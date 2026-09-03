@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     perfil              VARCHAR(20) NOT NULL DEFAULT 'OPERADOR'
                             CHECK (perfil IN ('ADMIN', 'OPERADOR')),
     ativo               BOOLEAN NOT NULL DEFAULT TRUE,
-    foto_perfil         BYTEA,
+    foto_perfil         OID,
     foto_content_type   VARCHAR(50),
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
