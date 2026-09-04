@@ -20,6 +20,15 @@ CREATE TABLE IF NOT EXISTS usuarios (
     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- O binario fica separado do registro autenticavel. Isso evita que uma foto de
+-- varios megabytes seja carregada em toda validacao de JWT/contexto.
+CREATE TABLE IF NOT EXISTS usuario_fotos (
+    usuario_id     BIGINT PRIMARY KEY REFERENCES usuarios(id) ON DELETE CASCADE,
+    conteudo       BYTEA NOT NULL,
+    content_type   VARCHAR(50) NOT NULL,
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS empresas (
     id          BIGSERIAL PRIMARY KEY,
     nome        VARCHAR(160) NOT NULL,

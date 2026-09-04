@@ -1,0 +1,32 @@
+@media (min-width: 1024px) {
+  .ds-sidebar {
+    width: 280px;
+    transition: width 240ms ease, transform 300ms ease;
+  }
+
+  .ds-sidebar.ds-sidebar-collapsed {
+    width: 84px;
+  }
+
+  .ds-sidebar-collapsed .ds-collapse-hide {
+    display: none;
+  }
+
+  .ds-sidebar-collapsed .ds-sidebar-header,
+  .ds-sidebar-collapsed .ds-logo-link,
+  .ds-sidebar-collapsed .ds-nav-link {
+    justify-content: center;
+  }
+
+  .ds-sidebar-collapsed .ds-sidebar-header {
+    padding-inline: 0.75rem;
+  }
+
+  .ds-sidebar-collapsed .ds-sidebar-nav {
+    padding-inline: 0.75rem;
+  }
+
+  .ds-sidebar-collapsed .ds-nav-link {
+    padding-inline: 0;
+  }
+}

@@ -21,6 +21,12 @@ class DropSalesApplicationTests {
     }
 
     @Test
+    void healthPermiteAquecerApiSemSessao() throws Exception {
+        mockMvc.perform(get("/api/health"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
     void rotaProtegidaSemSessaoRetorna401() throws Exception {
         mockMvc.perform(get("/api/usuarios/me"))
                 .andExpect(status().isUnauthorized())

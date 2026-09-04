@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, finalize, Observable, Subject, takeUntil, tap, throwError } from 'rxjs';
+import { catchError, finalize, Observable, of, shareReplay, Subject, takeUntil, tap, throwError } from 'rxjs';
 import { environment } from '@env/environment';
 import { ContextoLoja, EmpresaResumo, LojaResumo, PapelEmpresa } from '../models/business.models';
 
@@ -11,15 +11,21 @@ export class TenantService {
   private readonly api = environment.apiUrl;
   private readonly reiniciarContexto$ = new Subject<void>();
   private geracaoContexto = 0;
+  private carregamentoEmCurso$: Observable<ContextoLoja> | null = null;
   readonly contexto = signal<ContextoLoja | null>(null);
   readonly carregando = signal(false);
 
   constructor(private readonly http: HttpClient) {}
 
-  carregar(): Observable<ContextoLoja> {
+  carregar(force = false): Observable<ContextoLoja> {
+    const contextoAtual = this.contexto();
+    if (!force && contextoAtual) return of(contextoAtual);
+    if (!force && this.carregamentoEmCurso$) return this.carregamentoEmCurso$;
+
     const geracaoDaRequisicao = this.geracaoContexto;
     this.carregando.set(true);
-    return this.buscarContexto(true).pipe(
+    let requisicao$: Observable<ContextoLoja>;
+    requisicao$ = this.buscarContexto(true).pipe(
       takeUntil(this.reiniciarContexto$),
       tap((contexto) => {
         if (geracaoDaRequisicao !== this.geracaoContexto) return;
@@ -29,16 +35,23 @@ export class TenantService {
         }
       }),
       finalize(() => {
+        if (this.carregamentoEmCurso$ === requisicao$) {
+          this.carregamentoEmCurso$ = null;
+        }
         if (geracaoDaRequisicao === this.geracaoContexto) {
           this.carregando.set(false);
         }
       }),
+      shareReplay({ bufferSize: 1, refCount: false }),
     );
+    this.carregamentoEmCurso$ = requisicao$;
+    return requisicao$;
   }
 
   limpar(): void {
     this.geracaoContexto++;
     this.reiniciarContexto$.next();
+    this.carregamentoEmCurso$ = null;
     this.contexto.set(null);
     this.carregando.set(false);
     localStorage.removeItem(ACTIVE_STORE_KEY);

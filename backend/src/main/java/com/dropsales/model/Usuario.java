@@ -39,13 +39,6 @@ public class Usuario {
     @Builder.Default
     private Boolean ativo = true;
 
-    @Lob
-    @Column(name = "foto_perfil")
-    private byte[] fotoPerfil;
-
-    @Column(name = "foto_content_type", length = 50)
-    private String fotoContentType;
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

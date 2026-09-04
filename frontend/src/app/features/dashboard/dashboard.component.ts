@@ -4,9 +4,39 @@ import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { Produto, TopProduto, VendaRecente } from '../../core/models/api.models';
 import { BaseChartDirective } from 'ng2-charts';
-import { Chart, ChartConfiguration, ChartData, registerables } from 'chart.js';
+import {
+  ArcElement,
+  BarController,
+  BarElement,
+  CategoryScale,
+  Chart,
+  ChartConfiguration,
+  ChartData,
+  DoughnutController,
+  Filler,
+  Legend,
+  LinearScale,
+  LineController,
+  LineElement,
+  PointElement,
+  Tooltip,
+} from 'chart.js';
+import { formatarRotuloData, prepararSerieAtiva } from './dashboard-chart.utils';
 
-Chart.register(...registerables);
+Chart.register(
+  ArcElement,
+  BarController,
+  BarElement,
+  CategoryScale,
+  DoughnutController,
+  Filler,
+  Legend,
+  LinearScale,
+  LineController,
+  LineElement,
+  PointElement,
+  Tooltip,
+);
 
 @Component({
   selector: 'app-dashboard',
@@ -16,6 +46,7 @@ Chart.register(...registerables);
 })
 export class DashboardComponent implements OnInit {
   loading = true;
+  refreshing = false;
   erroCarregamento = false;
   atualizadoEm: Date | null = null;
 
@@ -32,42 +63,52 @@ export class DashboardComponent implements OnInit {
   topProdutos: TopProduto[] = [];
   vendasRecentes: VendaRecente[] = [];
 
-  // Desempenho dos últimos 30 dias
-  barChartData: ChartData<'bar'> = {
+  chartPeriodLabel = '7 dias';
+  receitaPeriodo = 0;
+  cmvPeriodo = 0;
+
+  // Janela adaptativa: preserva contexto sem exibir semanas vazias.
+  barChartData: ChartData<'bar' | 'line'> = {
     labels: [],
     datasets: [
       {
+        type: 'line',
         label: 'Receitas',
         data: [],
-        backgroundColor: 'rgba(79, 70, 229, 0.88)',
-        borderColor: '#4f46e5',
-        borderWidth: 0,
-        borderRadius: 7,
-        borderSkipped: false,
-        maxBarThickness: 28,
-        categoryPercentage: 0.72,
-        barPercentage: 0.78,
-        hoverBackgroundColor: '#4338ca',
+        backgroundColor: 'rgba(99, 102, 241, 0.16)',
+        borderColor: '#6366f1',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.38,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#6366f1',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        order: 1,
       },
       {
+        type: 'bar',
         label: 'CMV',
         data: [],
-        backgroundColor: 'rgba(15, 159, 143, 0.78)',
-        borderColor: '#0f9f8f',
+        backgroundColor: 'rgba(245, 158, 11, 0.72)',
+        borderColor: '#f59e0b',
         borderWidth: 0,
-        borderRadius: 7,
+        borderRadius: 6,
         borderSkipped: false,
-        maxBarThickness: 28,
-        categoryPercentage: 0.72,
-        barPercentage: 0.78,
-        hoverBackgroundColor: '#0d8276',
+        maxBarThickness: 22,
+        categoryPercentage: 0.66,
+        barPercentage: 0.7,
+        hoverBackgroundColor: '#d97706',
+        order: 2,
       },
     ],
   };
 
-  barChartOptions: ChartConfiguration<'bar'>['options'] = {
+  barChartOptions: ChartConfiguration<'bar' | 'line'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: { duration: 320 },
     interaction: { intersect: false, mode: 'index' },
     plugins: {
       legend: { display: false },
@@ -80,6 +121,7 @@ export class DashboardComponent implements OnInit {
         boxHeight: 9,
         padding: 12,
         cornerRadius: 10,
+        filter: (context) => Number(context.raw) !== 0,
         callbacks: {
           label: (context) =>
             ` ${context.dataset.label}: R$ ${(context.parsed.y || 0).toLocaleString('pt-BR', {
@@ -97,16 +139,19 @@ export class DashboardComponent implements OnInit {
           font: { size: 10, weight: 500 },
           maxRotation: 0,
           autoSkipPadding: 18,
+          maxTicksLimit: 8,
         },
       },
       y: {
         beginAtZero: true,
+        grace: '12%',
         border: { display: false },
         grid: { color: 'rgba(148, 163, 184, 0.16)' },
         ticks: {
           color: '#94a3b8',
           font: { size: 10 },
           padding: 8,
+          maxTicksLimit: 5,
           callback: (valor) => `R$ ${this.fmtCompacto(Number(valor))}`,
         },
       },
@@ -204,11 +249,13 @@ export class DashboardComponent implements OnInit {
     this.carregarDashboard();
   }
 
-  carregarDashboard(): void {
-    this.loading = true;
+  carregarDashboard(force = false): void {
+    const primeiraCarga = this.atualizadoEm === null;
+    this.loading = primeiraCarga;
+    this.refreshing = !primeiraCarga;
     this.erroCarregamento = false;
 
-    this.apiService.getDashboard().subscribe({
+    this.apiService.getDashboard(force).subscribe({
       next: (data) => {
         this.receitas = data.receitas;
         this.despesas = data.despesas;
@@ -222,20 +269,23 @@ export class DashboardComponent implements OnInit {
         this.vendasRecentes = data.vendasRecentes ?? [];
 
         const vendasDiarias = data.vendasDiarias ?? [];
-        const custosDiarios =
-          data.custosDiarios ?? vendasDiarias.map((venda) => ({ data: venda.data, total: 0 }));
+        const custosDiarios = data.custosDiarios ?? [];
+        const serie = prepararSerieAtiva(vendasDiarias, custosDiarios);
+        this.receitaPeriodo = serie.reduce((total, ponto) => total + ponto.receita, 0);
+        this.cmvPeriodo = serie.reduce((total, ponto) => total + ponto.cmv, 0);
+        this.chartPeriodLabel = serie.length === 1 ? 'Hoje' : `${serie.length} dias`;
 
         this.barChartData = {
           ...this.barChartData,
-          labels: vendasDiarias.map((venda) => this.fmtData(venda.data)),
+          labels: serie.map((ponto) => this.fmtData(ponto.data)),
           datasets: [
             {
               ...this.barChartData.datasets[0],
-              data: vendasDiarias.map((venda) => venda.total),
+              data: serie.map((ponto) => ponto.receita),
             },
             {
               ...this.barChartData.datasets[1],
-              data: custosDiarios.map((custo) => custo.total),
+              data: serie.map((ponto) => ponto.cmv),
             },
           ],
         };
@@ -263,13 +313,17 @@ export class DashboardComponent implements OnInit {
 
         this.atualizadoEm = new Date();
         this.loading = false;
+        this.refreshing = false;
       },
       error: () => {
         this.loading = false;
+        this.refreshing = false;
         this.erroCarregamento = true;
-        this.apiService
-          .getProdutosEstoqueBaixo()
-          .subscribe({ next: (produtos) => (this.estoqueBaixo = produtos) });
+        if (primeiraCarga) {
+          this.apiService
+            .getProdutosEstoqueBaixo()
+            .subscribe({ next: (produtos) => (this.estoqueBaixo = produtos) });
+        }
       },
     });
   }
@@ -282,17 +336,7 @@ export class DashboardComponent implements OnInit {
   }
 
   fmtData(valor: string): string {
-    if (!valor) return '—';
-    if (/^\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}$/.test(valor)) {
-      return valor.replace(/\s+/, ' às ');
-    }
-    const normalizado = valor.includes('T') ? valor : valor.replace(' ', 'T');
-    const data = new Date(normalizado);
-    if (Number.isNaN(data.getTime())) return valor.split(' ')[0];
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-    }).format(data);
+    return formatarRotuloData(valor);
   }
 
   fmtHora(data: Date): string {
@@ -311,6 +355,12 @@ export class DashboardComponent implements OnInit {
 
   get margemBruta(): number {
     return this.receitas > 0 ? (this.lucroBruto / this.receitas) * 100 : 0;
+  }
+
+  get margemPeriodo(): number {
+    return this.receitaPeriodo > 0
+      ? ((this.receitaPeriodo - this.cmvPeriodo) / this.receitaPeriodo) * 100
+      : 0;
   }
 
   get percentualCmv(): number {
@@ -368,4 +418,5 @@ export class DashboardComponent implements OnInit {
     if (produto.quantidadeEstoque <= produto.estoqueMinimo) return 'baixo';
     return 'ok';
   }
+
 }

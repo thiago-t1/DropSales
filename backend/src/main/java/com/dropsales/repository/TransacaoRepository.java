@@ -35,4 +35,17 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
     List<Transacao> findCustosDesde(
             @Param("desde") OffsetDateTime desde,
             @Param("loja") Loja loja);
+
+    /** Somente as duas colunas usadas no grafico; evita hidratar transacoes. */
+    @Query("""
+        SELECT t.createdAt, t.valor FROM Transacao t
+        WHERE t.tipo = 'DESPESA' AND t.status = 'PAGO'
+          AND t.venda IS NOT NULL
+          AND t.loja = :loja
+          AND t.createdAt >= :desde
+        ORDER BY t.createdAt ASC
+    """)
+    List<Object[]> findTotaisCustosDesde(
+            @Param("desde") OffsetDateTime desde,
+            @Param("loja") Loja loja);
 }

@@ -53,6 +53,7 @@ public class SecurityConfig {
                 // O Spring Security DEVE liberar OPTIONS sem autenticação,
                 // caso contrário retorna 403 antes do filtro CORS responder.
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .anyRequest().authenticated()
             )

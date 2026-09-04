@@ -6,6 +6,8 @@ import com.dropsales.dto.UsuarioUpdateRequest;
 import com.dropsales.exception.BusinessException;
 import com.dropsales.exception.ResourceNotFoundException;
 import com.dropsales.model.Usuario;
+import com.dropsales.model.UsuarioFoto;
+import com.dropsales.repository.UsuarioFotoRepository;
 import com.dropsales.repository.UsuarioRepository;
 import com.dropsales.security.JwtTokenProvider;
 import com.dropsales.util.EmailNormalizer;
@@ -16,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -28,16 +31,19 @@ public class UsuarioController {
     private static final long TAMANHO_MAXIMO_FOTO = 5L * 1024 * 1024;
 
     private final UsuarioRepository usuarioRepository;
+    private final UsuarioFotoRepository usuarioFotoRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
     @GetMapping("/me")
+    @Transactional(readOnly = true)
     public ResponseEntity<UsuarioResponse> getMe(Authentication authentication) {
         Usuario u = getUsuario(authentication);
         return ResponseEntity.ok(toResponse(u));
     }
 
     @PutMapping("/me")
+    @Transactional
     public ResponseEntity<UsuarioResponse> updateMe(
             @Valid @RequestBody UsuarioUpdateRequest request,
             Authentication authentication) {
@@ -54,6 +60,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/me/foto")
+    @Transactional
     public ResponseEntity<UsuarioResponse> uploadFoto(
             @RequestParam("file") MultipartFile file,
             Authentication authentication) throws IOException {
@@ -69,29 +76,35 @@ public class UsuarioController {
             throw new BusinessException("A foto deve ser uma imagem JPEG, PNG ou WebP valida");
         }
         Usuario u = getUsuario(authentication);
-        u.setFotoPerfil(conteudo);
-        u.setFotoContentType(contentType);
-        usuarioRepository.save(u);
-        return ResponseEntity.ok(toResponse(u));
+        usuarioFotoRepository.saveAndFlush(UsuarioFoto.builder()
+                .usuarioId(u.getId())
+                .conteudo(conteudo)
+                .contentType(contentType)
+                .build());
+        return ResponseEntity.ok(toResponse(u, null, true));
     }
 
     @GetMapping("/me/foto")
+    @Transactional(readOnly = true)
     public ResponseEntity<byte[]> getFoto(Authentication authentication) {
         Usuario u = getUsuario(authentication);
-        if (u.getFotoPerfil() == null || u.getFotoPerfil().length == 0) {
+        UsuarioFoto foto = usuarioFotoRepository.findById(u.getId()).orElse(null);
+        if (foto == null || foto.getConteudo() == null || foto.getConteudo().length == 0) {
             return ResponseEntity.notFound().build();
         }
-        String contentType = detectarTipoImagem(u.getFotoPerfil());
+        String contentType = detectarTipoImagem(foto.getConteudo());
         if (contentType == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, contentType)
                 .header("X-Content-Type-Options", "nosniff")
-                .body(u.getFotoPerfil());
+                .header(HttpHeaders.CACHE_CONTROL, "private, no-store")
+                .body(foto.getConteudo());
     }
 
     @PutMapping("/me/senha")
+    @Transactional
     public ResponseEntity<Void> alterarSenha(
             @Valid @RequestBody AlterarSenhaRequest request,
             Authentication authentication) {
@@ -144,16 +157,20 @@ public class UsuarioController {
     }
 
     private UsuarioResponse toResponse(Usuario u) {
-        return toResponse(u, null);
+        return toResponse(u, null, usuarioFotoRepository.existsById(u.getId()));
     }
 
     private UsuarioResponse toResponse(Usuario u, String token) {
+        return toResponse(u, token, usuarioFotoRepository.existsById(u.getId()));
+    }
+
+    private UsuarioResponse toResponse(Usuario u, String token, boolean temFoto) {
         return UsuarioResponse.builder()
                 .id(u.getId())
                 .nome(u.getNome())
                 .email(u.getEmail())
                 .perfil(u.getPerfil().name())
-                .temFoto(u.getFotoPerfil() != null && u.getFotoPerfil().length > 0)
+                .temFoto(temFoto)
                 .token(token)
                 .build();
     }

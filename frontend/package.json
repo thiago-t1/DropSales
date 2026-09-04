@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "lint": "tsc --noEmit -p tsconfig.app.json --noUnusedLocals --noUnusedParameters --pretty false",
-    "test": "node --experimental-default-type=module --test src/app/core/utils/auth-token.utils.spec.mts src/app/core/utils/api-request.utils.spec.mts src/app/core/guards/role.guard.spec.mts src/app/features/produtos/product-form.mapper.spec.mts src/app/features/vendas/payment-checkout.utils.spec.mts src/app/features/caixa/caixa.utils.spec.mts"
+    "test": "node --experimental-default-type=module --test src/app/core/utils/auth-token.utils.spec.mts src/app/core/utils/api-request.utils.spec.mts src/app/core/guards/role.guard.spec.mts src/app/features/produtos/product-form.mapper.spec.mts src/app/features/vendas/payment-checkout.utils.spec.mts src/app/features/caixa/caixa.utils.spec.mts src/app/features/dashboard/dashboard-chart.utils.spec.mts"
   },
   "private": true,
   "dependencies": {

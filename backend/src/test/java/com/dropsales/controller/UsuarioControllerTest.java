@@ -6,6 +6,8 @@ import com.dropsales.dto.UsuarioUpdateRequest;
 import com.dropsales.exception.BusinessException;
 import com.dropsales.model.Perfil;
 import com.dropsales.model.Usuario;
+import com.dropsales.model.UsuarioFoto;
+import com.dropsales.repository.UsuarioFotoRepository;
 import com.dropsales.repository.UsuarioRepository;
 import com.dropsales.security.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,11 +29,13 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.ArgumentCaptor;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioControllerTest {
 
     @Mock private UsuarioRepository usuarioRepository;
+    @Mock private UsuarioFotoRepository usuarioFotoRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private JwtTokenProvider jwtTokenProvider;
     @Mock private Authentication authentication;
@@ -40,7 +44,11 @@ class UsuarioControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new UsuarioController(usuarioRepository, passwordEncoder, jwtTokenProvider);
+        controller = new UsuarioController(
+                usuarioRepository,
+                usuarioFotoRepository,
+                passwordEncoder,
+                jwtTokenProvider);
     }
 
     @Test
@@ -114,9 +122,11 @@ class UsuarioControllerTest {
 
         controller.uploadFoto(arquivo, authentication);
 
-        assertArrayEquals(png, usuario.getFotoPerfil());
-        assertEquals(MediaType.IMAGE_PNG_VALUE, usuario.getFotoContentType());
-        verify(usuarioRepository).save(usuario);
+        ArgumentCaptor<UsuarioFoto> captor = ArgumentCaptor.forClass(UsuarioFoto.class);
+        verify(usuarioFotoRepository).saveAndFlush(captor.capture());
+        assertArrayEquals(png, captor.getValue().getConteudo());
+        assertEquals(MediaType.IMAGE_PNG_VALUE, captor.getValue().getContentType());
+        assertEquals(usuario.getId(), captor.getValue().getUsuarioId());
     }
 
     @Test
@@ -161,6 +171,12 @@ class UsuarioControllerTest {
         when(authentication.getName()).thenReturn(usuario.getEmail());
         when(usuarioRepository.findByEmailIgnoreCase(usuario.getEmail()))
                 .thenReturn(Optional.of(usuario));
+        when(usuarioFotoRepository.findById(usuario.getId()))
+                .thenReturn(Optional.of(UsuarioFoto.builder()
+                        .usuarioId(usuario.getId())
+                        .conteudo(jpeg)
+                        .contentType(MediaType.TEXT_HTML_VALUE)
+                        .build()));
 
         ResponseEntity<byte[]> response = controller.getFoto(authentication);
 
@@ -177,8 +193,6 @@ class UsuarioControllerTest {
                 .senha("hash")
                 .perfil(Perfil.OPERADOR)
                 .ativo(true)
-                .fotoPerfil(bytes)
-                .fotoContentType(contentType)
                 .build();
     }
 }

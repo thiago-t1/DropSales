@@ -7,19 +7,27 @@ export class ProfilePhotoService implements OnDestroy {
   readonly fotoUrl = this.fotoUrlState.asReadonly();
 
   private versaoRequisicao = 0;
+  private carregando = false;
+  private carregada = false;
 
   constructor(private readonly apiService: ApiService) {}
 
-  carregar(): void {
+  carregar(force = false): void {
+    if ((!force && this.carregada) || this.carregando) return;
     const versaoAtual = ++this.versaoRequisicao;
+    this.carregando = true;
 
     this.apiService.getFoto().subscribe({
       next: (foto) => {
         if (versaoAtual !== this.versaoRequisicao) return;
+        this.carregando = false;
+        this.carregada = true;
         this.substituirFoto(foto);
       },
       error: () => {
         if (versaoAtual !== this.versaoRequisicao) return;
+        this.carregando = false;
+        this.carregada = true;
         this.limparUrl();
       },
     });
@@ -27,11 +35,15 @@ export class ProfilePhotoService implements OnDestroy {
 
   definir(foto: Blob): void {
     this.versaoRequisicao++;
+    this.carregando = false;
+    this.carregada = true;
     this.substituirFoto(foto);
   }
 
   limpar(): void {
     this.versaoRequisicao++;
+    this.carregando = false;
+    this.carregada = false;
     this.limparUrl();
   }
 

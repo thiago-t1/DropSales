@@ -46,6 +46,32 @@ public interface VendaRepository extends JpaRepository<Venda, Long> {
             @Param("desde") OffsetDateTime desde,
             @Param("loja") Loja loja);
 
+    /** Somente as duas colunas usadas no grafico; evita hidratar vendas completas. */
+    @Query("""
+        SELECT v.createdAt, v.total FROM Venda v
+        WHERE v.createdAt >= :desde
+          AND v.loja = :loja
+          AND v.status = 'CONCLUIDA'
+        ORDER BY v.createdAt ASC
+    """)
+    List<Object[]> findTotaisVendasDesde(
+            @Param("desde") OffsetDateTime desde,
+            @Param("loja") Loja loja);
+
+    /** Resumo enxuto compartilhado pelo dashboard e pelo sino de atividade. */
+    @Query("""
+        SELECT v.id, v.usuario.nome, v.createdAt, v.total,
+               COALESCE(SUM(item.quantidade), 0)
+        FROM Venda v
+        LEFT JOIN v.itens item
+        WHERE v.loja = :loja
+          AND v.status = 'CONCLUIDA'
+        GROUP BY v.id, v.usuario.nome, v.createdAt, v.total
+        ORDER BY v.createdAt DESC
+        LIMIT 5
+    """)
+    List<Object[]> findResumosVendasRecentes(@Param("loja") Loja loja);
+
     @Query("""
         SELECT p.nome, COALESCE(SUM(iv.quantidade), 0) as total
         FROM ItemVenda iv

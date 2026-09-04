@@ -48,6 +48,9 @@ class DatabaseScriptsTest {
         assertTrue(ler("init.sql").contains("foto_perfil         OID"));
         assertTrue(ler("migrations/004_empresa_loja_equipe_multitenancy.sql")
                 .contains("foto_perfil OID"));
+        assertTrue(ler("init.sql").contains("CREATE TABLE IF NOT EXISTS usuario_fotos"));
+        assertTrue(ler("migrations/010_separate_profile_photos.sql")
+                .contains("lo_get(u.foto_perfil)"));
     }
 
     @Test

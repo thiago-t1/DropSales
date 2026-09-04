@@ -32,20 +32,17 @@ export class PerfilComponent implements OnInit, OnDestroy {
   sucessoSenha = '';
   erroSenha = '';
   uploadingFoto = false;
-  fotoRemotaFalhou = false;
   mostrarSenhaAtual = false;
   mostrarNovaSenha = false;
   mostrarConfirmacaoSenha = false;
 
   fotoPreview: string | null = null;
-  fotoUrl: string | null = null;
-  private destruido = false;
 
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
     private readonly tenantService: TenantService,
-    private readonly profilePhotoService: ProfilePhotoService,
+    readonly profilePhotoService: ProfilePhotoService,
   ) {}
 
   ngOnInit(): void {
@@ -54,16 +51,14 @@ export class PerfilComponent implements OnInit, OnDestroy {
         this.usuario = u;
         this.form = { nome: u.nome, email: u.email };
         this.loading = false;
-        if (u.temFoto) this.carregarFotoRemota();
+        if (u.temFoto) this.profilePhotoService.carregar();
       },
       error: () => { this.erro = 'Erro ao carregar perfil.'; this.loading = false; },
     });
   }
 
   ngOnDestroy(): void {
-    this.destruido = true;
     this.revogarFotoPreview();
-    this.revogarFotoRemota();
   }
 
   get inicialUsuario(): string {
@@ -83,8 +78,7 @@ export class PerfilComponent implements OnInit, OnDestroy {
   }
 
   onFotoRemotaErro(): void {
-    this.fotoRemotaFalhou = true;
-    this.revogarFotoRemota();
+    this.profilePhotoService.limpar();
   }
 
   onFotoSelecionada(event: Event): void {
@@ -115,8 +109,7 @@ export class PerfilComponent implements OnInit, OnDestroy {
       next: (u) => {
         this.usuario = u;
         this.profilePhotoService.definir(file);
-        this.fotoRemotaFalhou = false;
-        this.carregarFotoRemota(true);
+        this.revogarFotoPreview();
         this.sucesso = 'Foto atualizada com sucesso.';
         this.uploadingFoto = false;
         input.value = '';
@@ -132,31 +125,9 @@ export class PerfilComponent implements OnInit, OnDestroy {
     });
   }
 
-  private carregarFotoRemota(limparPreviewAoConcluir = false): void {
-    this.fotoRemotaFalhou = false;
-    this.apiService.getFoto().subscribe({
-      next: (foto) => {
-        if (this.destruido) return;
-        this.revogarFotoRemota();
-        this.fotoUrl = URL.createObjectURL(foto);
-        if (limparPreviewAoConcluir) this.revogarFotoPreview();
-      },
-      error: () => {
-        if (this.destruido) return;
-        this.fotoRemotaFalhou = true;
-        this.revogarFotoRemota();
-      },
-    });
-  }
-
   private revogarFotoPreview(): void {
     if (this.fotoPreview) URL.revokeObjectURL(this.fotoPreview);
     this.fotoPreview = null;
-  }
-
-  private revogarFotoRemota(): void {
-    if (this.fotoUrl) URL.revokeObjectURL(this.fotoUrl);
-    this.fotoUrl = null;
   }
 
   salvar(dadosForm?: NgForm): void {

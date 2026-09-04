@@ -4,9 +4,6 @@ import com.dropsales.dto.DashboardResponse;
 import com.dropsales.dto.ProdutoResponse;
 import com.dropsales.model.Loja;
 import com.dropsales.model.StatusRecebivel;
-import com.dropsales.model.StatusVenda;
-import com.dropsales.model.Transacao;
-import com.dropsales.model.Venda;
 import com.dropsales.repository.PagamentoVendaRepository;
 import com.dropsales.repository.RecebivelRepository;
 import com.dropsales.repository.TransacaoRepository;
@@ -22,9 +19,9 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -88,6 +85,11 @@ public class DashboardService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public List<DashboardResponse.VendaRecenteDTO> getVendasRecentes() {
+        return buscarVendasRecentes(tenantContext.atual().loja());
+    }
+
     private BigDecimal valorOuZero(BigDecimal valor) {
         return valor == null ? BigDecimal.ZERO : valor;
     }
@@ -101,17 +103,8 @@ public class DashboardService {
                 .atStartOfDay(zone)
                 .withZoneSameInstant(ZoneOffset.UTC)
                 .toOffsetDateTime();
-        List<Venda> vendas = vendaRepository.findVendasDesde(desde, loja);
-
-        Map<LocalDate, BigDecimal> porDia = vendas.stream()
-                .collect(Collectors.groupingBy(
-                        venda -> venda.getCreatedAt()
-                                .atZoneSameInstant(zone)
-                                .toLocalDate(),
-                        Collectors.reducing(
-                                BigDecimal.ZERO,
-                                Venda::getTotal,
-                                BigDecimal::add)));
+        List<Object[]> vendas = vendaRepository.findTotaisVendasDesde(desde, loja);
+        Map<LocalDate, BigDecimal> porDia = agruparTotaisPorDia(vendas, zone);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
         List<DashboardResponse.VendaDiariaDTO> resultado = new ArrayList<>();
@@ -134,17 +127,8 @@ public class DashboardService {
                 .atStartOfDay(zone)
                 .withZoneSameInstant(ZoneOffset.UTC)
                 .toOffsetDateTime();
-        List<Transacao> custos = transacaoRepository.findCustosDesde(desde, loja);
-
-        Map<LocalDate, BigDecimal> porDia = custos.stream()
-                .collect(Collectors.groupingBy(
-                        transacao -> transacao.getCreatedAt()
-                                .atZoneSameInstant(zone)
-                                .toLocalDate(),
-                        Collectors.reducing(
-                                BigDecimal.ZERO,
-                                Transacao::getValor,
-                                BigDecimal::add)));
+        List<Object[]> custos = transacaoRepository.findTotaisCustosDesde(desde, loja);
+        Map<LocalDate, BigDecimal> porDia = agruparTotaisPorDia(custos, zone);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
         List<DashboardResponse.VendaDiariaDTO> resultado = new ArrayList<>();
@@ -172,21 +156,30 @@ public class DashboardService {
     private List<DashboardResponse.VendaRecenteDTO> buscarVendasRecentes(Loja loja) {
         ZoneId zone = zoneDaLoja(loja);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        return vendaRepository.findTop5ByLojaAndStatusOrderByCreatedAtDesc(
-                        loja,
-                        StatusVenda.CONCLUIDA).stream()
-                .map(venda -> DashboardResponse.VendaRecenteDTO.builder()
-                        .id(venda.getId())
-                        .vendedor(venda.getUsuario().getNome())
-                        .data(venda.getCreatedAt()
+        return vendaRepository.findResumosVendasRecentes(loja).stream()
+                .map(row -> DashboardResponse.VendaRecenteDTO.builder()
+                        .id(((Number) row[0]).longValue())
+                        .vendedor((String) row[1])
+                        .data(((OffsetDateTime) row[2])
                                 .atZoneSameInstant(zone)
                                 .format(formatter))
-                        .valor(venda.getTotal())
-                        .totalItens(venda.getItens().stream()
-                                .mapToInt(item -> item.getQuantidade())
-                                .sum())
+                        .valor((BigDecimal) row[3])
+                        .totalItens(((Number) row[4]).intValue())
                         .build())
                 .toList();
+    }
+
+    private Map<LocalDate, BigDecimal> agruparTotaisPorDia(
+            List<Object[]> linhas,
+            ZoneId zone) {
+        Map<LocalDate, BigDecimal> porDia = new HashMap<>();
+        for (Object[] linha : linhas) {
+            LocalDate dia = ((OffsetDateTime) linha[0])
+                    .atZoneSameInstant(zone)
+                    .toLocalDate();
+            porDia.merge(dia, (BigDecimal) linha[1], BigDecimal::add);
+        }
+        return porDia;
     }
 
     private ZoneId zoneDaLoja(Loja loja) {

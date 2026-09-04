@@ -53,7 +53,7 @@
         <div class="relative mx-auto w-fit">
           @if (fotoPreview) {
             <img [src]="fotoPreview" alt="Prévia da foto de perfil" class="h-28 w-28 rounded-full border-4 border-white object-cover shadow-lg shadow-slate-200 dark:border-slate-800 dark:shadow-black/20" />
-          } @else if (usuario?.temFoto && fotoUrl && !fotoRemotaFalhou) {
+          } @else if (usuario?.temFoto && profilePhotoService.fotoUrl(); as fotoUrl) {
             <img [src]="fotoUrl" (error)="onFotoRemotaErro()" alt="Foto de perfil" class="h-28 w-28 rounded-full border-4 border-white object-cover shadow-lg shadow-slate-200 dark:border-slate-800 dark:shadow-black/20" />
           } @else {
             <div class="flex h-28 w-28 items-center justify-center rounded-full border-4 border-white bg-indigo-600 text-3xl font-bold text-white shadow-lg shadow-slate-200 dark:border-slate-800 dark:shadow-black/20" aria-hidden="true">

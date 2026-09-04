@@ -2,15 +2,11 @@ package com.dropsales.service;
 
 import com.dropsales.dto.DashboardResponse;
 import com.dropsales.model.Empresa;
-import com.dropsales.model.ItemVenda;
 import com.dropsales.model.Loja;
 import com.dropsales.model.MembroEmpresa;
 import com.dropsales.model.PapelEmpresa;
 import com.dropsales.model.StatusRecebivel;
-import com.dropsales.model.StatusVenda;
-import com.dropsales.model.Transacao;
 import com.dropsales.model.Usuario;
-import com.dropsales.model.Venda;
 import com.dropsales.repository.PagamentoVendaRepository;
 import com.dropsales.repository.RecebivelRepository;
 import com.dropsales.repository.TransacaoRepository;
@@ -100,15 +96,13 @@ class DashboardServiceTest {
                 loja,
                 StatusRecebivel.PENDENTE)).thenReturn(new BigDecimal("500.00"));
         when(produtoService.listarEstoqueBaixo()).thenReturn(List.of());
-        when(vendaRepository.findVendasDesde(any(), org.mockito.ArgumentMatchers.eq(loja)))
+        when(vendaRepository.findTotaisVendasDesde(any(), org.mockito.ArgumentMatchers.eq(loja)))
                 .thenReturn(List.of());
-        when(transacaoRepository.findCustosDesde(
+        when(transacaoRepository.findTotaisCustosDesde(
                 any(),
                 org.mockito.ArgumentMatchers.eq(loja))).thenReturn(List.of());
         when(vendaRepository.findTop5ProdutosPorQuantidade(loja)).thenReturn(List.of());
-        when(vendaRepository.findTop5ByLojaAndStatusOrderByCreatedAtDesc(
-                loja,
-                StatusVenda.CONCLUIDA)).thenReturn(List.of());
+        when(vendaRepository.findResumosVendasRecentes(loja)).thenReturn(List.of());
 
         DashboardResponse response = dashboardService.getDashboard();
 
@@ -131,33 +125,23 @@ class DashboardServiceTest {
 
     @Test
     void apresentaVendaRecenteNoHorarioDaLojaComVendedorEQuantidade() {
-        Usuario vendedor = Usuario.builder()
-                .id(10L)
-                .nome("Maria")
-                .email("maria@teste.com")
-                .build();
-        Venda venda = Venda.builder()
-                .id(20L)
-                .usuario(vendedor)
-                .loja(loja)
-                .status(StatusVenda.CONCLUIDA)
-                .total(new BigDecimal("149.90"))
-                .createdAt(OffsetDateTime.parse("2026-07-28T15:30:00Z"))
-                .itens(List.of(
-                        ItemVenda.builder().quantidade(2).build(),
-                        ItemVenda.builder().quantidade(1).build()))
-                .build();
+        OffsetDateTime criadaEm = OffsetDateTime.parse("2026-07-28T15:30:00Z");
 
         when(produtoService.listarEstoqueBaixo()).thenReturn(List.of());
-        when(vendaRepository.findVendasDesde(any(), org.mockito.ArgumentMatchers.eq(loja)))
-                .thenReturn(List.of(venda));
-        when(transacaoRepository.findCustosDesde(
+        when(vendaRepository.findTotaisVendasDesde(any(), org.mockito.ArgumentMatchers.eq(loja)))
+                .thenReturn(List.<Object[]>of(new Object[] {criadaEm, new BigDecimal("149.90")}));
+        when(transacaoRepository.findTotaisCustosDesde(
                 any(),
                 org.mockito.ArgumentMatchers.eq(loja))).thenReturn(List.of());
         when(vendaRepository.findTop5ProdutosPorQuantidade(loja)).thenReturn(List.of());
-        when(vendaRepository.findTop5ByLojaAndStatusOrderByCreatedAtDesc(
-                loja,
-                StatusVenda.CONCLUIDA)).thenReturn(List.of(venda));
+        when(vendaRepository.findResumosVendasRecentes(loja))
+                .thenReturn(List.<Object[]>of(new Object[] {
+                        20L,
+                        "Maria",
+                        criadaEm,
+                        new BigDecimal("149.90"),
+                        3L
+                }));
 
         DashboardResponse response = dashboardService.getDashboard();
 
@@ -177,21 +161,18 @@ class DashboardServiceTest {
                 .atZone(zone)
                 .withZoneSameInstant(ZoneOffset.UTC)
                 .toOffsetDateTime();
-        Transacao custo = Transacao.builder()
-                .valor(new BigDecimal("42.50"))
-                .createdAt(instanteUtc)
-                .build();
-
         when(produtoService.listarEstoqueBaixo()).thenReturn(List.of());
-        when(vendaRepository.findVendasDesde(any(), org.mockito.ArgumentMatchers.eq(loja)))
+        when(vendaRepository.findTotaisVendasDesde(any(), org.mockito.ArgumentMatchers.eq(loja)))
                 .thenReturn(List.of());
-        when(transacaoRepository.findCustosDesde(
+        when(transacaoRepository.findTotaisCustosDesde(
                 any(),
-                org.mockito.ArgumentMatchers.eq(loja))).thenReturn(List.of(custo));
+                org.mockito.ArgumentMatchers.eq(loja))).thenReturn(
+                        List.<Object[]>of(new Object[] {
+                                instanteUtc,
+                                new BigDecimal("42.50")
+                        }));
         when(vendaRepository.findTop5ProdutosPorQuantidade(loja)).thenReturn(List.of());
-        when(vendaRepository.findTop5ByLojaAndStatusOrderByCreatedAtDesc(
-                loja,
-                StatusVenda.CONCLUIDA)).thenReturn(List.of());
+        when(vendaRepository.findResumosVendasRecentes(loja)).thenReturn(List.of());
 
         DashboardResponse response = dashboardService.getDashboard();
 
