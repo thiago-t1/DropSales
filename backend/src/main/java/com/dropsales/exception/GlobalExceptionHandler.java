@@ -53,6 +53,9 @@ public class GlobalExceptionHandler {
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("message", errors.values().stream()
+                .findFirst()
+                .orElse("Revise os campos informados."));
         body.put("errors", errors);
         return ResponseEntity.badRequest().body(body);
     }

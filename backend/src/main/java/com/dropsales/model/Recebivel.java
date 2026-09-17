@@ -41,13 +41,13 @@ public class Recebivel {
     @Column(name = "total_parcelas", nullable = false)
     private Integer totalParcelas;
 
-    @Column(name = "valor_bruto", nullable = false, precision = 12, scale = 2)
+    @Column(name = "valor_bruto", nullable = false, precision = 19, scale = 2)
     private BigDecimal valorBruto;
 
-    @Column(name = "taxa_valor", nullable = false, precision = 12, scale = 2)
+    @Column(name = "taxa_valor", nullable = false, precision = 19, scale = 2)
     private BigDecimal taxaValor;
 
-    @Column(name = "valor_liquido", nullable = false, precision = 12, scale = 2)
+    @Column(name = "valor_liquido", nullable = false, precision = 19, scale = 2)
     private BigDecimal valorLiquido;
 
     @Column(name = "data_prevista", nullable = false)

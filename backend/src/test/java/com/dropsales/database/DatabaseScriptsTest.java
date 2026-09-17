@@ -63,6 +63,13 @@ class DatabaseScriptsTest {
         assertTrue(compatibilitySql.contains("ADD COLUMN IF NOT EXISTS idempotency_request_hash"));
     }
 
+    @Test
+    void valoresFinanceirosSuportamVendasAcimaDeDezBilhoes() throws IOException {
+        assertTrue(ler("init.sql").contains("total                       DECIMAL(19,2)"));
+        assertTrue(ler("migrations/011_expand_monetary_values.sql")
+                .contains("ALTER COLUMN total TYPE NUMERIC(19,2)"));
+    }
+
     private String ler(String relativePath) throws IOException {
         return Files.readString(DATABASE_DIR.resolve(relativePath));
     }

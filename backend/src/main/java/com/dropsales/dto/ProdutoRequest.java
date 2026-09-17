@@ -8,12 +8,16 @@ import java.math.BigDecimal;
 public class ProdutoRequest {
     @NotBlank(message = "Nome e obrigatorio")
     @Size(max = 200, message = "Nome deve ter no maximo 200 caracteres")
+    @Pattern(
+            regexp = "^[\\p{L}\\p{N}][\\p{L}\\p{N} .,'’&/()\\-+]{0,199}$",
+            message = "Nome contem caracteres nao permitidos")
     private String nome;
 
     @Size(max = 500, message = "Descricao deve ter no maximo 500 caracteres")
     private String descricao;
 
-    @Size(max = 50, message = "SKU deve ter no maximo 50 caracteres")
+    @Size(max = 50, message = "Codigo do produto deve ter no maximo 50 caracteres")
+    @Pattern(regexp = "^[A-Za-z0-9._-]*$", message = "Codigo do produto contem caracteres invalidos")
     private String sku;
 
     @NotNull(message = "Preco de custo e obrigatorio")

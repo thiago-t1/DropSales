@@ -42,28 +42,28 @@ public class PagamentoVenda {
     @Builder.Default
     private Integer parcelas = 1;
 
-    @Column(name = "valor_bruto", nullable = false, precision = 12, scale = 2)
+    @Column(name = "valor_bruto", nullable = false, precision = 19, scale = 2)
     private BigDecimal valorBruto;
 
     @Column(name = "taxa_percentual", nullable = false, precision = 7, scale = 4)
     @Builder.Default
     private BigDecimal taxaPercentual = BigDecimal.ZERO;
 
-    @Column(name = "taxa_fixa", nullable = false, precision = 12, scale = 2)
+    @Column(name = "taxa_fixa", nullable = false, precision = 19, scale = 2)
     @Builder.Default
     private BigDecimal taxaFixa = BigDecimal.ZERO;
 
-    @Column(name = "taxa_valor", nullable = false, precision = 12, scale = 2)
+    @Column(name = "taxa_valor", nullable = false, precision = 19, scale = 2)
     @Builder.Default
     private BigDecimal taxaValor = BigDecimal.ZERO;
 
-    @Column(name = "valor_liquido", nullable = false, precision = 12, scale = 2)
+    @Column(name = "valor_liquido", nullable = false, precision = 19, scale = 2)
     private BigDecimal valorLiquido;
 
-    @Column(name = "valor_recebido", precision = 12, scale = 2)
+    @Column(name = "valor_recebido", precision = 19, scale = 2)
     private BigDecimal valorRecebido;
 
-    @Column(precision = 12, scale = 2)
+    @Column(precision = 19, scale = 2)
     private BigDecimal troco;
 
     @Column(name = "prazo_recebimento_dias", nullable = false)

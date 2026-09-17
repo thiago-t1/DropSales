@@ -1,5 +1,13 @@
 import type { Produto, ProdutoRequest } from '../../core/models/api.models';
 
+const NOME_PRODUTO_INVALIDO = /[^\p{L}\p{N} .,'’&/()\-+]/u;
+
+function nomeProdutoValido(valor: string): boolean {
+  return Boolean(valor.trim())
+    && valor.trim().length <= 200
+    && !NOME_PRODUTO_INVALIDO.test(valor);
+}
+
 /**
  * Converte o snapshot retornado pela API no payload completo de edicao.
  * Manter esta conversao centralizada evita que campos nao visiveis sejam
@@ -31,7 +39,7 @@ export function inteiroNaoNegativo(valor: number): boolean {
 }
 
 export function produtoRequestValido(produto: ProdutoRequest): boolean {
-  return Boolean(produto.nome?.trim())
+  return nomeProdutoValido(produto.nome ?? '')
     && produto.nome.trim().length <= 200
     && (produto.descricao?.length ?? 0) <= 500
     && (produto.sku?.length ?? 0) <= 50

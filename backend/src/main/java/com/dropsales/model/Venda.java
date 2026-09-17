@@ -50,7 +50,7 @@ public class Venda {
     @Builder.Default
     private StatusVenda status = StatusVenda.CONCLUIDA;
 
-    @Column(nullable = false, precision = 12, scale = 2)
+    @Column(nullable = false, precision = 19, scale = 2)
     @Builder.Default
     private BigDecimal total = BigDecimal.ZERO;
 
@@ -63,11 +63,11 @@ public class Venda {
     @Builder.Default
     private BigDecimal taxaPagamentoPercentual = BigDecimal.ZERO;
 
-    @Column(name = "taxa_pagamento_valor", nullable = false, precision = 12, scale = 2)
+    @Column(name = "taxa_pagamento_valor", nullable = false, precision = 19, scale = 2)
     @Builder.Default
     private BigDecimal taxaPagamentoValor = BigDecimal.ZERO;
 
-    @Column(name = "valor_liquido", nullable = false, precision = 12, scale = 2)
+    @Column(name = "valor_liquido", nullable = false, precision = 19, scale = 2)
     @Builder.Default
     private BigDecimal valorLiquido = BigDecimal.ZERO;
 

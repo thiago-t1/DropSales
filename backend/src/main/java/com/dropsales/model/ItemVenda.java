@@ -29,10 +29,10 @@ public class ItemVenda {
     @Column(nullable = false)
     private Integer quantidade;
 
-    @Column(name = "preco_unitario", nullable = false, precision = 12, scale = 2)
+    @Column(name = "preco_unitario", nullable = false, precision = 19, scale = 2)
     private BigDecimal precoUnitario;
 
-    @Column(nullable = false, precision = 12, scale = 2)
+    @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal subtotal;
 
     /** Calcula o subtotal automaticamente */

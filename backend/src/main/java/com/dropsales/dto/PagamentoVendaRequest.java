@@ -13,8 +13,8 @@ public class PagamentoVendaRequest {
 
     @NotNull
     @DecimalMin(value = "0.01", message = "Valor do pagamento deve ser maior que zero")
-    @Digits(integer = 10, fraction = 2,
-            message = "Valor do pagamento deve ter no maximo dez inteiros e duas casas decimais")
+    @Digits(integer = 17, fraction = 2,
+            message = "Valor do pagamento excede o limite permitido")
     private BigDecimal valor;
 
     @Positive(message = "Adquirente deve ser um identificador positivo")
@@ -28,7 +28,7 @@ public class PagamentoVendaRequest {
     private Integer parcelas = 1;
 
     @DecimalMin(value = "0.00", message = "Valor recebido nao pode ser negativo")
-    @Digits(integer = 10, fraction = 2,
-            message = "Valor recebido deve ter no maximo dez inteiros e duas casas decimais")
+    @Digits(integer = 17, fraction = 2,
+            message = "Valor recebido excede o limite permitido")
     private BigDecimal valorRecebido;
 }

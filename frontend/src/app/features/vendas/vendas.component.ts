@@ -1171,11 +1171,21 @@ export class VendasComponent implements OnInit, PendingChangesAware {
         const mensagemPadrao = this.checkoutIncerto
           ? 'Não foi possível confirmar o resultado. Tente novamente com segurança ou descarte o checkout.'
           : 'Erro ao registrar venda.';
-        this.mostrarErro(
-          error.error?.message || (this.checkoutIncerto ? mensagemPadrao : error.message) || mensagemPadrao,
-        );
+        this.mostrarErro(this.mensagemDaApi(error, mensagemPadrao));
       },
     });
+  }
+
+  private mensagemDaApi(error: any, fallback: string): string {
+    if (typeof error?.error?.message === 'string' && error.error.message.trim()) {
+      return error.error.message;
+    }
+    const erros = error?.error?.errors;
+    if (erros && typeof erros === 'object') {
+      const primeira = Object.values(erros).find((valor) => typeof valor === 'string');
+      if (typeof primeira === 'string') return primeira;
+    }
+    return this.checkoutIncerto ? fallback : 'Não foi possível registrar a venda. Revise os valores e tente novamente.';
   }
 
   private substituirVendaNoHistorico(vendaAtualizada: VendaResponse): void {

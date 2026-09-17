@@ -105,7 +105,7 @@
             <div>
               <h2 class="font-extrabold text-slate-900">Escolha os produtos</h2>
               <p class="mt-0.5 text-xs text-slate-500 sm:text-sm">
-                Pesquise por nome, SKU ou categoria.
+                Pesquise por nome, código ou categoria.
               </p>
             </div>
           </div>
@@ -160,7 +160,7 @@
             <div class="grid min-h-32 place-items-center p-6 text-center">
               <div>
                 <p class="text-sm font-bold text-slate-700">Nenhum resultado encontrado</p>
-                <p class="mt-1 text-xs text-slate-400">Tente buscar com outro nome, SKU ou categoria.</p>
+                <p class="mt-1 text-xs text-slate-400">Tente buscar com outro nome, código ou categoria.</p>
               </div>
             </div>
           } @else {
@@ -183,7 +183,7 @@
                     }
                   </div>
                   <p class="mt-1 truncate text-[11px] text-slate-400">
-                    {{ produto.sku || 'Sem SKU' }}
+                    {{ produto.sku || 'Sem código' }}
                     @if (produtoSelecionadoId === produto.id) {
                       <span class="font-bold text-indigo-600"> · selecionado</span>
                     }

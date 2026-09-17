@@ -25,7 +25,7 @@ public class Transacao {
     @Column(nullable = false, length = 300)
     private String descricao;
 
-    @Column(nullable = false, precision = 12, scale = 2)
+    @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal valor;
 
     @Enumerated(EnumType.STRING)

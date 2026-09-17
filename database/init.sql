@@ -100,9 +100,9 @@ CREATE TABLE IF NOT EXISTS produtos (
     nome                    VARCHAR(200) NOT NULL,
     descricao               TEXT,
     sku                     VARCHAR(50),
-    preco_custo             DECIMAL(12,2) NOT NULL DEFAULT 0
+    preco_custo             DECIMAL(19,2) NOT NULL DEFAULT 0
                                 CHECK (preco_custo >= 0),
-    preco_venda             DECIMAL(12,2) NOT NULL
+    preco_venda             DECIMAL(19,2) NOT NULL
                                 CHECK (preco_venda >= 0),
     quantidade_estoque      INTEGER NOT NULL DEFAULT 0
                                 CHECK (quantidade_estoque >= 0),
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS vendas (
                                     ),
     status                      VARCHAR(20) NOT NULL DEFAULT 'CONCLUIDA'
                                     CHECK (status IN ('CONCLUIDA', 'CANCELADA')),
-    total                       DECIMAL(12,2) NOT NULL DEFAULT 0,
+    total                       DECIMAL(19,2) NOT NULL DEFAULT 0,
     forma_pagamento             VARCHAR(20) NOT NULL DEFAULT 'PIX'
                                     CHECK (forma_pagamento IN (
                                         'DINHEIRO', 'PIX', 'CARTAO_DEBITO',
@@ -140,8 +140,8 @@ CREATE TABLE IF NOT EXISTS vendas (
                                     CHECK (
                                         taxa_pagamento_percentual BETWEEN 0 AND 100
                                     ),
-    taxa_pagamento_valor        DECIMAL(12,2) NOT NULL DEFAULT 0,
-    valor_liquido               DECIMAL(12,2) NOT NULL DEFAULT 0,
+    taxa_pagamento_valor        DECIMAL(19,2) NOT NULL DEFAULT 0,
+    valor_liquido               DECIMAL(19,2) NOT NULL DEFAULT 0,
     observacao                  TEXT,
     motivo_cancelamento         VARCHAR(500),
     cancelada_por_id            BIGINT REFERENCES usuarios(id),
@@ -185,14 +185,14 @@ CREATE TABLE IF NOT EXISTS itens_venda (
     venda_id        BIGINT NOT NULL REFERENCES vendas(id) ON DELETE CASCADE,
     produto_id      BIGINT NOT NULL REFERENCES produtos(id),
     quantidade      INTEGER NOT NULL CHECK (quantidade > 0),
-    preco_unitario  DECIMAL(12,2) NOT NULL,
-    subtotal        DECIMAL(12,2) NOT NULL
+    preco_unitario  DECIMAL(19,2) NOT NULL,
+    subtotal        DECIMAL(19,2) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS transacoes (
     id                  BIGSERIAL PRIMARY KEY,
     descricao           VARCHAR(300) NOT NULL,
-    valor               DECIMAL(12,2) NOT NULL,
+    valor               DECIMAL(19,2) NOT NULL,
     tipo                VARCHAR(20) NOT NULL
                             CHECK (tipo IN ('RECEITA', 'DESPESA')),
     status              VARCHAR(20) NOT NULL DEFAULT 'PENDENTE'
@@ -235,7 +235,7 @@ CREATE TABLE IF NOT EXISTS configuracoes_taxa_pagamento (
     parcelas                INTEGER NOT NULL DEFAULT 1
                                 CHECK (parcelas BETWEEN 1 AND 18),
     taxa_percentual         DECIMAL(7,4) NOT NULL DEFAULT 0,
-    taxa_fixa               DECIMAL(12,2) NOT NULL DEFAULT 0,
+    taxa_fixa               DECIMAL(19,2) NOT NULL DEFAULT 0,
     prazo_recebimento_dias  INTEGER NOT NULL DEFAULT 0,
     ativo                   BOOLEAN NOT NULL DEFAULT TRUE,
     created_at              TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -271,13 +271,13 @@ CREATE TABLE IF NOT EXISTS pagamentos_venda (
     adquirente_id           BIGINT,
     bandeira                VARCHAR(40),
     parcelas                INTEGER NOT NULL DEFAULT 1,
-    valor_bruto             DECIMAL(12,2) NOT NULL,
+    valor_bruto             DECIMAL(19,2) NOT NULL,
     taxa_percentual         DECIMAL(7,4) NOT NULL DEFAULT 0,
-    taxa_fixa               DECIMAL(12,2) NOT NULL DEFAULT 0,
-    taxa_valor              DECIMAL(12,2) NOT NULL DEFAULT 0,
-    valor_liquido           DECIMAL(12,2) NOT NULL,
-    valor_recebido          DECIMAL(12,2),
-    troco                   DECIMAL(12,2),
+    taxa_fixa               DECIMAL(19,2) NOT NULL DEFAULT 0,
+    taxa_valor              DECIMAL(19,2) NOT NULL DEFAULT 0,
+    valor_liquido           DECIMAL(19,2) NOT NULL,
+    valor_recebido          DECIMAL(19,2),
+    troco                   DECIMAL(19,2),
     prazo_recebimento_dias  INTEGER NOT NULL DEFAULT 0,
     status                  VARCHAR(20) NOT NULL DEFAULT 'ATIVO'
                                 CHECK (status IN (
@@ -319,9 +319,9 @@ CREATE TABLE IF NOT EXISTS recebiveis (
     pagamento_venda_id  BIGINT NOT NULL,
     numero_parcela      INTEGER NOT NULL,
     total_parcelas      INTEGER NOT NULL,
-    valor_bruto         DECIMAL(12,2) NOT NULL,
-    taxa_valor          DECIMAL(12,2) NOT NULL,
-    valor_liquido       DECIMAL(12,2) NOT NULL,
+    valor_bruto         DECIMAL(19,2) NOT NULL,
+    taxa_valor          DECIMAL(19,2) NOT NULL,
+    valor_liquido       DECIMAL(19,2) NOT NULL,
     data_prevista       DATE NOT NULL,
     status              VARCHAR(20) NOT NULL DEFAULT 'PENDENTE'
                             CHECK (status IN (

@@ -43,7 +43,7 @@ public class ConfiguracaoTaxaPagamento {
     @Builder.Default
     private BigDecimal taxaPercentual = BigDecimal.ZERO;
 
-    @Column(name = "taxa_fixa", nullable = false, precision = 12, scale = 2)
+    @Column(name = "taxa_fixa", nullable = false, precision = 19, scale = 2)
     @Builder.Default
     private BigDecimal taxaFixa = BigDecimal.ZERO;
 

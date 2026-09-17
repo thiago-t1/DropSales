@@ -66,6 +66,15 @@ class RequestValidationTest {
     }
 
     @Test
+    void produtoRejeitaCaracteresInadequadosNoNomeECodigo() {
+        ProdutoRequest request = produtoValido();
+        request.setNome("Produto @@@!!!");
+        request.setSku("ITEM 001!");
+
+        assertCamposInvalidos(validar(request), "nome", "sku");
+    }
+
+    @Test
     void configuracaoDeTaxaAceitaPrecisaoEExtremosDoBanco() {
         ConfiguracaoTaxaRequest request = configuracaoValida();
         request.setAdquirenteId(1L);
@@ -96,13 +105,13 @@ class RequestValidationTest {
     }
 
     @Test
-    void pagamentoAceitaValoresMonetariosCompativeisComDecimalDozeDois() {
+    void pagamentoAceitaVendaAcimaDeDezBilhoes() {
         PagamentoVendaRequest request = pagamentoValido();
         request.setAdquirenteId(1L);
         request.setBandeira("B".repeat(40));
         request.setParcelas(18);
-        request.setValor(new BigDecimal("9999999999.99"));
-        request.setValorRecebido(new BigDecimal("9999999999.99"));
+        request.setValor(new BigDecimal("16650000000.00"));
+        request.setValorRecebido(new BigDecimal("16650000000.00"));
 
         assertTrue(validar(request).isEmpty());
     }

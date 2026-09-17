@@ -34,11 +34,11 @@ public class Produto {
     @Column(length = 50)
     private String sku;
 
-    @Column(name = "preco_custo", nullable = false, precision = 12, scale = 2)
+    @Column(name = "preco_custo", nullable = false, precision = 19, scale = 2)
     @Builder.Default
     private BigDecimal precoCusto = BigDecimal.ZERO;
 
-    @Column(name = "preco_venda", nullable = false, precision = 12, scale = 2)
+    @Column(name = "preco_venda", nullable = false, precision = 19, scale = 2)
     private BigDecimal precoVenda;
 
     @Column(name = "quantidade_estoque", nullable = false)

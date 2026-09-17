@@ -204,7 +204,7 @@
             name="buscaProduto"
             [(ngModel)]="busca"
             class="product-input !pl-10"
-            placeholder="Buscar por nome, SKU ou categoria"
+            placeholder="Buscar por nome, código ou categoria"
             autocomplete="off"
           />
         </label>
@@ -358,7 +358,7 @@
                     </span>
                     <div class="min-w-0">
                       <p class="max-w-[260px] truncate text-sm font-semibold text-slate-900" [title]="p.nome">{{ p.nome }}</p>
-                      <p class="mt-0.5 font-mono text-[11px] text-slate-400">SKU {{ p.sku || 'não informado' }}</p>
+                      <p class="mt-0.5 font-mono text-[11px] text-slate-400">Código {{ p.sku || 'não informado' }}</p>
                     </div>
                   </div>
                 </td>
@@ -446,7 +446,7 @@
                   <div class="min-w-0">
                     <h3 class="truncate text-sm font-bold text-slate-900">{{ p.nome }}</h3>
                     <p class="mt-0.5 truncate text-xs text-slate-500">
-                      {{ p.categoria || 'Sem categoria' }} · <span class="font-mono">{{ p.sku || 'Sem SKU' }}</span>
+                      {{ p.categoria || 'Sem categoria' }} · <span class="font-mono">{{ p.sku || 'Sem código' }}</span>
                     </p>
                   </div>
                   @if (p.quantidadeEstoque === 0) {
@@ -586,7 +586,8 @@
                     #produtoNome="ngModel"
                     id="input-produto-nome"
                     name="produtoNome"
-                    [(ngModel)]="form.nome"
+                    [ngModel]="form.nome"
+                    (ngModelChange)="onNomeInput($event)"
                     class="product-input"
                     placeholder="Ex.: Camiseta básica preta"
                     maxlength="200"
@@ -603,17 +604,18 @@
                 </div>
                 <div class="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label for="input-produto-sku" class="product-label">Código / SKU</label>
+                    <label for="input-produto-sku" class="product-label">Código do produto</label>
                     <input
                       id="input-produto-sku"
                       name="produtoSku"
                       [(ngModel)]="form.sku"
                       class="product-input font-mono"
-                      placeholder="EX-001"
+                      placeholder="ITEM-0001"
                       maxlength="50"
-                      autocomplete="off"
+                      readonly
+                      aria-readonly="true"
                     />
-                    <p class="mt-1.5 text-[11px] leading-4 text-slate-400">Use um código único para facilitar buscas.</p>
+                    <p class="mt-1.5 text-[11px] leading-4 text-slate-400">Gerado automaticamente e separado para esta loja.</p>
                   </div>
                   <div>
                     <label for="input-produto-desc" class="product-label">Descrição</label>
@@ -642,12 +644,11 @@
                       #produtoCusto="ngModel"
                       id="input-produto-custo"
                       name="produtoCusto"
-                      type="number"
-                      [(ngModel)]="form.precoCusto"
+                      type="text"
+                      [(ngModel)]="precoCustoExibido"
+                      (ngModelChange)="onMoedaInput('precoCusto', $event)"
+                      (blur)="onMoedaBlur('precoCusto')"
                       class="product-input !pl-10"
-                      min="0"
-                      max="9999999999.99"
-                      step="0.01"
                       inputmode="decimal"
                       required
                       [class.border-rose-400]="produtoCusto.touched && (produtoCusto.invalid || !precoFormularioValido(form.precoCusto, 0))"
@@ -668,12 +669,11 @@
                       #produtoVenda="ngModel"
                       id="input-produto-venda"
                       name="produtoVenda"
-                      type="number"
-                      [(ngModel)]="form.precoVenda"
+                      type="text"
+                      [(ngModel)]="precoVendaExibido"
+                      (ngModelChange)="onMoedaInput('precoVenda', $event)"
+                      (blur)="onMoedaBlur('precoVenda')"
                       class="product-input !pl-10"
-                      min="0.01"
-                      max="9999999999.99"
-                      step="0.01"
                       inputmode="decimal"
                       required
                       [class.border-rose-400]="produtoVenda.touched && (produtoVenda.invalid || !precoFormularioValido(form.precoVenda, 0.01))"
@@ -710,11 +710,10 @@
                     #produtoEstoque="ngModel"
                     id="input-produto-estoque"
                     name="produtoEstoque"
-                    type="number"
-                    [(ngModel)]="form.quantidadeEstoque"
+                    type="text"
+                    [(ngModel)]="quantidadeExibida"
+                    (ngModelChange)="onInteiroInput('quantidadeEstoque', $event)"
                     class="product-input"
-                    min="0"
-                    step="1"
                     inputmode="numeric"
                     required
                     [class.border-rose-400]="produtoEstoque.touched && (produtoEstoque.invalid || !inteiroFormularioValido(form.quantidadeEstoque))"
@@ -732,11 +731,10 @@
                     #produtoMinimo="ngModel"
                     id="input-produto-minimo"
                     name="produtoMinimo"
-                    type="number"
-                    [(ngModel)]="form.estoqueMinimo"
+                    type="text"
+                    [(ngModel)]="estoqueMinimoExibido"
+                    (ngModelChange)="onInteiroInput('estoqueMinimo', $event)"
                     class="product-input"
-                    min="0"
-                    step="1"
                     inputmode="numeric"
                     required
                     [class.border-rose-400]="produtoMinimo.touched && (produtoMinimo.invalid || !inteiroFormularioValido(form.estoqueMinimo))"

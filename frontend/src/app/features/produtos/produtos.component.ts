@@ -10,6 +10,14 @@ import {
   produtoRequestValido,
   valorMonetarioValido,
 } from './product-form.mapper';
+import {
+  formatarInteiroBrasileiro,
+  formatarMoedaBrasileira,
+  lerInteiroFormatado,
+  lerMoedaBrasileira,
+  proximoCodigoProduto,
+  sanitizarNomeProduto,
+} from './product-input.utils';
 
 @Component({
   selector: 'app-produtos',
@@ -122,6 +130,10 @@ export class ProdutosComponent implements OnInit {
   // Form fields
   editId: number | null = null;
   form: ProdutoRequest = this.emptyForm();
+  precoCustoExibido = '0,00';
+  precoVendaExibido = '0,00';
+  quantidadeExibida = '0';
+  estoqueMinimoExibido = '5';
 
   // Catalog navigation
   busca = '';
@@ -165,6 +177,8 @@ export class ProdutosComponent implements OnInit {
     if (!this.podeAlterarCatalogo()) return;
     this.editId = null;
     this.form = this.emptyForm();
+    this.form.sku = proximoCodigoProduto(this.produtos.map((produto) => produto.sku));
+    this.sincronizarCamposFormatados();
     this.erro = '';
     this.showModal = true;
     this.focarNomeDoProduto();
@@ -174,6 +188,7 @@ export class ProdutosComponent implements OnInit {
     if (!this.podeAlterarCatalogo()) return;
     this.editId = p.id;
     this.form = produtoParaFormulario(p);
+    this.sincronizarCamposFormatados();
     this.erro = '';
     this.showModal = true;
     this.focarNomeDoProduto();
@@ -194,6 +209,41 @@ export class ProdutosComponent implements OnInit {
 
   inteiroFormularioValido(valor: number): boolean {
     return inteiroNaoNegativo(Number(valor));
+  }
+
+  onNomeInput(valor: string): void {
+    this.form.nome = sanitizarNomeProduto(valor);
+  }
+
+  onMoedaInput(campo: 'precoCusto' | 'precoVenda', valor: string): void {
+    const numero = lerMoedaBrasileira(valor);
+    if (numero === null) return;
+    this.form[campo] = numero;
+    const exibido = valor.replace(/[^\d,.]/g, '').slice(0, 16);
+    if (campo === 'precoCusto') this.precoCustoExibido = exibido;
+    else this.precoVendaExibido = exibido;
+  }
+
+  onMoedaBlur(campo: 'precoCusto' | 'precoVenda'): void {
+    const exibido = formatarMoedaBrasileira(Number(this.form[campo]));
+    if (campo === 'precoCusto') this.precoCustoExibido = exibido;
+    else this.precoVendaExibido = exibido;
+  }
+
+  onInteiroInput(campo: 'quantidadeEstoque' | 'estoqueMinimo', valor: string): void {
+    const numero = lerInteiroFormatado(valor);
+    if (numero === null) return;
+    this.form[campo] = numero;
+    const exibido = formatarInteiroBrasileiro(numero);
+    if (campo === 'quantidadeEstoque') this.quantidadeExibida = exibido;
+    else this.estoqueMinimoExibido = exibido;
+  }
+
+  private sincronizarCamposFormatados(): void {
+    this.precoCustoExibido = formatarMoedaBrasileira(Number(this.form.precoCusto));
+    this.precoVendaExibido = formatarMoedaBrasileira(Number(this.form.precoVenda));
+    this.quantidadeExibida = formatarInteiroBrasileiro(Number(this.form.quantidadeEstoque));
+    this.estoqueMinimoExibido = formatarInteiroBrasileiro(Number(this.form.estoqueMinimo));
   }
 
   salvar(formulario: NgForm): void {
