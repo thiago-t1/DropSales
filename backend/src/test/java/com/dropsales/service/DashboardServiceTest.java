@@ -71,7 +71,7 @@ class DashboardServiceTest {
                 .papel(PapelEmpresa.GERENTE)
                 .ativo(true)
                 .build();
-        when(tenantContext.atual()).thenReturn(
+        when(tenantContext.exigirGerencia()).thenReturn(
                 new TenantContextService.ContextoAtual(
                         usuario,
                         empresa,

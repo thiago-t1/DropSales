@@ -36,7 +36,7 @@ public class DashboardService {
 
     @Transactional(readOnly = true)
     public DashboardResponse getDashboard() {
-        Loja loja = tenantContext.atual().loja();
+        Loja loja = tenantContext.exigirGerencia().loja();
 
         // Competencia: venda concluida no periodo, independentemente da liquidacao.
         BigDecimal receitas = valorOuZero(transacaoRepository.somarReceitasPagas(loja));

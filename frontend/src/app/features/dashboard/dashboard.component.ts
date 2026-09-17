@@ -5,36 +5,24 @@ import { ApiService } from '../../core/services/api.service';
 import { Produto, TopProduto, VendaRecente } from '../../core/models/api.models';
 import { BaseChartDirective } from 'ng2-charts';
 import {
-  ArcElement,
   BarController,
   BarElement,
   CategoryScale,
   Chart,
   ChartConfiguration,
   ChartData,
-  DoughnutController,
-  Filler,
   Legend,
   LinearScale,
-  LineController,
-  LineElement,
-  PointElement,
   Tooltip,
 } from 'chart.js';
 import { formatarRotuloData, prepararSerieAtiva } from './dashboard-chart.utils';
 
 Chart.register(
-  ArcElement,
   BarController,
   BarElement,
   CategoryScale,
-  DoughnutController,
-  Filler,
   Legend,
   LinearScale,
-  LineController,
-  LineElement,
-  PointElement,
   Tooltip,
 );
 
@@ -52,12 +40,10 @@ export class DashboardComponent implements OnInit {
 
   // Indicadores financeiros
   receitas = 0;
-  despesas = 0;
   lucroBruto = 0;
   cmv = 0;
   taxasPagamento = 0;
-  recebidoLiquido = 0;
-  aReceber = 0;
+  lucroLiquido = 0;
 
   estoqueBaixo: Produto[] = [];
   topProdutos: TopProduto[] = [];
@@ -68,44 +54,31 @@ export class DashboardComponent implements OnInit {
   cmvPeriodo = 0;
 
   // Janela adaptativa: preserva contexto sem exibir semanas vazias.
-  barChartData: ChartData<'bar' | 'line'> = {
+  barChartData: ChartData<'bar'> = {
     labels: [],
     datasets: [
       {
-        type: 'line',
-        label: 'Receitas',
+        label: 'Faturamento',
         data: [],
-        backgroundColor: 'rgba(99, 102, 241, 0.16)',
-        borderColor: '#6366f1',
-        borderWidth: 3,
-        fill: true,
-        tension: 0.38,
-        pointRadius: 3,
-        pointHoverRadius: 6,
-        pointBackgroundColor: '#6366f1',
-        pointBorderColor: '#ffffff',
-        pointBorderWidth: 2,
-        order: 1,
+        backgroundColor: '#0e7490',
+        hoverBackgroundColor: '#155e75',
+        borderRadius: 7,
+        borderSkipped: false,
+        maxBarThickness: 28,
       },
       {
-        type: 'bar',
-        label: 'CMV',
+        label: 'Custo dos produtos',
         data: [],
-        backgroundColor: 'rgba(245, 158, 11, 0.72)',
-        borderColor: '#f59e0b',
-        borderWidth: 0,
+        backgroundColor: '#5eead4',
+        hoverBackgroundColor: '#2dd4bf',
         borderRadius: 6,
         borderSkipped: false,
-        maxBarThickness: 22,
-        categoryPercentage: 0.66,
-        barPercentage: 0.7,
-        hoverBackgroundColor: '#d97706',
-        order: 2,
+        maxBarThickness: 28,
       },
     ],
   };
 
-  barChartOptions: ChartConfiguration<'bar' | 'line'>['options'] = {
+  barChartOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     animation: { duration: 320 },
@@ -159,42 +132,6 @@ export class DashboardComponent implements OnInit {
   };
 
   // Distribuição de receitas e despesas
-  doughnutData: ChartData<'doughnut'> = {
-    labels: ['Receitas', 'Despesas'],
-    datasets: [
-      {
-        data: [0, 0],
-        backgroundColor: ['#4f46e5', '#f43f5e'],
-        hoverBackgroundColor: ['#4338ca', '#e11d48'],
-        borderColor: ['transparent', 'transparent'],
-        borderWidth: 0,
-        hoverOffset: 5,
-        borderRadius: 5,
-        spacing: 2,
-      },
-    ],
-  };
-
-  doughnutOptions: ChartConfiguration<'doughnut'>['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: '78%',
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: 'rgba(15, 23, 42, 0.94)',
-        padding: 12,
-        cornerRadius: 10,
-        callbacks: {
-          label: (context) =>
-            ` R$ ${(context.parsed || 0).toLocaleString('pt-BR', {
-              minimumFractionDigits: 2,
-            })}`,
-        },
-      },
-    },
-  };
-
   // Ranking de produtos
   topBarData: ChartData<'bar'> = {
     labels: [],
@@ -258,12 +195,10 @@ export class DashboardComponent implements OnInit {
     this.apiService.getDashboard(force).subscribe({
       next: (data) => {
         this.receitas = data.receitas;
-        this.despesas = data.despesas;
         this.cmv = data.cmv ?? 0;
         this.lucroBruto = data.lucroBruto ?? (this.receitas - this.cmv);
         this.taxasPagamento = data.taxasPagamento ?? 0;
-        this.recebidoLiquido = data.recebidoLiquido ?? data.saldo ?? 0;
-        this.aReceber = data.aReceber ?? data.areceber ?? 0;
+        this.lucroLiquido = data.lucroLiquido ?? data.saldoOperacional ?? data.saldo ?? 0;
         this.estoqueBaixo = data.estoqueBaixo ?? [];
         this.topProdutos = data.topProdutos ?? [];
         this.vendasRecentes = data.vendasRecentes ?? [];
@@ -286,16 +221,6 @@ export class DashboardComponent implements OnInit {
             {
               ...this.barChartData.datasets[1],
               data: serie.map((ponto) => ponto.cmv),
-            },
-          ],
-        };
-
-        this.doughnutData = {
-          ...this.doughnutData,
-          datasets: [
-            {
-              ...this.doughnutData.datasets[0],
-              data: [this.receitas, this.despesas],
             },
           ],
         };
@@ -363,26 +288,24 @@ export class DashboardComponent implements OnInit {
       : 0;
   }
 
-  get percentualCmv(): number {
-    return this.receitas > 0 ? (this.cmv / this.receitas) * 100 : 0;
+  get percentualCustoProdutos(): number {
+    return this.receitas > 0 ? Math.min(100, (this.cmv / this.receitas) * 100) : 0;
   }
 
-  get percentualDespesas(): number {
-    return this.receitas > 0 ? (this.despesas / this.receitas) * 100 : 0;
+  get percentualTaxas(): number {
+    return this.receitas > 0 ? Math.min(100, (this.taxasPagamento / this.receitas) * 100) : 0;
   }
 
-  get totalMovimentado(): number {
-    return this.receitas + this.despesas;
+  get percentualResultado(): number {
+    return this.receitas > 0
+      ? Math.max(0, Math.min(100, (this.lucroLiquido / this.receitas) * 100))
+      : 0;
   }
 
   get temDadosGrafico(): boolean {
     return this.barChartData.datasets.some((dataset) =>
       dataset.data.some((valor) => Number(valor) > 0),
     );
-  }
-
-  get temMovimentacaoFinanceira(): boolean {
-    return this.receitas > 0 || this.despesas > 0;
   }
 
   get estoqueCritico(): number {

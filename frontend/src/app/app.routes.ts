@@ -1,7 +1,7 @@
 ﻿import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { pendingChangesGuard } from './core/guards/pending-changes.guard';
-import { administrationGuard } from './core/guards/role.guard';
+import { administrationGuard, managementGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -27,6 +27,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
+        canActivate: [managementGuard],
         loadComponent: () =>
           import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
       },

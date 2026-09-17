@@ -10,7 +10,7 @@ html.dark body {
 
 :root {
   color-scheme: light;
-  --ds-bg: #f5f7fb;
+  --ds-bg: #f3f8fa;
   --ds-surface: #ffffff;
   --ds-surface-soft: #f8fafc;
   --ds-border: #e2e8f0;
@@ -19,11 +19,11 @@ html.dark body {
   --ds-text-soft: #334155;
   --ds-muted: #64748b;
   --ds-muted-soft: #94a3b8;
-  --ds-primary: #4f46e5;
-  --ds-primary-dark: #4338ca;
-  --ds-primary-soft: #eef2ff;
-  --ds-accent: #0f9f8f;
-  --ds-accent-soft: #ecfdf8;
+  --ds-primary: #0e7490;
+  --ds-primary-dark: #155e75;
+  --ds-primary-soft: #ecfeff;
+  --ds-accent: #0f766e;
+  --ds-accent-soft: #f0fdfa;
   --ds-danger: #dc2626;
   --ds-warning: #d97706;
   --ds-success: #059669;
@@ -42,18 +42,18 @@ html.dark body {
 
 :root.dark {
   color-scheme: dark;
-  --ds-bg: #020617;
-  --ds-surface: #0f172a;
-  --ds-surface-soft: #111c2f;
-  --ds-border: #243147;
-  --ds-border-strong: #3b4b63;
+  --ds-bg: #06131d;
+  --ds-surface: #0b1f2d;
+  --ds-surface-soft: #102938;
+  --ds-border: #1d3b4b;
+  --ds-border-strong: #31576a;
   --ds-text: #f8fafc;
   --ds-text-soft: #dbe4f0;
   --ds-muted: #9aa8bc;
   --ds-muted-soft: #718096;
-  --ds-primary: #6366f1;
-  --ds-primary-dark: #818cf8;
-  --ds-primary-soft: #24234f;
+  --ds-primary: #22d3ee;
+  --ds-primary-dark: #67e8f9;
+  --ds-primary-soft: #12333f;
   --ds-accent: #2dd4bf;
   --ds-accent-soft: #0d302f;
   --ds-danger: #fb7185;
@@ -341,10 +341,10 @@ html.dark body {
   }
 
   .ds-nav-active {
-    color: #4338ca !important;
-    background: #eef2ff !important;
-    border-color: #e0e7ff !important;
-    box-shadow: inset 3px 0 0 #4f46e5;
+    color: #0e7490 !important;
+    background: #ecfeff !important;
+    border-color: #a5f3fc !important;
+    box-shadow: inset 3px 0 0 #0891b2;
   }
 
   .ds-nav-active:hover {
@@ -352,10 +352,10 @@ html.dark body {
   }
 
   .dark .ds-nav-active {
-    color: #c7d2fe !important;
-    background: #24234f !important;
-    border-color: #37356f !important;
-    box-shadow: inset 3px 0 0 #818cf8;
+    color: #a5f3fc !important;
+    background: #12333f !important;
+    border-color: #155e75 !important;
+    box-shadow: inset 3px 0 0 #22d3ee;
   }
 
   .dark .ds-nav-active:hover {
@@ -368,6 +368,23 @@ html.dark body {
  * utilities directly. Keeping these mappings in one place makes every screen
  * respond to the persisted theme without producing isolated light surfaces.
  */
+.bg-indigo-600,
+.bg-violet-600 { background-color: #0e7490; }
+.hover\:bg-indigo-700:hover,
+.hover\:bg-violet-700:hover { background-color: #155e75; }
+.text-indigo-500,
+.text-indigo-600,
+.text-indigo-700,
+.text-violet-600 { color: #0e7490; }
+.bg-indigo-50,
+.bg-indigo-50\/70,
+.bg-violet-50 { background-color: #ecfeff; }
+.border-indigo-200,
+.border-violet-200 { border-color: #a5f3fc; }
+.ring-indigo-500,
+.focus\:ring-indigo-500:focus { --tw-ring-color: rgb(6 182 212 / 0.38) !important; }
+.shadow-indigo-200 { --tw-shadow-color: rgb(8 145 178 / 0.18) !important; }
+
 .dark .bg-white { background-color: var(--ds-surface); }
 .dark .bg-white\/70 { background-color: rgb(15 23 42 / 0.7); }
 .dark .bg-white\/90 { background-color: rgb(15 23 42 / 0.9); }
@@ -411,13 +428,13 @@ html.dark body {
 .dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: var(--ds-border); }
 
 .dark .bg-indigo-50,
-.dark .bg-indigo-50\/70 { background-color: #24234f; }
+.dark .bg-indigo-50\/70 { background-color: #12333f; }
 .dark .border-indigo-100,
-.dark .border-indigo-200 { border-color: #3e3b78; }
+.dark .border-indigo-200 { border-color: #155e75; }
 .dark .text-indigo-600,
 .dark .text-indigo-700,
-.dark .text-indigo-800 { color: #a5b4fc; }
-.dark .text-indigo-500 { color: #818cf8; }
+.dark .text-indigo-800 { color: #a5f3fc; }
+.dark .text-indigo-500 { color: #67e8f9; }
 
 .dark .bg-emerald-50,
 .dark .bg-green-50,
@@ -457,10 +474,10 @@ html.dark body {
 .dark .text-rose-800 { color: var(--ds-danger-text); }
 
 .dark .bg-blue-50,
-.dark .bg-violet-50 { background-color: #22264d; }
+.dark .bg-violet-50 { background-color: #12333f; }
 .dark .bg-cyan-50 { background-color: #0b3038; }
 .dark .text-blue-600,
-.dark .text-violet-600 { color: #a5b4fc; }
+.dark .text-violet-600 { color: #67e8f9; }
 .dark .text-cyan-700 { color: #67e8f9; }
 
 .dark .shadow-slate-200,
@@ -469,10 +486,10 @@ html.dark body {
 .dark .shadow-slate-900\/15 { --tw-shadow-color: rgb(0 0 0 / 0.28); }
 
 .dark .hover\:bg-slate-50:hover { background-color: #1a2435; }
-.dark .hover\:bg-indigo-50:hover { background-color: #292754; }
+.dark .hover\:bg-indigo-50:hover { background-color: #164454; }
 .dark .hover\:bg-rose-50:hover { background-color: #421923; }
 .dark .hover\:text-slate-900:hover { color: var(--ds-text); }
-.dark .hover\:text-indigo-800:hover { color: #c7d2fe; }
+.dark .hover\:text-indigo-800:hover { color: #cffafe; }
 .dark .hover\:border-slate-200:hover { border-color: var(--ds-border-strong); }
 
 @media (prefers-reduced-motion: reduce) {

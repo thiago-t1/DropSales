@@ -42,7 +42,7 @@ export class CaixaComponent implements OnInit {
 
   readonly abas: Array<{ id: CaixaSecao; label: string; descricao: string }> = [
     { id: 'visao-geral', label: 'Visão geral', descricao: 'Resumo do caixa' },
-    { id: 'a-receber', label: 'A receber', descricao: 'Agenda de entradas' },
+    { id: 'a-receber', label: 'Repasses', descricao: 'Agenda das operadoras' },
     { id: 'movimentacoes', label: 'Movimentações', descricao: 'Entradas confirmadas' },
     { id: 'fechamento', label: 'Fechamento', descricao: 'Conferência diária' },
   ];

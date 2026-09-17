@@ -24,3 +24,20 @@ export const administrationGuard: CanActivateFn = () => {
     catchError(() => of(router.createUrlTree(['/dashboard']))),
   );
 };
+
+export const managementGuard: CanActivateFn = () => {
+  const tenant = inject(TenantService);
+  const router = inject(Router);
+  const permitidos: readonly PapelEmpresa[] = ['PROPRIETARIO', 'ADMINISTRADOR', 'GERENTE'];
+  const negado = router.createUrlTree(['/vendas'], { queryParams: { acesso: 'restrito' } });
+  const contexto = tenant.contexto();
+
+  if (contexto) {
+    return papelPermitido(contexto.papelAtual, permitidos) ? true : negado;
+  }
+
+  return tenant.carregar().pipe(
+    map((carregado) => papelPermitido(carregado.papelAtual, permitidos) ? true : negado),
+    catchError(() => of(router.createUrlTree(['/vendas']))),
+  );
+};

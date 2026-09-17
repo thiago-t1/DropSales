@@ -1,589 +1,68 @@
 <div class="mx-auto w-full max-w-[1600px] space-y-5 text-slate-900 dark:text-slate-100">
-  <!-- Page heading -->
   <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-    <div class="min-w-0">
-      <div class="mb-2 flex items-center gap-2">
-        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400" aria-hidden="true">
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19V9m5 10V5m5 14v-7m5 7V3" />
-          </svg>
+    <div>
+      <div class="mb-2 flex items-center gap-2 text-cyan-700 dark:text-cyan-300">
+        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-50 dark:bg-cyan-400/10" aria-hidden="true">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19V9m5 10V5m5 14v-7m5 7V3" /></svg>
         </span>
-        <span class="text-xs font-bold uppercase tracking-[0.16em] text-indigo-600 dark:text-indigo-400">Painel de gestão</span>
+        <span class="text-xs font-bold uppercase tracking-[0.16em]">Painel de gestão</span>
       </div>
       <h1 class="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl dark:text-white">Visão geral</h1>
-      <p class="mt-1 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-        Acompanhe o financeiro, as vendas e os pontos de atenção do estoque.
-      </p>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Entenda o resultado das vendas e o que precisa da sua atenção.</p>
     </div>
-
-    <div class="flex w-full items-center gap-2 sm:w-auto">
+    <div class="flex items-center gap-2">
       @if (!loading && atualizadoEm) {
-        <div class="hidden min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-500 shadow-sm md:flex dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-          <span class="relative flex h-2 w-2" aria-hidden="true">
-            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
-            <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-          </span>
-          Atualizado às {{ fmtHora(atualizadoEm) }}
-        </div>
+        <span class="hidden min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-500 md:flex dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"><i class="h-2 w-2 rounded-full bg-emerald-500"></i>Atualizado às {{ fmtHora(atualizadoEm) }}</span>
       }
-
-      <button
-        type="button"
-        (click)="carregarDashboard(true)"
-        [disabled]="loading || refreshing"
-        [attr.aria-busy]="loading || refreshing"
-        class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:cursor-wait disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-indigo-500/30 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-400"
-        aria-label="Atualizar dados do painel"
-        title="Atualizar painel"
-      >
-        <svg class="h-[18px] w-[18px]" [class.animate-spin]="loading || refreshing" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11a8.1 8.1 0 00-15.5-3M4 4v4h4m-4 5a8.1 8.1 0 0015.5 3M20 20v-4h-4" />
-        </svg>
+      <button type="button" (click)="carregarDashboard(true)" [disabled]="loading || refreshing" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-cyan-300 hover:text-cyan-700 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-cyan-700" aria-label="Atualizar painel">
+        <svg class="h-[18px] w-[18px]" [class.animate-spin]="loading || refreshing" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 11a8.1 8.1 0 00-15.5-3M4 4v4h4m-4 5a8.1 8.1 0 0015.5 3M20 20v-4h-4" /></svg>
       </button>
-
-      <a
-        routerLink="/vendas"
-        class="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white shadow-sm shadow-indigo-200 transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2 active:scale-[0.98] sm:flex-none dark:shadow-none dark:ring-offset-slate-950"
-      >
-        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.25" d="M12 5v14m7-7H5" />
-        </svg>
-        Nova venda
-      </a>
+      <a routerLink="/vendas" class="inline-flex min-h-11 items-center gap-2 rounded-xl bg-cyan-700 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-cyan-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"><span class="text-lg leading-none">+</span> Nova venda</a>
     </div>
   </header>
 
   @if (loading) {
-    <!-- Loading state -->
-    <div role="status" aria-label="Carregando indicadores" class="space-y-5">
-      <div class="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 xl:grid-cols-5">
-        @for (item of [1, 2, 3, 4, 5]; track item) {
-          <div class="h-36 animate-pulse rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-            <div class="flex justify-between">
-              <div class="h-3 w-20 rounded bg-slate-100 dark:bg-slate-800"></div>
-              <div class="h-10 w-10 rounded-xl bg-slate-100 dark:bg-slate-800"></div>
-            </div>
-            <div class="mt-5 h-6 w-32 rounded bg-slate-100 dark:bg-slate-800"></div>
-            <div class="mt-3 h-2.5 w-24 rounded bg-slate-100 dark:bg-slate-800"></div>
-          </div>
-        }
-      </div>
-      <div class="grid gap-4 lg:grid-cols-3">
-        <div class="h-[360px] animate-pulse rounded-2xl border border-slate-200 bg-white lg:col-span-2 dark:border-slate-800 dark:bg-slate-900"></div>
-        <div class="h-[360px] animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"></div>
-      </div>
+    <div role="status" class="space-y-4">
+      <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">@for (item of [1,2,3,4]; track item) {<div class="h-36 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-900"></div>}</div>
+      <div class="grid gap-4 lg:grid-cols-3"><div class="h-[390px] animate-pulse rounded-2xl bg-slate-100 lg:col-span-2 dark:bg-slate-900"></div><div class="h-[390px] animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-900"></div></div>
       <span class="sr-only">Carregando painel...</span>
     </div>
   } @else {
     @if (erroCarregamento) {
-      <div
-        role="alert"
-        class="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-amber-900 sm:flex-row sm:items-center sm:justify-between dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200"
-      >
-        <div class="flex items-start gap-3">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 3h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-          </svg>
-          <div>
-            <p class="text-sm font-semibold">Alguns dados não puderam ser atualizados</p>
-            <p class="mt-0.5 text-xs text-amber-700 dark:text-amber-300/80">Verifique sua conexão e tente carregar o painel novamente.</p>
-          </div>
-        </div>
-        <button
-          type="button"
-          (click)="carregarDashboard(true)"
-          class="min-h-9 self-start rounded-lg border border-amber-300 bg-white/70 px-3 text-xs font-bold text-amber-800 transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/30 sm:self-auto dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200 dark:hover:bg-amber-500/20"
-        >
-          Tentar novamente
-        </button>
+      <div role="alert" class="flex items-center justify-between gap-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-200">
+        <span>Alguns dados não puderam ser atualizados.</span><button type="button" (click)="carregarDashboard(true)" class="font-bold underline">Tentar novamente</button>
       </div>
     }
 
-    <!-- Financial KPIs -->
-    <section aria-label="Indicadores financeiros" class="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 xl:grid-cols-3 min-[2000px]:grid-cols-6">
-      <article class="group relative flex min-h-[142px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition [container-type:inline-size] hover:-translate-y-0.5 hover:shadow-md sm:p-5 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
-        <span class="absolute inset-x-0 top-0 h-0.5 bg-indigo-500" aria-hidden="true"></span>
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Recebido líquido</p>
-            <p class="mt-3 whitespace-nowrap text-[clamp(0.75rem,7cqw,1.5rem)] font-bold leading-tight tracking-tight tabular-nums text-slate-950 dark:text-white">
-              R$ {{ fmt(recebidoLiquido) }}
-            </p>
-          </div>
-          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-            </svg>
-          </span>
-        </div>
-        <div class="mt-auto flex items-center gap-1.5 pt-3 text-xs">
-          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-          <span class="text-slate-500 dark:text-slate-400">
-            Confirmado no caixa
-          </span>
-        </div>
-      </article>
-
-      <article class="group relative flex min-h-[142px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition [container-type:inline-size] hover:-translate-y-0.5 hover:shadow-md sm:p-5 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
-        <span class="absolute inset-x-0 top-0 h-0.5 bg-amber-500" aria-hidden="true"></span>
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0 flex-1"><p class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">A receber</p><p class="mt-3 whitespace-nowrap text-[clamp(0.75rem,7cqw,1.5rem)] font-bold leading-tight tracking-tight tabular-nums text-slate-950 dark:text-white">R$ {{ fmt(aReceber) }}</p></div>
-          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span>
-        </div>
-        <p class="mt-auto pt-3 text-xs text-slate-500 dark:text-slate-400">Cartões e parcelas pendentes</p>
-      </article>
-
-      <article class="group relative flex min-h-[142px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition [container-type:inline-size] hover:-translate-y-0.5 hover:shadow-md sm:p-5 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
-        <span class="absolute inset-x-0 top-0 h-0.5 bg-emerald-500" aria-hidden="true"></span>
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Faturamento</p>
-            <p class="mt-3 whitespace-nowrap text-[clamp(0.75rem,7cqw,1.5rem)] font-bold leading-tight tracking-tight tabular-nums text-slate-950 dark:text-white">
-              R$ {{ fmt(receitas) }}
-            </p>
-          </div>
-          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 17l5-5 4 4 7-8m0 0h-5m5 0v5" />
-            </svg>
-          </span>
-        </div>
-        <p class="mt-auto pt-3 text-xs text-slate-500 dark:text-slate-400">Total de entradas registradas</p>
-      </article>
-
-      <article class="group relative flex min-h-[142px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition [container-type:inline-size] hover:-translate-y-0.5 hover:shadow-md sm:p-5 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
-        <span class="absolute inset-x-0 top-0 h-0.5" [class.bg-cyan-500]="lucroBruto >= 0" [class.bg-rose-500]="lucroBruto < 0" aria-hidden="true"></span>
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Lucro bruto</p>
-            <p
-              class="mt-3 whitespace-nowrap text-[clamp(0.75rem,7cqw,1.5rem)] font-bold leading-tight tracking-tight tabular-nums"
-              [ngClass]="lucroBruto >= 0 ? 'text-slate-950 dark:text-white' : 'text-rose-600 dark:text-rose-400'"
-            >
-              R$ {{ fmt(lucroBruto) }}
-            </p>
-          </div>
-          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-400" aria-hidden="true">
-            <span class="-mt-px text-xl font-bold leading-none tracking-tight">$</span>
-          </span>
-        </div>
-        <div class="mt-auto flex items-center gap-1.5 pt-3 text-xs text-slate-500 dark:text-slate-400">
-          <span class="font-bold" [class.text-emerald-600]="margemBruta >= 0" [class.text-rose-600]="margemBruta < 0">
-            {{ margemBruta.toFixed(1) }}%
-          </span>
-          de margem bruta
-        </div>
-      </article>
-
-      <article class="group relative flex min-h-[142px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition [container-type:inline-size] hover:-translate-y-0.5 hover:shadow-md sm:p-5 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
-        <span class="absolute inset-x-0 top-0 h-0.5 bg-rose-500" aria-hidden="true"></span>
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Despesas</p>
-            <p class="mt-3 whitespace-nowrap text-[clamp(0.75rem,7cqw,1.5rem)] font-bold leading-tight tracking-tight tabular-nums text-slate-950 dark:text-white">
-              R$ {{ fmt(despesas) }}
-            </p>
-          </div>
-          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7l5 5 4-4 7 8m0 0h-5m5 0v-5" />
-            </svg>
-          </span>
-        </div>
-        <p class="mt-auto pt-3 text-xs text-slate-500 dark:text-slate-400">
-          {{ percentualDespesas.toFixed(1) }}% do faturamento
-          @if (taxasPagamento > 0) {
-            <span class="font-semibold text-rose-600 dark:text-rose-400"> · taxas R$ {{ fmt(taxasPagamento) }}</span>
-          }
-        </p>
-      </article>
-
-      <article class="group relative flex min-h-[142px] flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition [container-type:inline-size] hover:-translate-y-0.5 hover:shadow-md min-[480px]:col-span-2 sm:p-5 xl:col-span-1 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
-        <span class="absolute inset-x-0 top-0 h-0.5 bg-violet-500" aria-hidden="true"></span>
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-1.5">
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">CMV</p>
-              <button
-                type="button"
-                class="group/info relative inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition hover:bg-violet-50 hover:text-violet-600 focus:outline-none focus-visible:bg-violet-50 focus-visible:text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-500/30 dark:text-slate-500 dark:hover:bg-violet-500/10 dark:hover:text-violet-400 dark:focus-visible:bg-violet-500/10 dark:focus-visible:text-violet-400"
-                aria-label="O que significa CMV?"
-                aria-describedby="tooltip-cmv"
-              >
-                <svg class="h-3.5 w-3.5 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16v-4m0-4h.01m9 4a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span
-                  id="tooltip-cmv"
-                  role="tooltip"
-                  class="pointer-events-none invisible absolute bottom-[calc(100%+0.5rem)] left-0 z-50 w-52 rounded-lg bg-slate-950 px-3 py-2 text-left text-[11px] font-medium normal-case leading-4 text-white opacity-0 shadow-xl transition duration-150 group-hover/info:visible group-hover/info:opacity-100 group-focus/info:visible group-focus/info:opacity-100 sm:left-1/2 sm:-translate-x-1/2 dark:bg-slate-700"
-                >
-                  CMV é o custo das mercadorias vendidas no período.
-                </span>
-              </button>
-            </div>
-            <p class="mt-3 whitespace-nowrap text-[clamp(0.75rem,7cqw,1.5rem)] font-bold leading-tight tracking-tight tabular-nums text-slate-950 dark:text-white">
-              R$ {{ fmt(cmv) }}
-            </p>
-          </div>
-          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
-          </span>
-        </div>
-        <p class="mt-auto pt-3 text-xs text-slate-500 dark:text-slate-400">{{ percentualCmv.toFixed(1) }}% do faturamento</p>
-      </article>
+    <section aria-label="Indicadores financeiros" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <article class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><span class="absolute inset-y-0 left-0 w-1 bg-cyan-600"></span><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Faturamento</p><p class="mt-3 text-2xl font-bold tabular-nums">R$ {{ fmt(receitas) }}</p><p class="mt-3 text-xs text-slate-500">Total vendido pela loja</p></article>
+      <article class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><span class="absolute inset-y-0 left-0 w-1 bg-teal-400"></span><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Lucro bruto</p><p class="mt-3 text-2xl font-bold tabular-nums">R$ {{ fmt(lucroBruto) }}</p><p class="mt-3 text-xs text-slate-500"><b class="text-teal-600 dark:text-teal-300">{{ margemBruta.toFixed(1) }}%</b> após custo dos produtos</p></article>
+      <article class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><span class="absolute inset-y-0 left-0 w-1 bg-sky-400"></span><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Taxas de pagamento</p><p class="mt-3 text-2xl font-bold tabular-nums">R$ {{ fmt(taxasPagamento) }}</p><p class="mt-3 text-xs text-slate-500">Cartões e demais meios</p></article>
+      <article class="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 p-5 text-white shadow-sm dark:border-cyan-900 dark:bg-cyan-950"><span class="absolute inset-y-0 left-0 w-1" [class.bg-emerald-400]="lucroLiquido >= 0" [class.bg-rose-400]="lucroLiquido < 0"></span><p class="text-xs font-bold uppercase tracking-wide text-slate-400">Resultado líquido</p><p class="mt-3 text-2xl font-bold tabular-nums" [class.text-rose-300]="lucroLiquido < 0">R$ {{ fmt(lucroLiquido) }}</p><p class="mt-3 text-xs text-slate-400">Após produtos e taxas</p></article>
     </section>
 
-    <!-- Financial charts -->
-    <section aria-label="Análises financeiras" class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:col-span-2 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
-        <header class="flex flex-col gap-3 border-b border-slate-100 pb-4 sm:flex-row sm:items-start sm:justify-between dark:border-slate-800">
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="text-sm font-bold text-slate-900 sm:text-base dark:text-white">Receita e custo de vendas</h2>
-              <span class="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-300">{{ chartPeriodLabel }}</span>
-            </div>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Janela inteligente desde o início da movimentação recente.</p>
-          </div>
-          <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
-            <span class="inline-flex items-center gap-1.5">
-              <span class="h-0.5 w-4 rounded-full bg-indigo-500"></span>Receita
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <span class="h-2.5 w-2.5 rounded-sm bg-amber-500"></span>CMV
-            </span>
-          </div>
-        </header>
-
-        @if (temDadosGrafico) {
-          <div class="mt-4 grid grid-cols-3 gap-2">
-            <div class="rounded-xl bg-indigo-50/70 px-3 py-2.5 dark:bg-indigo-500/10">
-              <p class="text-[10px] font-bold uppercase tracking-wide text-indigo-500 dark:text-indigo-300">Receita</p>
-              <p class="mt-1 truncate text-sm font-bold tabular-nums text-slate-900 dark:text-white">R$ {{ fmtCompacto(receitaPeriodo) }}</p>
-            </div>
-            <div class="rounded-xl bg-amber-50/80 px-3 py-2.5 dark:bg-amber-500/10">
-              <p class="text-[10px] font-bold uppercase tracking-wide text-amber-600 dark:text-amber-300">CMV</p>
-              <p class="mt-1 truncate text-sm font-bold tabular-nums text-slate-900 dark:text-white">R$ {{ fmtCompacto(cmvPeriodo) }}</p>
-            </div>
-            <div class="rounded-xl bg-emerald-50/80 px-3 py-2.5 dark:bg-emerald-500/10">
-              <p class="text-[10px] font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">Margem</p>
-              <p class="mt-1 text-sm font-bold tabular-nums text-slate-900 dark:text-white">{{ margemPeriodo.toFixed(1) }}%</p>
-            </div>
-          </div>
-          <div class="relative mt-4 h-[220px] w-full sm:h-[255px]">
-            <canvas
-              baseChart
-              [datasets]="barChartData.datasets"
-              [labels]="barChartData.labels"
-              [options]="barChartOptions"
-              type="bar"
-              role="img"
-              aria-label="Gráfico de receita e custo de mercadorias na janela ativa"
-            ></canvas>
-          </div>
-        } @else {
-          <div class="flex h-[292px] flex-col items-center justify-center px-4 text-center sm:h-[329px]">
-            <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500" aria-hidden="true">
-              <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M4 19V9m5 10V5m5 14v-7m5 7V3" />
-              </svg>
-            </span>
-            <p class="mt-3 text-sm font-semibold text-slate-700 dark:text-slate-300">Sem movimentação no período</p>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-500">As vendas registradas aparecerão neste gráfico.</p>
-          </div>
-        }
+    <section aria-label="Análises financeiras" class="grid gap-4 lg:grid-cols-3">
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2 dark:border-slate-800 dark:bg-slate-900">
+        <header class="flex flex-col gap-3 border-b border-slate-100 pb-4 sm:flex-row sm:items-start sm:justify-between dark:border-slate-800"><div><div class="flex items-center gap-2"><h2 class="font-bold">Vendas por dia</h2><span class="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300">{{ chartPeriodLabel }}</span></div><p class="mt-1 text-xs text-slate-500">Compare o valor vendido com o custo dos produtos.</p></div><div class="flex gap-4 text-xs text-slate-500"><span class="flex items-center gap-2"><i class="h-2.5 w-2.5 rounded-sm bg-cyan-700"></i>Faturamento</span><span class="flex items-center gap-2"><i class="h-2.5 w-2.5 rounded-sm bg-teal-300"></i>Custo</span></div></header>
+        @if (temDadosGrafico) {<div class="relative mt-5 h-[300px]"><canvas baseChart [data]="barChartData" [options]="barChartOptions" type="bar" role="img" aria-label="Faturamento e custo dos produtos por dia"></canvas></div>} @else {<div class="flex h-[300px] flex-col items-center justify-center text-center"><p class="font-semibold">O gráfico começa com a primeira venda</p><p class="mt-1 text-xs text-slate-500">Aqui serão comparados faturamento e custo, dia a dia.</p></div>}
       </article>
-
-      <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
-        <header class="border-b border-slate-100 pb-4 dark:border-slate-800">
-          <h2 class="text-sm font-bold text-slate-900 sm:text-base dark:text-white">Movimentação financeira</h2>
-          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Composição das entradas e saídas.</p>
-        </header>
-
-        @if (temMovimentacaoFinanceira) {
-          <div class="relative mx-auto mt-5 h-[205px] max-w-[260px]">
-            <canvas
-              baseChart
-              [datasets]="doughnutData.datasets"
-              [labels]="doughnutData.labels"
-              [options]="doughnutOptions"
-              type="doughnut"
-              role="img"
-              aria-label="Gráfico de distribuição entre receitas e despesas"
-            ></canvas>
-            <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center pt-1 text-center">
-              <span class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">Movimentado</span>
-              <strong class="mt-1 text-lg font-bold tracking-tight text-slate-900 dark:text-white">R$ {{ fmtCompacto(totalMovimentado) }}</strong>
-            </div>
-          </div>
-        } @else {
-          <div class="mx-auto mt-5 flex h-[205px] max-w-[260px] flex-col items-center justify-center rounded-full border-[18px] border-slate-100 text-center dark:border-slate-800">
-            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Sem movimentação</span>
-          </div>
-        }
-
-        <div class="mt-5 space-y-3 border-t border-slate-100 pt-4 dark:border-slate-800">
-          <div class="flex items-center justify-between gap-3 text-xs">
-            <span class="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400">
-              <span class="h-2.5 w-2.5 rounded-full bg-indigo-600"></span>Receitas
-            </span>
-            <strong class="tabular-nums text-slate-800 dark:text-slate-200">R$ {{ fmt(receitas) }}</strong>
-          </div>
-          <div class="flex items-center justify-between gap-3 text-xs">
-            <span class="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400">
-              <span class="h-2.5 w-2.5 rounded-full bg-rose-500"></span>Despesas
-            </span>
-            <strong class="tabular-nums text-slate-800 dark:text-slate-200">R$ {{ fmt(despesas) }}</strong>
-          </div>
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <header class="border-b border-slate-100 pb-4 dark:border-slate-800"><h2 class="font-bold">Como o resultado foi formado</h2><p class="mt-1 text-xs text-slate-500">Leitura simples, sem indicadores duplicados.</p></header>
+        <div class="mt-6 space-y-6">
+          <div><div class="flex justify-between text-xs"><span>Faturamento</span><b>R$ {{ fmt(receitas) }}</b></div><div class="mt-2 h-2 rounded-full bg-slate-100 dark:bg-slate-800"><div class="h-full w-full rounded-full bg-cyan-700"></div></div></div>
+          <div><div class="flex justify-between text-xs"><span>(−) Custo dos produtos</span><b>R$ {{ fmt(cmv) }}</b></div><div class="mt-2 h-2 rounded-full bg-slate-100 dark:bg-slate-800"><div class="h-full rounded-full bg-teal-300" [style.width.%]="percentualCustoProdutos"></div></div></div>
+          <div><div class="flex justify-between text-xs"><span>(−) Taxas de pagamento</span><b>R$ {{ fmt(taxasPagamento) }}</b></div><div class="mt-2 h-2 rounded-full bg-slate-100 dark:bg-slate-800"><div class="h-full rounded-full bg-sky-400" [style.width.%]="percentualTaxas"></div></div></div>
+          <div class="rounded-xl bg-slate-950 p-4 text-white dark:bg-cyan-950"><div class="flex justify-between gap-3"><span class="text-sm font-semibold">Resultado líquido</span><b class="tabular-nums" [class.text-rose-300]="lucroLiquido < 0">R$ {{ fmt(lucroLiquido) }}</b></div><div class="mt-3 h-2 rounded-full bg-white/10"><div class="h-full rounded-full bg-emerald-400" [class.bg-rose-400]="lucroLiquido < 0" [style.width.%]="percentualResultado"></div></div></div>
         </div>
       </article>
     </section>
 
-    <!-- Products and stock -->
-    <section aria-label="Desempenho de produtos e estoque" class="grid grid-cols-1 gap-4 xl:grid-cols-12">
-      <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 xl:col-span-5 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
-        <header class="flex items-start justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-800">
-          <div>
-            <h2 class="text-sm font-bold text-slate-900 sm:text-base dark:text-white">Produtos mais vendidos</h2>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ranking histórico por unidades vendidas.</p>
-          </div>
-          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-700 dark:bg-teal-500/10 dark:text-teal-400" aria-hidden="true">
-            <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 21h8m-4-4v4m-7-9h14M7 3h10l-1 9H8L7 3zm0 2H4v2a4 4 0 004 4m9-6h3v2a4 4 0 01-4 4" />
-            </svg>
-          </span>
-        </header>
-
-        @if (topProdutos.length === 0) {
-          <div class="flex h-[240px] flex-col items-center justify-center text-center">
-            <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500" aria-hidden="true">
-              <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            </span>
-            <p class="mt-3 text-sm font-semibold text-slate-700 dark:text-slate-300">Ranking ainda vazio</p>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-500">Registre vendas para descobrir seus campeões.</p>
-          </div>
-        } @else {
-          <div class="relative mt-5 h-[240px]">
-            <canvas
-              baseChart
-              [datasets]="topBarData.datasets"
-              [labels]="topBarData.labels"
-              [options]="topBarOptions"
-              type="bar"
-              role="img"
-              aria-label="Gráfico dos cinco produtos mais vendidos"
-            ></canvas>
-          </div>
-        }
-      </article>
-
-      <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm xl:col-span-7 dark:border-slate-800 dark:bg-slate-900 dark:shadow-none">
-        <header class="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5 dark:border-slate-800">
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="text-sm font-bold text-slate-900 sm:text-base dark:text-white">Atenção no estoque</h2>
-              @if (estoqueBaixo.length > 0) {
-                <span class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-400">
-                  {{ estoqueBaixo.length }}
-                </span>
-              }
-            </div>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Priorize os itens que precisam de reposição.</p>
-          </div>
-          <a routerLink="/produtos" class="inline-flex min-h-8 items-center gap-1 self-start rounded-lg px-2.5 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-indigo-400 dark:hover:bg-indigo-500/10">
-            Ver estoque
-            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </a>
-        </header>
-
-        @if (estoqueBaixo.length === 0) {
-          <div class="flex min-h-[250px] flex-col items-center justify-center px-5 text-center">
-            <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400" aria-hidden="true">
-              <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 12.5l4 4L19 7" />
-              </svg>
-            </span>
-            <p class="mt-3 text-sm font-bold text-slate-800 dark:text-slate-200">Estoque saudável</p>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-500">Nenhum produto precisa de reposição agora.</p>
-          </div>
-        } @else {
-          <div class="divide-y divide-slate-100 dark:divide-slate-800">
-            @for (produto of estoquePrioritario; track produto.id) {
-              <div class="grid gap-3 px-4 py-3.5 transition hover:bg-slate-50 sm:grid-cols-[minmax(180px,1.4fr)_minmax(150px,1fr)_110px] sm:items-center sm:px-5 dark:hover:bg-slate-800/50">
-                <div class="flex min-w-0 items-center gap-3">
-                  <span
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold"
-                    [class.bg-rose-50]="estoqueStatus(produto) === 'critico'"
-                    [class.text-rose-600]="estoqueStatus(produto) === 'critico'"
-                    [class.bg-amber-50]="estoqueStatus(produto) === 'baixo'"
-                    [class.text-amber-700]="estoqueStatus(produto) === 'baixo'"
-                  >
-                    {{ produto.nome.charAt(0).toUpperCase() }}
-                  </span>
-                  <div class="min-w-0">
-                    <p class="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">{{ produto.nome }}</p>
-                      <p class="mt-0.5 truncate font-mono text-[10px] text-slate-400 dark:text-slate-500">{{ produto.sku || 'Sem código' }}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <div class="mb-1.5 flex items-center justify-between text-[10px]">
-                    <span class="text-slate-400 dark:text-slate-500">Nível do estoque</span>
-                    <span class="font-bold text-slate-600 dark:text-slate-300">{{ produto.quantidadeEstoque }} / mín. {{ produto.estoqueMinimo }}</span>
-                  </div>
-                  <div
-                    class="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"
-                    role="progressbar"
-                    [attr.aria-label]="'Nível de estoque de ' + produto.nome"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                    [attr.aria-valuenow]="estoquePercent(produto)"
-                  >
-                    <div
-                      class="h-full rounded-full transition-all duration-500"
-                      [class.bg-rose-500]="estoqueStatus(produto) === 'critico'"
-                      [class.bg-amber-400]="estoqueStatus(produto) === 'baixo'"
-                      [class.bg-emerald-500]="estoqueStatus(produto) === 'ok'"
-                      [style.width.%]="estoquePercent(produto)"
-                    ></div>
-                  </div>
-                </div>
-
-                <div class="flex items-center justify-between sm:justify-end">
-                  <span class="text-xs text-slate-400 sm:hidden dark:text-slate-500">Situação</span>
-                  @if (estoqueStatus(produto) === 'critico') {
-                    <span class="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-[10px] font-bold text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400">
-                      <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>Esgotado
-                    </span>
-                  } @else {
-                    <span class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-400">
-                      <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>Baixo
-                    </span>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-
-          <footer class="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 px-4 py-3 text-xs text-slate-500 sm:px-5 dark:border-slate-800 dark:bg-slate-800/30 dark:text-slate-400">
-            <span>{{ estoqueCritico }} esgotado{{ estoqueCritico === 1 ? '' : 's' }}</span>
-            @if (estoqueBaixo.length > estoquePrioritario.length) {
-              <span>+ {{ estoqueBaixo.length - estoquePrioritario.length }} outros produtos</span>
-            } @else {
-              <span>Mostrando itens prioritários</span>
-            }
-          </footer>
-        }
-      </article>
+    <section class="grid gap-4 xl:grid-cols-12">
+      <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-5 dark:border-slate-800 dark:bg-slate-900"><header class="border-b border-slate-100 pb-4 dark:border-slate-800"><h2 class="font-bold">Produtos mais vendidos</h2><p class="mt-1 text-xs text-slate-500">Ranking por unidades vendidas.</p></header>@if (topProdutos.length === 0) {<div class="flex h-[240px] items-center justify-center text-center text-sm text-slate-500">O ranking aparece após as primeiras vendas.</div>} @else {<div class="relative mt-5 h-[240px]"><canvas baseChart [datasets]="topBarData.datasets" [labels]="topBarData.labels" [options]="topBarOptions" type="bar" role="img" aria-label="Produtos mais vendidos"></canvas></div>}</article>
+      <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm xl:col-span-7 dark:border-slate-800 dark:bg-slate-900"><header class="flex items-start justify-between border-b border-slate-100 p-5 dark:border-slate-800"><div><h2 class="font-bold">Reposição de estoque</h2><p class="mt-1 text-xs text-slate-500">Itens que precisam de atenção.</p></div><a routerLink="/produtos" class="text-xs font-bold text-cyan-700 dark:text-cyan-300">Ver produtos →</a></header>@if (estoqueBaixo.length === 0) {<div class="flex min-h-[250px] flex-col items-center justify-center text-center"><span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10">✓</span><p class="mt-3 font-bold">Estoque em dia</p><p class="mt-1 text-xs text-slate-500">Nenhum produto precisa de reposição agora.</p></div>} @else {<div class="divide-y divide-slate-100 dark:divide-slate-800">@for (produto of estoquePrioritario; track produto.id) {<div class="flex items-center justify-between gap-4 px-5 py-4"><div class="min-w-0"><p class="truncate text-sm font-semibold">{{ produto.nome }}</p><p class="mt-1 text-xs text-slate-500">Código {{ produto.sku || 'não informado' }}</p></div><div class="text-right"><b class="text-sm">{{ produto.quantidadeEstoque }} un.</b><p class="text-[10px] text-slate-500">mínimo {{ produto.estoqueMinimo }}</p></div></div>}</div>}</article>
     </section>
 
-    <!-- Recent sales -->
-    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:shadow-none" aria-labelledby="vendas-recentes-titulo">
-      <header class="flex items-start justify-between gap-3 border-b border-slate-100 p-4 sm:p-5 dark:border-slate-800">
-        <div>
-          <h2 id="vendas-recentes-titulo" class="text-sm font-bold text-slate-900 sm:text-base dark:text-white">Vendas recentes</h2>
-          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Últimas transações registradas pela equipe.</p>
-        </div>
-        <a routerLink="/vendas" class="inline-flex min-h-8 shrink-0 items-center gap-1 rounded-lg px-2.5 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-indigo-400 dark:hover:bg-indigo-500/10">
-          Ver todas
-          <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
-      </header>
-
-      @if (vendasRecentes.length === 0) {
-        <div class="flex min-h-[220px] flex-col items-center justify-center px-5 text-center">
-          <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-500 dark:bg-indigo-500/10 dark:text-indigo-400" aria-hidden="true">
-            <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 2.3c-.63.63-.18 1.7.71 1.7H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
-            </svg>
-          </span>
-          <p class="mt-3 text-sm font-bold text-slate-800 dark:text-slate-200">Nenhuma venda registrada</p>
-          <p class="mt-1 max-w-sm text-xs leading-5 text-slate-500 dark:text-slate-500">Crie sua primeira venda para começar a acompanhar o desempenho da loja.</p>
-          <a routerLink="/vendas" class="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl bg-indigo-600 px-4 text-xs font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.25" d="M12 5v14m7-7H5" />
-            </svg>
-            Registrar venda
-          </a>
-        </div>
-      } @else {
-        <!-- Desktop table -->
-        <div class="hidden overflow-x-auto md:block">
-          <table class="w-full">
-            <caption class="sr-only">Lista das vendas recentes</caption>
-            <thead class="bg-slate-50/80 text-left text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:bg-slate-800/40 dark:text-slate-500">
-              <tr>
-                <th scope="col" class="px-5 py-3">Venda</th>
-                <th scope="col" class="px-4 py-3">Data</th>
-                <th scope="col" class="px-4 py-3">Vendedor</th>
-                <th scope="col" class="px-4 py-3 text-center">Itens</th>
-                <th scope="col" class="px-5 py-3 text-right">Valor</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-              @for (venda of vendasRecentes; track venda.id) {
-                <tr class="transition hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
-                  <td class="px-5 py-3.5">
-                    <div class="flex items-center gap-2.5">
-                      <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12.5l4 4L19 7" />
-                        </svg>
-                      </span>
-                      <span class="text-xs font-bold text-slate-700 dark:text-slate-300">#{{ venda.id }}</span>
-                    </div>
-                  </td>
-                  <td class="px-4 py-3.5 text-xs font-medium text-slate-500 dark:text-slate-400">{{ fmtData(venda.data) }}</td>
-                  <td class="px-4 py-3.5">
-                    <div class="flex min-w-0 items-center gap-2.5">
-                      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-[10px] font-bold text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
-                        {{ iniciais(venda.vendedor) }}
-                      </span>
-                      <span class="max-w-[180px] truncate text-xs font-semibold text-slate-700 dark:text-slate-300">{{ venda.vendedor }}</span>
-                    </div>
-                  </td>
-                  <td class="px-4 py-3.5 text-center text-xs text-slate-500 dark:text-slate-400">
-                    {{ venda.totalItens }} {{ venda.totalItens === 1 ? 'item' : 'itens' }}
-                  </td>
-                  <td class="px-5 py-3.5 text-right text-sm font-bold tabular-nums text-slate-900 dark:text-white">R$ {{ fmt(venda.valor) }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Mobile cards -->
-        <div class="divide-y divide-slate-100 md:hidden dark:divide-slate-800">
-          @for (venda of vendasRecentes; track venda.id) {
-            <article class="p-4">
-              <div class="flex items-start justify-between gap-3">
-                <div class="flex min-w-0 items-center gap-3">
-                  <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-bold text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
-                    {{ iniciais(venda.vendedor) }}
-                  </span>
-                  <div class="min-w-0">
-                    <p class="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">{{ venda.vendedor }}</p>
-                    <p class="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">Venda #{{ venda.id }} · {{ fmtData(venda.data) }}</p>
-                  </div>
-                </div>
-                <span class="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">Concluída</span>
-              </div>
-              <div class="mt-3 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800/60">
-                <span class="text-xs text-slate-500 dark:text-slate-400">{{ venda.totalItens }} {{ venda.totalItens === 1 ? 'item' : 'itens' }}</span>
-                <strong class="text-sm tabular-nums text-slate-900 dark:text-white">R$ {{ fmt(venda.valor) }}</strong>
-              </div>
-            </article>
-          }
-        </div>
-      }
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><header class="flex items-start justify-between border-b border-slate-100 p-5 dark:border-slate-800"><div><h2 class="font-bold">Vendas recentes</h2><p class="mt-1 text-xs text-slate-500">Últimas transações registradas pela equipe.</p></div><a routerLink="/vendas" class="text-xs font-bold text-cyan-700 dark:text-cyan-300">Ver vendas →</a></header>@if (vendasRecentes.length === 0) {<div class="flex min-h-[190px] flex-col items-center justify-center text-center"><p class="font-semibold">Nenhuma venda registrada</p><p class="mt-1 text-xs text-slate-500">Registre uma venda para começar a acompanhar a loja.</p></div>} @else {<div class="overflow-x-auto"><table class="w-full"><thead class="bg-slate-50 text-left text-[10px] uppercase tracking-wider text-slate-400 dark:bg-slate-800/40"><tr><th class="px-5 py-3">Venda</th><th class="px-4 py-3">Data</th><th class="px-4 py-3">Vendedor</th><th class="px-4 py-3 text-center">Itens</th><th class="px-5 py-3 text-right">Valor</th></tr></thead><tbody class="divide-y divide-slate-100 dark:divide-slate-800">@for (venda of vendasRecentes; track venda.id) {<tr><td class="px-5 py-3 text-xs font-bold">#{{ venda.id }}</td><td class="px-4 py-3 text-xs text-slate-500">{{ fmtData(venda.data) }}</td><td class="px-4 py-3 text-xs font-semibold">{{ venda.vendedor }}</td><td class="px-4 py-3 text-center text-xs">{{ venda.totalItens }}</td><td class="px-5 py-3 text-right text-sm font-bold">R$ {{ fmt(venda.valor) }}</td></tr>}</tbody></table></div>}
     </section>
   }
 </div>
